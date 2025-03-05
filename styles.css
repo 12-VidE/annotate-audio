@@ -1,8 +1,262 @@
-/*
+/* ----------------------- */
+/* Comments */
+/* ----------------------- */
+.comment-list {
+	margin-top: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	&::after {
+		content: ""; /* Create a pseudo-element for spacing at the end */
+		display: block;
+		height: 1rem;
+	}
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.comment {
+	border-radius: 10px;
+	padding: 0.2rem;
 
-If your plugin does not need CSS, delete this file.
+	margin-left: 0.2rem;
+	margin-top: 0.2rem;
+	margin-bottom: 0.2rem;
 
-*/
+	min-height: 1rem;
+	transition: all 0.2s;
+	display: grid;
+	grid-template-columns: auto 1fr 24px;
+	gap: 10px;
+	align-items: center;
+	cursor: pointer;
+
+	&:hover {
+		background-color: var(--background-modifier-cover);
+	}
+	&:active {
+		background-color: var(--color-base-10);
+	}
+	&.active-comment {
+		background-color: var(--background-secondary);
+	}
+
+	> .comment-content {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		> p {
+			margin: 0;
+		}
+	}
+	> .comment-time {
+		color: var(--color-base-50);
+	}
+}
+
+.comment-input-box {
+	display: flex;
+	gap: 6px;
+	margin-top: 4px;
+	flex-wrap: wrap;
+	align-items: center;
+	> input {
+		flex: 1; /* Allow the input to take available space */
+		min-width: 12em; /* Ensure input doesn't shrink too much */
+		width: 100%;
+	}
+}
+
+.comment-buttons {
+	display: flex;
+	gap: 4px; /* Add spacing between buttons */
+	flex-shrink: 0; /* Prevent the group from shrinking */
+}
+
+/* ----------------------- */
+/* WaveForm Graph */
+/* ----------------------- */
+
+.waveform {
+	width: 100%;
+	height: 100px;
+	align-items: baseline;
+	display: flex;
+	> .bar {
+		flex: 1;
+		height: 80px;
+		background-color: var(--color-base-50);
+		border-left: 1px solid var(--color-base-10);
+		transition: all 0.2s;
+
+		&.playedBar {
+			background-color: var(--color-accent-1);
+		}
+	}
+}
+
+/* ----------------------- */
+/* Controls */
+/* ----------------------- */
+
+.controls-container {
+	display: flex;
+	justify-content: center;
+	margin: auto;
+
+	> .control_btn {
+		flex: 1;
+		margin: 6px;
+		background-color: var(--color-accent-1);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 10px;
+		border-radius: 30px;
+		max-height: 40px;
+		max-width: 40px;
+		transition: all 0.15s;
+		cursor: pointer;
+
+		&:active {
+			background-color: var(--color-base-10);
+		}
+		&.secondary_btn {
+			border-radius: 2;
+			min-height: unset;
+			padding-top: 0;
+			padding-bottom: 0;
+			height: 25px;
+			flex: unset;
+		}
+		&.commentInput_btn {
+			background-color: var(--color-base-50);
+			max-height: 30px;
+			max-width: 30px;
+			padding: 5px;
+		}
+	}
+}
+
+/* ----------------------- */
+/* TimeLine */
+/* ----------------------- */
+
+.timeline-container {
+	display: flex;
+	gap: 3px; /* Add spacing between slider and timeline */
+
+	> input[type="range"] {
+		width: 100% !important;
+		margin: 0;
+	}
+	> .timeline {
+		height: 20px;
+		display: flex; /* Allow currentTime and duration to be @opposite sides */
+		justify-content: space-between;
+		color: var(--color-base-50);
+		font-size: 0.9rem;
+		margin-left: 1em;
+		margin-right: 1em;
+	}
+}
+
+/* ----------------------- */
+/* Other */
+/* ----------------------- */
+
+.disabled {
+	pointer-events: none;
+	opacity: 0.6;
+}
+
+.audio-box {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: space-between;
+	padding: 10px;
+	user-select: none;
+	cursor: default;
+	flex-direction: column;
+	> .audio-box-title {
+		color: var(--text-normal);
+		> span {
+			padding-right: 0.5rem;
+			vertical-align: middle;
+		}
+	}
+}
+
+.sticky-container {
+	background-color: var(--background-secondary);
+	border-color: var(--color-base-30);
+	&.is-sticky {
+		position: sticky;
+		top: 0; /* Stick to the top */
+		z-index: 10; /* Above other content */
+	}
+}
+
+.vert {
+	display: flex;
+	flex-direction: column;
+}
+.vert:first-of-type {
+	margin-right: 10px;
+}
+
+.horiz {
+	display: flex;
+}
+
+.wide {
+	width: 100%;
+}
+
+/* ----------------------- */
+/* ----------------------- */
+/* -----  LEGACY  -------- */
+
+/* .waveform-small {
+	position: relative;
+	width: 100%;
+	height: 30px;
+	justify-content: space-between;
+	align-items: baseline;
+	display: flex;
+}
+
+.playpause_btn-small {
+	flex: 1;
+	margin-right: 20px;
+	background-color: var(--color-accent-1);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 10px;
+	border-radius: 30px;
+	max-height: 30px;
+	max-width: 30px;
+	opacity: 0.8;
+	transition: all 0.15s;
+	cursor: pointer;
+}
+.playpause_btn-small:hover {
+	opacity: 1;
+}
+.playpause_btn-small:active {
+	background-color: var(--color-base-10);
+}
+
+.player-container-small {
+	width: 100%;
+	align-items: start;
+	display: flex;
+	flex-direction: row;
+}
+
+.player-container {
+	width: 100%;
+	align-items: start;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+} */

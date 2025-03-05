@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"id": "annotate-audio",
+	"name": "Annotate Audio",
+	"version": "0.1.0",
+	"minAppVersion": "1.8.7",
+	"description": "Listen to an audio and add comments to it.",
+	"author": "VidE",
+	"authorUrl": "https://github.com/12-VidE",
+	"fundingUrl": "",
+	"isDesktopOnly": true
 }
