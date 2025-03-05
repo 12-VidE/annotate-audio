@@ -1,94 +1,79 @@
-# Obsidian Sample Plugin
+> [This is a (sort of) fork of "obsidian-audio-player" by noonesimg](https://github.com/noonesimg/obsidian-audio-player)
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+## What is it?
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+![Preview GIF](resources/preview.gif)
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+-   Reproduce an audio file
+-   Tweak listening experience by changing: volume, playback speed, looping...
+-   Add comments to desired timestamps
+-   Quickly jump to a specific timestamp by left-clicking on the related comment
+-   Modify/Delete a comment by right-clicking on it
 
-## First time developing plugins?
+````
+``` annotate-audio
+source: [[My Audio.mp3]]
+volume: 0.5
+speed: 1
+loop: false
+sticky: false
+title:
+small: false
 
-Quick starting guide for new plugin devs:
-
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
-
-## Releasing new releases
-
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
-
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
-
-## Adding your plugin to the community plugin list
-
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+37 --- Section 1
+162 --- Section 2
+174 --- Section 3
 ```
+````
 
-If you have multiple URLs, you can also do:
+### Options
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+| Name     | Default     | Boundaries     | Description                                                                                              |
+| -------- | ----------- | -------------- | -------------------------------------------------------------------------------------------------------- |
+| `source` |             |                | WikiLink to the audio file to reproduce                                                                  |
+| `volume` | `0.5`       | `0.0` → `1.0`  | Player base volume                                                                                       |
+| `speed`  | `1`         | `0.0` → `1.0`  | Player playback speed                                                                                    |
+| `loop`   | `false`     | `true`/`false` | Loop-back to beginning after getting to the end of the audio                                             |
+| `sticky` | `false`     | `true`/`false` | Main controls become sticky, following you as you scroll                                                 |
+| `title`  | `undefined` |                | Title of the player. IF not present: not shown. IF not set: name of audio file (or its alias if present) |
+| `small`  | `false`     | `true`/`false` | Size of the audio-box                                                                                    |
 
-## API Documentation
+### Obsidian Commands
 
-See https://github.com/obsidianmd/obsidian-api
+| Name            | Action                                             |
+| --------------- | -------------------------------------------------- |
+| `Add Audio-Box` | Insert an already-configured audio-box in the note |
+
+---
+
+## Development
+
+### Road-Map
+
+1. Allow only a `chunk` of audio to be reproduced
+2. Better implement `small` size template
+3. (main.ts) Implement better Obsidian commands that can manipulate 1 single player @a time
+4. (main.ts) Use a modal to set-up an audio-box WHEN created via Obsidian command
+5. Use the alias in the title (if nothing is specified)
+6. Render markdown even WHEN modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
+
+### Known Issues
+
+-   (App.vue) `getCommentsArray`, `getComment`, `getPlaybackSpeedSetting`, `getLoopSetting`, `getVolumeSetting`, `getStickySetting` should be `computed` to be more efficient
+-   Remove `codeblockContent` by extracting the lines directly from the file
+-   (App.vue) Remove `currentTime` CAUSE redundant: use `this.player.currenTime`
+-   (App.vue) Remove `duration` CAUSE redundant: use `this.player.duration`
+-   WHEN calling a function for one instance of `annotate-audio` iin a file with multiple instances, the function is triggered also for all the other instances
+-   After some seconds, it crashes the Obsidian mobile app
+
+### Changelog
+
+-   **0.1.0 -** Initial release
+
+---
+
+## Credits
+
+-   **Original Repo:** ["obsidian-audio-player" by noonesimg](https://github.com/noonesimg/obsidian-audio-player)
+-   **Other Fork:** ["obsidian-enhanced-audio-player" by Yidaotus](https://github.com/Yidaotus/obsidian-enhanced-audio-player)
+-   **Other Fork:** ["obsidian-audio-player" by dtkav](https://github.com/dtkav/obsidian-audio-player)

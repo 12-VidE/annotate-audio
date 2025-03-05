@@ -1,6 +1,7 @@
 import esbuild from "esbuild";
 import process from "process";
 import builtins from "builtin-modules";
+import vue from "esbuild-plugin-vue3"
 
 const banner =
 `/*
@@ -15,7 +16,8 @@ const context = await esbuild.context({
 	banner: {
 		js: banner,
 	},
-	entryPoints: ["main.ts"],
+	entryPoints: ["./src/main.ts"],
+    plugins: [vue()],
 	bundle: true,
 	external: [
 		"obsidian",
@@ -37,7 +39,7 @@ const context = await esbuild.context({
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
-	outfile: "main.js",
+	outfile: "./main.js",
 	minify: prod,
 });
 
