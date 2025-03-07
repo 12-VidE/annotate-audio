@@ -54,8 +54,7 @@ small: false
 2. Better implement `small` size template
 3. (main.ts) Implement better Obsidian commands that can manipulate 1 single player @a time
 4. (main.ts) Use a modal to set-up an audio-box when created via Obsidian command
-5. Use the alias in the title (if nothing is specified)
-6. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
+5. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
 
 ### Known Issues
 
@@ -65,9 +64,12 @@ small: false
 -   (App.vue) Remove `duration` CAUSE redundant: use `this.player.duration`
 -   When calling a function for one instance of `annotate-audio` iin a file with multiple instances, the function is triggered also for all the other instances
 -   After some seconds, it crashes the Obsidian mobile app
+-   (main.ts) Perform an onunload
 
 ### Changelog
 
+-   **0.1.1**
+    -   Show `source` alias as title if it exists and `title` option is `undefined`
 -   **0.1.0 -** Initial release
 
 ---

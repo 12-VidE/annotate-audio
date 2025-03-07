@@ -180,16 +180,22 @@ export default defineComponent({
 		},
 		displayTitle() {
 			const title = this.getTitleSetting();
-			if (title === undefined) return false;
-			else if (title === "") {
-				let cleanedAudioSource =
-					this.audioSource.split(/[/\\]/).pop() || ""; // Get filename + extension
-				cleanedAudioSource = cleanedAudioSource.replace(
-					/\.[^/.]+$/,
-					""
-				); // Remove extension
-				return cleanedAudioSource;
-			} else return title;
+			if (title === undefined) {
+				// Show nothing IF there's no 'title' option
+				return false;
+			} else if (title === "") {
+				const sourceValue: string = this.getSourceSetting();
+				if (typeof sourceValue === "string") {
+					// Use source (cleaning extension)
+					return sourceValue.replace(/\.[^/.]+$/, "");
+				} else {
+					// Use alias in the source (IF present)
+					return sourceValue[1];
+				}
+			} else {
+				// Return 'title' option IF specied
+				return title;
+			}
 		},
 		currentBar() {
 			return Math.floor(
@@ -543,6 +549,19 @@ export default defineComponent({
 				(item: AudioComment) => time == item.time
 			);
 			return commentsArray[commentIndex] || null;
+		},
+		/**
+		 * @returns audio source
+		 */
+		getSourceSetting(): Array<string> | string {
+			const surceRegex = new RegExp(
+				"^source: *\\[\\[([^|\\]]+)(?:\\|([^\\]]*))?\\]\\]$"
+			);
+			const sourceValue: string = this.getCodeBlockData(surceRegex)[0];
+			if (sourceValue[1] && sourceValue[1].length > 0)
+				return sourceValue; // Return both file-name and alias (if present)
+			else return sourceValue[0]; // Return only file-name (if alias doesn't exists)
+			// Notice it cannot be undefined CAUSE it must exists
 		},
 		/**
 		 * @returns Speed @ which to play the audio
