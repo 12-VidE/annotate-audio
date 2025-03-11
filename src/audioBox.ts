@@ -11,13 +11,8 @@ export class AudioBox extends MarkdownRenderChild {
 	constructor(options: AudioBoxParameters) {
 		super(options.container);
 		this.container = options.container;
-		const sectionInfo = options.ctx.getSectionInfo(options.container);
 		this.vueApp = createApp(VueApp, {
-			codeblockContent: options.codeblockContent,
-			codeblockPosition: {
-				start: sectionInfo?.lineStart,
-				end: sectionInfo?.lineEnd,
-			},
+			container: options.container,
 			audioSource: options.audioSource,
 			ctx: options.ctx,
 			player: options.player,

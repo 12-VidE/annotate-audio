@@ -35,7 +35,6 @@ export const defaultAudioBoxOptions: AudioBoxOptions = {
 
 export type AudioBoxParameters = {
 	container: HTMLElement;
-	codeblockContent: string;
 	audioSource: string;
 	ctx: MarkdownPostProcessorContext;
 	player: HTMLAudioElement;

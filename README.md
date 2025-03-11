@@ -59,17 +59,17 @@ small: false
 ### Known Issues
 
 -   (App.vue) `getCommentsArray`, `getComment`, `getPlaybackSpeedSetting`, `getLoopSetting`, `getVolumeSetting`, `getStickySetting` should be `computed` to be more efficient
--   Remove `codeblockContent` by extracting the lines directly from the file
 -   (App.vue) Remove `currentTime` CAUSE redundant: use `this.player.currenTime`
 -   (App.vue) Remove `duration` CAUSE redundant: use `this.player.duration`
--   When calling a function for one instance of `annotate-audio` iin a file with multiple instances, the function is triggered also for all the other instances
+-   When calling a function for one instance of `annotate-audio` in a file with multiple instances, the function is triggered also for all the other instances
 -   After some seconds, it crashes the Obsidian mobile app
 -   (main.ts) Perform an onunload
 
 ### Changelog
 
--   **0.1.1**
-    -   Show `source` alias as title if it exists and `title` option is `undefined`
+-   **0.1.1 (developing)**
+    -   feat: Show `source` alias as title if it exists and `title` option is `undefined`
+    -   fix: Removed `codeblockContent`, `codeblockPosition` pros because redundant
 -   **0.1.0 -** Initial release
 
 ---

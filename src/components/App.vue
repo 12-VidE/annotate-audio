@@ -131,7 +131,6 @@ import { secondsToTime } from "../utils";
 import { defaultAudioBoxOptions } from "../types";
 
 import type { AudioComment /* AudioChunk */ } from "../types";
-import type { Pos } from "obsidian";
 
 export default defineComponent({
 	name: "App",
@@ -139,9 +138,8 @@ export default defineComponent({
 		AudioCommentVue,
 	},
 	props: {
-		codeblockContent: String, // What's inside the code-block
-		codeblockPosition: Object as PropType<Pos>, // Where to find the code-block in the file
-		audioSource: String, // What's inside "source"
+		container: Object as PropType<HTMLElement>,
+		audioSource: String, // What's inside "source" property
 		ctx: Object as PropType<MarkdownPostProcessorContext>,
 		player: Object as PropType<HTMLAudioElement>,
 		obsidianApp: Object as PropType<App>,
@@ -344,15 +342,9 @@ export default defineComponent({
 				return;
 			}
 
-			// Get file
-			const file = this.obsidianApp.vault.getAbstractFileByPath(
-				this.ctx.sourcePath
-			);
-			if (!file || !(file instanceof TFile)) return;
 			// Get file full content
-			let lines: Array<string> = (
-				await this.obsidianApp.vault.read(file)
-			).split("\n");
+			const sectionInfo = this.ctx.getSectionInfo(this.container);
+			const lines = sectionInfo.text.split("\n");
 
 			try {
 				const commentsArray: Array<AudioComment> =
@@ -385,15 +377,15 @@ export default defineComponent({
 				}
 
 				const commentOnFocusAbsoluteLine =
-					this.codeblockPosition.end -
+					sectionInfo.lineEnd -
 					commentsArray.length +
 					commentOnFocusIndex; // line WHERE the comment is place inside the entire file
 
 				// Check IF it's within bounds
 				if (
 					commentOnFocusAbsoluteLine <
-						this.codeblockPosition.end - commentsArray.length ||
-					commentOnFocusAbsoluteLine > this.codeblockPosition.end
+						sectionInfo.lineEnd - commentsArray.length ||
+					commentOnFocusAbsoluteLine > sectionInfo.lineEnd
 				)
 					return;
 
@@ -407,7 +399,12 @@ export default defineComponent({
 								`${commentOnFocus.time} --- ${commentOnFocus.content}`,
 						  ]) // IF adding/modifying
 				);
-				// Write the updated file
+
+				// Get file & write the changes to it
+				const file = this.obsidianApp.vault.getAbstractFileByPath(
+					this.ctx.sourcePath
+				);
+				if (!file || !(file instanceof TFile)) return;
 				await this.obsidianApp.vault.modify(file, lines.join("\n"));
 			} catch (error) {
 				console.error("Cannot manage comment - ", error);
@@ -504,23 +501,29 @@ export default defineComponent({
 		 * @returns What's inside matching group. Each line may for an array IF there are 2+ matching groups
 		 */
 		getCodeBlockData(regex: RegExp = /^.*$/): Array<string | string[]> {
-			const lines: string[] = this.codeblockContent.split("\n");
+			const sectionInfo = this.ctx.getSectionInfo(this.container);
+			const lines = sectionInfo.text
+				.split("\n")
+				.slice(sectionInfo.lineStart + 1, sectionInfo.lineEnd);
 			return lines
-				.map((line) => {
+				.map((line: string) => {
 					const match = regex.exec(line);
 					if (match) {
-						if (match.length === 2) {
-							return match[1]; // Only one capturing group → return it directly
-						} else if (match.length > 2) {
-							return match.slice(1); // More than one capturing group → return an array
-						} else {
-							return match[0]; // No capturing groups → return full match
-						}
+						if (match.length === 2)
+							// Only one capturing group → return it directly
+							return match[1];
+						else if (match.length > 2)
+							// More than one capturing group → return an array
+							return match.slice(1);
+						// No capturing groups → return full match
+						else return match[0];
 					}
+					// Fallback
 					return null;
 				})
 				.filter(
-					(result): result is string | string[] => result !== null
+					(result: any): result is string | string[] =>
+						result !== null
 				);
 		},
 		/**
@@ -640,7 +643,7 @@ export default defineComponent({
 	created() {
 		this.loadFile();
 	},
-	mounted() {
+	async mounted() {
 		/* ---------------------- */
 		/* --- Initialization --- */
 		/* ---------------------- */
@@ -653,6 +656,8 @@ export default defineComponent({
 		// Initialize player state
 		this.isSticky = this.getStickySetting();
 		this.isSmall = this.getSmallSetting();
+
+		/* ------ Event List */
 
 		// Event Listener - End of track #TODO Sposta al posto giusto con gli altri listener
 		this.player.addEventListener("ended", () => {

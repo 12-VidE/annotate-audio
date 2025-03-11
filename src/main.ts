@@ -170,7 +170,6 @@ export default class AnnotateAudioPlugin extends Plugin {
 				ctx.addChild(
 					new AudioBox({
 						container: el,
-						codeblockContent: source,
 						audioSource: link.path,
 						ctx: ctx,
 						player: localPlayer,
