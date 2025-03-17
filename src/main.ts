@@ -21,7 +21,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 		/* ---------------- */
 		this.addCommand({
 			id: "add-audio-box",
-			name: "Add Audio-Box",
+			name: "Add audiobox",
 			editorCallback: (editor: Editor) => {
 				const optionsString = Object.entries(defaultAudioBoxOptions)
 					.map(

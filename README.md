@@ -40,9 +40,9 @@ small: false
 
 ### Obsidian Commands
 
-| Name            | Action                                             |
-| --------------- | -------------------------------------------------- |
-| `Add Audio-Box` | Insert an already-configured audio-box in the note |
+| Name           | Action                                             |
+| -------------- | -------------------------------------------------- |
+| `Add audiobox` | Insert an already-configured audio-box in the note |
 
 ---
 
@@ -67,9 +67,11 @@ small: false
 
 ### Changelog
 
--   **0.1.1 (developing)**
+-   **0.2.0 (developing)**
     -   feat: Show `source` alias as title if it exists and `title` option is `undefined`
     -   fix: Removed `codeblockContent`, `codeblockPosition` pros because redundant
+-   **0.1.1**
+    -   fix: Renamed `Add Audio-Box` command to `Add audiobox` to follow "Plugin gidelines"
 -   **0.1.0 -** Initial release
 
 ---
