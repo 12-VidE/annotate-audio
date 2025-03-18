@@ -5,10 +5,11 @@ export type AudioComment = {
 	content: string;
 };
 
-/* export type AudioChunk = {
+export type AudioChunk = {
 	startTime: number;
 	endTime: number;
-}; */
+	duration?: number;
+};
 
 // What can be changed inside audio-box
 export type AudioBoxOptions = {
@@ -18,8 +19,7 @@ export type AudioBoxOptions = {
 	sticky: boolean;
 	title: string | undefined;
 	small: boolean;
-
-	/* chunk: AudioChunk | undefined; */
+	chunk: AudioChunk | undefined;
 };
 
 export const defaultAudioBoxOptions: AudioBoxOptions = {
@@ -29,8 +29,7 @@ export const defaultAudioBoxOptions: AudioBoxOptions = {
 	sticky: false,
 	title: undefined,
 	small: false,
-
-	/* chunk: undefined, */
+	chunk: undefined,
 };
 
 export type AudioBoxParameters = {

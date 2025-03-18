@@ -7,7 +7,7 @@
 		<div v-if="!isSmall" :class="['vert', 'wide', showInput && 'disabled']">
 			<div :class="['waveform', 'wide']">
 				<div
-					v-for="(s, i) in waveGraphHeights"
+					v-for="(s, i) in barHeights"
 					:class="{ bar: true, playedBar: i <= currentBar }"
 					:key="srcPath + i"
 					:style="{ height: s * 100 + 'px' }"
@@ -29,8 +29,8 @@
 			>
 				<input
 					type="range"
-					min="0"
-					:max="duration"
+					:min="chunk.startTime"
+					:max="chunk.endTime"
 					step="0.1"
 					v-model="currentTime"
 					@input="onTimeBarInput"
@@ -102,7 +102,7 @@
 		<!-- Comment List -->
 		<div :class="['comment-list', showInput && 'disabled']">
 			<AudioCommentVue
-				v-for="comment in getCommentsArray()"
+				v-for="comment in filteredCommentList"
 				:class="{
 					'active-comment': comment.time === activeComment?.time,
 				}"
@@ -118,19 +118,13 @@
 </template>
 
 <script lang="ts">
-import {
-	TFile,
-	setIcon,
-	MarkdownPostProcessorContext,
-	App,
-	normalizePath,
-} from "obsidian";
-import { defineComponent, PropType /* onMounted, onUnmounted */ } from "vue";
+import { TFile, setIcon, MarkdownPostProcessorContext, App } from "obsidian";
+import { defineComponent, PropType } from "vue";
 import AudioCommentVue from "./AudioComment.vue";
-import { secondsToTime } from "../utils";
+import { secondsToTime, timeToSeconds } from "../utils";
 import { defaultAudioBoxOptions } from "../types";
 
-import type { AudioComment /* AudioChunk */ } from "../types";
+import type { AudioComment, AudioChunk } from "../types";
 
 export default defineComponent({
 	name: "App",
@@ -148,12 +142,12 @@ export default defineComponent({
 		return {
 			//WaveGraph
 			nSamples: 150 as number, // N° of bars in WaveGraph
-			waveGraphHeights: [] as number[],
+			barHeights: [] as number[], // Height of the bars of the graph
 
 			//Player
 			srcPath: "",
-			duration: 0 as number, // Durant of the audio track
 			currentTime: 0 as number, // WHERE is the player @?
+			chunk: this.getChunkSetting(),
 
 			// Comments
 			commentInputBox: "" as string, // Content of input-box WHEN creating/modififing comment
@@ -174,7 +168,7 @@ export default defineComponent({
 			return secondsToTime(this.currentTime);
 		},
 		displayDuration() {
-			return secondsToTime(this.duration);
+			return secondsToTime(this.chunk.endTime);
 		},
 		displayTitle() {
 			const title = this.getTitleSetting();
@@ -197,7 +191,20 @@ export default defineComponent({
 		},
 		currentBar() {
 			return Math.floor(
-				(this.currentTime / this.duration) * this.nSamples
+				((this.currentTime - this.chunk.startTime) /
+					this.chunk.duration) *
+					this.nSamples
+			);
+		},
+		/**
+		 * Remove comment outside chunk
+		 * CANNOT do it inside getCommentsArray otherwise it's difficult to add comment
+		 */
+		filteredCommentList() {
+			return this.getCommentsArray().filter(
+				(comment: AudioComment) =>
+					comment.time >= this.chunk.startTime &&
+					comment.time <= this.chunk.endTime
 			);
 		},
 	},
@@ -213,28 +220,36 @@ export default defineComponent({
 			// Process audio file & set audio source
 			if (file && file instanceof TFile) {
 				//check cached values
-				if (!this.loadCache()) await this.processAudio(file.path);
+				await this.processAudio(file.path);
 				this.srcPath = this.obsidianApp.vault.getResourcePath(file);
 			}
 			this.player.src = this.srcPath;
-
-			/* console.log(this.getChunkSetting()); */
 		},
 		saveCache(): void {
+			// Store: waveGraph + player time
 			localStorage[`${this.audioSource}`] = JSON.stringify(
-				this.waveGraphHeights
+				this.barHeights
 			);
-			localStorage[`${this.audioSource}_duration`] =
-				this.duration.toString();
+			localStorage[`${this.audioSource}_timePosition`] = JSON.stringify(
+				this.currentTime
+			);
+			localStorage[`${this.audioSource}_chunk`] = JSON.stringify(
+				this.chunk
+			);
 		},
 		loadCache(): boolean {
-			let cachedData = localStorage[`${this.audioSource}`];
-			let cachedDuration = localStorage[`${this.audioSource}_duration`];
+			const cachedBarHeights = localStorage[`${this.audioSource}`];
+			const cachedTimePosition =
+				localStorage[`${this.audioSource}_timePosition`];
+			const cachedChunk = localStorage[`${this.audioSource}_chunk`];
 
-			if (!cachedData || !cachedDuration) return false;
+			if (!cachedBarHeights || !cachedTimePosition || !cachedChunk)
+				return false;
 
-			this.waveGraphHeights = JSON.parse(cachedData);
-			this.duration = Math.trunc(Number.parseFloat(cachedDuration));
+			this.barHeights = JSON.parse(cachedBarHeights);
+			this.currentTime = JSON.parse(cachedTimePosition);
+			this.player.currentTime = this.currentTime;
+			this.chunk = JSON.parse(cachedChunk);
 			return true;
 		},
 		async processAudio(path: string): Promise<void> {
@@ -244,39 +259,60 @@ export default defineComponent({
 			const audioContext = new AudioContext();
 			const tempArray: Array<number> = [];
 
-			audioContext.decodeAudioData(arrBuf, (buf) => {
+			audioContext.decodeAudioData(arrBuf, async (buf) => {
 				let rawData = buf.getChannelData(0);
-				this.duration = buf.duration;
 
-				const blockSize = Math.floor(rawData.length / this.nSamples);
-				for (let i = 0; i < this.nSamples; i++) {
-					let blockStart = blockSize * i;
-					let sum = 0;
-					for (let j = 0; j < blockSize; j++)
-						sum += Math.abs(rawData[blockStart + j]);
-					tempArray.push(sum / blockSize);
+				const chunkOption = await this.getChunkSetting();
+				/* console.log(chunkOption, this.chunk); //#debug */
+				if (chunkOption && chunkOption !== this.chunk) {
+					// IF the chunk has changed - Recalculate it
+
+					// (Correctly) Initialize this.chunk
+					this.chunk = chunkOption || {
+						startTime: 0,
+						endTime: buf.duration,
+						duration: buf.duration,
+					};
+
+					this.currentTime = this.chunk.startTime;
+					this.player.currentTime = this.currentTime;
+					// Manage Chunck
+					const audioSampleRate = buf.sampleRate;
+					const playedChunk: AudioChunk = {
+						startTime: Math.floor(
+							this.chunk.startTime * audioSampleRate
+						),
+						endTime: Math.floor(
+							this.chunk.endTime * audioSampleRate
+						),
+					}; // Portion of audio to play (can be entire file
+
+					// Manage WaveGraph (considering the chunk)
+					const barWidth = Math.floor(
+						(playedChunk.endTime - playedChunk.startTime) /
+							this.nSamples
+					);
+
+					let highestBar = 0;
+					for (let i = 0; i < this.nSamples; i++) {
+						let blockStart = this.chunk.startTime + barWidth * i;
+						let sum = 0;
+						for (let j = 0; j < barWidth; j++) {
+							sum += Math.abs(rawData[blockStart + j]);
+						}
+						const barHeigth = sum / barWidth;
+						tempArray.push(barHeigth);
+						// Save highest
+						if (barHeigth > highestBar) highestBar = barHeigth;
+					}
+					// Normalize WaveGraph
+					this.barHeights = tempArray.map((x) => x / highestBar);
+					this.saveCache();
+				} else {
+					// IF the chunk has not change, no need to recalculate it
+					this.loadCache();
 				}
-
-				let maxval = Math.max(...tempArray);
-				this.waveGraphHeights = tempArray.map((x) => x / maxval);
-				this.saveCache();
 			});
-		},
-		timeUpdateHandler() {
-			if (this.player.src === this.srcPath) {
-				this.currentTime = this.player?.currentTime;
-
-				// Set WaveGraph Style: show already player bars
-				const nextTimestamps = this.getCommentsArray().filter(
-					(comment: AudioComment) =>
-						this.player?.currentTime >= comment.time
-				);
-				if (nextTimestamps.length == 1)
-					this.activeComment = nextTimestamps[0];
-				else if (nextTimestamps.length > 1)
-					this.activeComment =
-						nextTimestamps[nextTimestamps.length - 1];
-			}
 		},
 		imposeDefaultState(): void {
 			this.showInput = false;
@@ -291,15 +327,20 @@ export default defineComponent({
 		/* --- Manage Player --- */
 		/* --------------------- */
 		playPlayer() {
-			// Apply player settings
-			this.player.volume = this.getVolumeSetting();
-			this.player.playbackRate = this.getPlaybackSpeedSetting();
-			this.player.loop = this.getLoopSetting();
-
-			this.player?.play();
-			setIcon(this.$refs.playpause_btn, "pause");
+			// IF inside chunk
+			if (!this.chunk || this.currentTime <= this.chunk.endTime) {
+				// Apply player settings
+				this.player.volume = this.getVolumeSetting();
+				this.player.playbackRate = this.getPlaybackSpeedSetting();
+				this.player.loop = this.getLoopSetting();
+				// Play
+				this.player?.play();
+				setIcon(this.$refs.playpause_btn, "pause");
+			}
 		},
 		pausePlayer() {
+			this.currentTime = this.player?.currentTime;
+
 			this.player?.pause();
 			setIcon(this.$refs.playpause_btn, "play");
 		},
@@ -311,6 +352,7 @@ export default defineComponent({
 		},
 		setPlayerPosition(time: number) {
 			this.player.currentTime = time;
+			this.currentTime = time;
 		},
 		movePlayerPosition(change: number) {
 			this.setPlayerPosition(this.player.currentTime + change);
@@ -533,14 +575,15 @@ export default defineComponent({
 			const commentRegex = new RegExp("^(.+) --- (.+)$");
 			// Get comments FROM codeblock
 			// Format comment into AudioComment
+
 			// Sort comment (just to make sure, they should already be in order)
-			const commentArray = this.getCodeBlockData(commentRegex)
+			return this.getCodeBlockData(commentRegex)
 				.map(([time, content]: [number, string]) => ({
 					time: Number(time),
 					content: String(content),
 				}))
+
 				.sort((x: AudioComment, y: AudioComment) => x.time - y.time);
-			return commentArray;
 		},
 		/**
 		 * @param time (=index) where to find that specific comment
@@ -624,58 +667,78 @@ export default defineComponent({
 			return smallValue.toLowerCase() === "true";
 		},
 		/**
-		 * @returns Boundaries of the audio
+		 * @returns Boundaries of the audio - default back to full audio
 		 */
-		/* getChunkSetting(): AudioChunk | undefined {
+		async getChunkSetting(): Promise<AudioChunk | undefined> {
+			// Check IF exists the option
 			const chunkRegex = new RegExp(
 				"^chunk: *(\\d{2}:\\d{2}:\\d{2}) *- *(\\d{2}:\\d{2}:\\d{2})$"
 			);
 			const chunkData = this.getCodeBlockData(chunkRegex)[0];
 			if (chunkData === undefined)
 				return defaultAudioBoxOptions.chunk; // Useless BUT good practice
-			else
-				return {
-					startTime: chunkData[0],
-					endTime: chunkData[1],
-				} as AudioChunk;
-		}, */
-	},
-	created() {
-		this.loadFile();
-	},
-	async mounted() {
+			else {
+				// IF the option exists
+				const startTime = timeToSeconds(chunkData[0]);
+				const endTime = timeToSeconds(chunkData[1]);
+				if (startTime >= endTime) {
+					// IF out of boundary: fall back to default
+					console.warn("Annotate-Audio: Impossible audio chunk");
+					return defaultAudioBoxOptions.chunk; // Useless BUT good practice
+				} else
+					return {
+						startTime,
+						endTime,
+						duration: endTime - startTime,
+					} as AudioChunk;
+			}
+		},
+
 		/* ---------------------- */
-		/* --- Initialization --- */
+		/* --- Event Handlers --- */
 		/* ---------------------- */
 
+		eventTimeUpdate() {
+			this.currentTime = this.player?.currentTime;
+			/* console.log("EV: timeupdate"); //#debug */
+			// Set WaveGraph Style: show already player bars
+			const nextCommentToPlay = this.getCommentsArray().filter(
+				(comment: AudioComment) =>
+					this.player?.currentTime >= comment.time
+			);
+			this.activeComment =
+				nextCommentToPlay[nextCommentToPlay.length - 1];
+			// IF outside chunk, simulate the end
+			if (this.currentTime > this.chunk.endTime) {
+				/* console.log("EV: ended"); //#debug */
+
+				this.player.dispatchEvent(
+					new Event("ended", { bubbles: true })
+				);
+			}
+		},
+		eventEndedAudio() {
+			this.setPlayerPosition(this.chunk.startTime);
+			if (!this.player.loop) this.pausePlayer();
+		},
+	},
+	async created() {
+		/* console.log("EV: mouted"); //#debug */
+		await this.loadFile();
+		// Initialize player state
+		this.isSticky = this.getStickySetting();
+		this.isSmall = this.getSmallSetting();
+	},
+	mounted() {
 		// Initialize icons
 		setIcon(this.$refs.playpause_btn, "play");
 		setIcon(this.$refs.showCommentInput, "bookmark-plus");
 		setIcon(this.$refs.titleIcon, "audio-lines");
 
-		// Initialize player state
-		this.isSticky = this.getStickySetting();
-		this.isSmall = this.getSmallSetting();
+		//Create Event-Listener
+		this.player.addEventListener("ended", this.eventEndedAudio);
+		this.player.addEventListener("timeupdate", this.eventTimeUpdate);
 
-		/* ------ Event List */
-
-		// Event Listener - End of track #TODO Sposta al posto giusto con gli altri listener
-		this.player.addEventListener("ended", () => {
-			if (this.player.src === this.srcPath)
-				setIcon(this.$refs.playpause_btn, "play");
-		});
-
-		// Event Listener - Get current time
-		if (this.player.src === this.srcPath) {
-			this.currentTime = this.player.currentTime;
-			this.player.addEventListener("timeupdate", this.timeUpdateHandler);
-			setIcon(
-				this.$refs.playpause_btn,
-				this.player.paused ? "play" : "pause"
-			);
-		}
-	},
-	setup(props) {
 		/* const addCommentHandler = () => {
 			console.log("yessss", props.audioSource, " -- ");
 		}; */
@@ -704,6 +767,15 @@ export default defineComponent({
                 setIcon(this.$refs.playpause_btn, this.player.paused ? 'play' : 'pause');
             }
         }); */
+	},
+	beforeUnmount() {
+		console.log("EV: unmouted"); //#debug
+
+		this.saveCache();
+		this.pausePlayer();
+		// Destroy Event-Listeners
+		this.player.removeEventListener("ended", this.eventEndedAudio);
+		this.player.removeEventListener("timeupdate", this.eventTimeUpdate);
 	},
 });
 </script>
