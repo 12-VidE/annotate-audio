@@ -19,7 +19,7 @@ speed: 1
 loop: false
 sticky: false
 title:
-layoyt: 1
+layout: 1
 
 37 --- Section 1
 162 --- Section 2
@@ -70,9 +70,9 @@ layoyt: 1
 ### Changelog
 
 -   **1.0.1 (developing)**
-    -   #1
-    -   #2
-    -   #3
+    -   [#1](https://github.com/12-VidE/annotate-audio/issues/1)
+    -   [#2](https://github.com/12-VidE/annotate-audio/issues/2)
+    -   [#3](https://github.com/12-VidE/annotate-audio/issues/3)
 -   **1.0.0**
     -   Complete redesign, moving from Vue "Options API" to "Composition API". This will allow better flexibility in the future
     -   feat: Add ability to reproduce a `chunk` of the total audio
