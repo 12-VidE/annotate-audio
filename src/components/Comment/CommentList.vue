@@ -1,0 +1,136 @@
+<template>
+	<div :class="['comment-list', isCommentInputShown && 'disabled']">
+		<AudioCommentVue
+			v-for="comment in filteredCommentList"
+			:class="{
+				'active-comment': comment.time === activeComment?.time,
+			}"
+			@play-from="(time) => setPlayerPosition(player, time)"
+			@edit-comment="enableEditMode"
+			:comment="comment"
+			:obsidianApp="obsidianApp"
+			:key="comment.time"
+		/>
+	</div>
+</template>
+
+<script setup lang="ts">
+import { MarkdownPostProcessorContext, App } from "obsidian";
+import {
+	ref,
+	computed,
+	useTemplateRef,
+	nextTick,
+	onMounted,
+	inject,
+	Ref,
+} from "vue";
+// Import - Component
+import AudioCommentVue from "./AudioComment.vue";
+// Import - Type
+import type { AudioComment } from "src/types";
+// Import - Ref
+import {
+	isCommentInputShown,
+	editMode,
+	chunk,
+	editedCommentTime,
+	contentCommentInput,
+	commentInput,
+} from "../sharedRefs";
+
+// Import - Function
+import { getCommentsArray } from "../sharedFunc";
+import { setPlayerPosition, pausePlayer } from "../Logic/playerFunc";
+
+const props = defineProps<{
+	container: HTMLElement;
+	ctx: MarkdownPostProcessorContext;
+	audioSource: string;
+	player: HTMLAudioElement;
+	obsidianApp: App;
+}>();
+
+/* ------------ */
+/* --- Refs --- */
+/* ------------ */
+const activeComment = ref<AudioComment | null>(null); //
+
+onMounted(() => {
+	// Initialize Event-Listeners
+	if (props.player)
+		props.player.addEventListener("timeupdate", eventActiveComment);
+});
+
+/* ---------------- */
+/* --- Computed --- */
+/* ---------------- */
+
+/**
+ * @returns Comments inside the chunk (CANNOT do it inside getCommentsArray otherwise it's difficult to add comment)
+ */
+const filteredCommentList = computed(() => {
+	return getCommentsArray(props.ctx, props.container).filter(
+		(comment: AudioComment) =>
+			comment.time >= chunk.value?.startTime! &&
+			comment.time <= chunk.value?.endTime!
+	);
+});
+
+/* ----------------- */
+/* --- Functions --- */
+/* ----------------- */
+
+/**
+ * Enable editing on a comment
+ * @param time - Index of comment to edit
+ */
+function enableEditMode(time: number): void {
+	// Set states
+	isCommentInputShown.value = true;
+	editMode.value = true;
+	editedCommentTime.value = time;
+
+	pausePlayer(props.ctx, props.container, props.player);
+
+	contentCommentInput.value = getComment(time)!.content;
+
+	nextTick(() => {
+		// Scroll contentCommentInput into view
+		commentInput.value?.scrollIntoView({
+			behavior: "smooth",
+			block: "center",
+		});
+		// Delay focusing until the scrolling completes
+		setTimeout(() => {
+			commentInput.value?.focus();
+		}, 300);
+	});
+}
+
+/**
+ * @param time - index
+ * @returns the comment @ that time
+ */
+function getComment(time: number): AudioComment | null {
+	const commentsArray = getCommentsArray(props.ctx, props.container);
+	const commentIndex: number = commentsArray.findIndex(
+		(item: AudioComment) => time == item.time
+	);
+	return commentsArray[commentIndex] || null;
+}
+
+/**
+ * Find whose the comment we are reproducing
+ */
+function eventActiveComment() {
+	// Find activeComment
+	const nextCommentToPlay = getCommentsArray(
+		props.ctx,
+		props.container
+	).filter(
+		(comment: AudioComment) => props.player?.currentTime >= comment.time
+	);
+	activeComment.value = nextCommentToPlay[nextCommentToPlay.length - 1];
+}
+</script>

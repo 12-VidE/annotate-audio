@@ -663,7 +663,7 @@ export default defineComponent({
 		getSmallSetting(): boolean {
 			const smallRegex = new RegExp("^small: *(True|False)$", "i");
 			const smallValue: string = this.getCodeBlockData(smallRegex)[0];
-			if (!smallValue) return defaultAudioBoxOptions.small;
+			if (!smallValue) return false /* defaultAudioBoxOptions.small */;
 			return smallValue.toLowerCase() === "true";
 		},
 		/**

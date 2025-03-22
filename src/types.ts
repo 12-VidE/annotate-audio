@@ -18,7 +18,7 @@ export type AudioBoxOptions = {
 	loop: boolean;
 	sticky: boolean;
 	title: string | undefined;
-	small: boolean;
+	layout: number;
 	chunk: AudioChunk | undefined;
 };
 
@@ -28,7 +28,7 @@ export const defaultAudioBoxOptions: AudioBoxOptions = {
 	loop: false,
 	sticky: false,
 	title: undefined,
-	small: false,
+	layout: 1,
 	chunk: undefined,
 };
 
