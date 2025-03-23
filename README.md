@@ -64,8 +64,9 @@ layout: 1
 -   After some seconds, it crashes the Obsidian mobile app
 -   (main.ts) Perform an onunload
 -   Better cache handling. Mainly, understanding when it can use cached data
--   (LayoutDefault.vue) The wavegraph is not always loaded reliably
+-   (LayoutDefault.vue) The wavegraph is not always loaded reliably. Sometimes, the wrong values are cached, requiring a cleaning
 -   Stattering loading
+-   At first loading, the player does not start from the start of the chunk but from zero
 
 ### Changelog
 

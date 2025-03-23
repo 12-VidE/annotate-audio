@@ -152,11 +152,13 @@ onMounted(async () => {
 	}
 
 	// Initialize Wavegraph
-	if (isCached.value)
+	if (isCached.value) {
 		barHeights.value = JSON.parse(
 			localStorage[`${props.audioSource}_barHeights`]
 		);
-	else await calculateWaveGraph();
+	} else {
+		await calculateWaveGraph();
+	}
 });
 
 onBeforeUnmount(() => {

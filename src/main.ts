@@ -8,14 +8,8 @@ import { AudioBox } from "./audioBox";
 import { defaultAudioBoxOptions } from "./types";
 
 export default class AnnotateAudioPlugin extends Plugin {
-	/* audioPlayers: { [id: string]: HTMLAudioElement } = {};
-	activeAudioId: string | null = null; */
-	/* player!: HTMLAudioElement */
+	player: HTMLAudioElement;
 	async onload() {
-		/* this.player = document.createElement("audio");
-		const body = document.getElementsByTagName("body")[0];
-		body.appendChild(this.player); */
-
 		/* -----------------*/
 		/* --- Commands --- */
 		/* ---------------- */
@@ -161,18 +155,23 @@ export default class AnnotateAudioPlugin extends Plugin {
 					return;
 				}
 
-				// Create container
-				const container = el.createDiv();
-				const localPlayer = document.createElement("audio");
-				container.appendChild(localPlayer);
+				let container = el.createDiv({
+					cls: "annotate-audio-container",
+				});
 
-				// Render vue app
+				// Create the audio element if needed, or reuse an existing one
+				if (!this.player) {
+					this.player = document.createElement("audio");
+					container.appendChild(this.player);
+				}
+
+				// Register the Vue component as a child so that it persists
 				ctx.addChild(
 					new AudioBox({
-						container: el,
+						container,
 						audioSource: link.path,
-						ctx: ctx,
-						player: localPlayer,
+						ctx,
+						player: this.player,
 						obsidianApp: this.app,
 					})
 				);
@@ -181,13 +180,6 @@ export default class AnnotateAudioPlugin extends Plugin {
 	}
 
 	onunload() {
-		//#Fix
-		/* Object.values(this.audioPlayers).forEach((player) => {
-			if (player.parentElement) {
-				player.parentElement.removeChild(player);
-			}
-			player.remove();
-		});
-		this.audioPlayers = {}; */
+		this.player.remove();
 	}
 }
