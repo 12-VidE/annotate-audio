@@ -60,6 +60,7 @@ Only `source` is required, the others are all facoltative.
 1. (main.ts) Use a modal to set-up an audio-box when created via Obsidian command
 2. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
 3. Better controls to manage all the options - like using a modal
+4. Cache where you left the player time
 
 ### Known Issues
 
@@ -67,19 +68,16 @@ Only `source` is required, the others are all facoltative.
 -   After some seconds, it crashes the Obsidian mobile app
 -   Better cache handling. Mainly, understanding when it can be useful to use cached data for performance reasons
 -   (LayoutDefault.vue) The wavegraph is not always loaded reliably. Sometimes, the wrong values are cached, requiring a cleaning
--   At first load, the player does not start playing from the start of the chunk but from zero
 -   Remove `editMode` flag as it's redundant
 -   Player is umounted and mounted when a comment is added. It would be better to have an update.
 
 ### Changelog
 
 -   **1.1.0**
-
     -   Allow each player to be independent by creating its props in `ParentApp.vue` and passing them as `props`. To use targeted Obsidian commands, each player is called by its `id`
     -   feat [#1](https://github.com/12-VidE/annotate-audio/issues/1): Added Obsidian command `Insert comment`
-    -   fix: Render `LayoutDefault` even when property `title` is not present
     -   feat: [#3](https://github.com/12-VidE/annotate-audio/issues/3) Added `autoplay` option
-
+    -   fix: Render `LayoutDefault` even when property `title` is not present
 -   **1.0.0**
     -   Complete redesign, moving from Vue "Options API" to "Composition API". This will allow better flexibility in the future
     -   feat: Add ability to reproduce a `chunk` of the total audio

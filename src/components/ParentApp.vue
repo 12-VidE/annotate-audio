@@ -122,15 +122,16 @@ async function loadFile(): Promise<void> {
 			localStorage[`${props.audioSource}_chunk`] = JSON.stringify(
 				sharedRefs.chunk.value
 			);
-			// (Force) Set time otherwise may be out-of-boundary
-			sharedRefs.currentTime.value = sharedRefs.chunk.value?.startTime!;
-			props.player.currentTime = sharedRefs.currentTime.value;
 		} else {
 			sharedRefs.isCached.value = true;
 			sharedRefs.chunk.value = JSON.parse(
 				localStorage[`${props.audioSource}_chunk`]
 			);
 		}
+		// (Force) Set time otherwise may be out-of-boundary
+		// #TODO find a way to preserve last position
+		sharedRefs.currentTime.value = sharedRefs.chunk.value?.startTime!;
+		props.player.currentTime = sharedRefs.currentTime.value;
 	} catch (error) {
 		console.error("loadFile → ", error);
 	}
