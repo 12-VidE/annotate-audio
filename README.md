@@ -61,6 +61,7 @@ Only `source` is required, the others are all facoltative.
 2. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
 3. Better controls to manage all the options - like using a modal
 4. Cache where you left the player time
+5. Cache where you left the player time
 
 ### Known Issues
 
