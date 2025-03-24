@@ -20,6 +20,7 @@ export interface SharedRefs {
 	/* --- States --- */
 	/* -------------- */
 	isSticky: Ref<boolean>; // IF we enable the player to be sticky
+	isAutoplay: Ref<boolean>; // WHEN clicking on a comment, the playes does NOT pause
 	isDuplicate: Ref<boolean>; // WHEN we want to create a comment WHERE it already exists
 	deleteConfirmation: Ref<boolean>; // IF the user confirm he wants to delete the comment
 	editMode: Ref<boolean>; // IF we are editing a comment (NOT creating a new one)
@@ -42,6 +43,7 @@ export function createShareRefs(): SharedRefs {
 		contentCommentInput: ref(""),
 
 		isSticky: ref(false),
+		isAutoplay: ref(false),
 		isDuplicate: ref(false),
 		deleteConfirmation: ref(false),
 		editMode: ref(false),

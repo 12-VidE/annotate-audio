@@ -78,7 +78,6 @@ export function setPlayerPosition(
 	currentTime: Ref<number>,
 	time: number
 ) {
-	// IF moving within chunk
 	if (time <= chunk?.startTime!) {
 		// IF moving BEFORE chunk, move @ start
 		player.currentTime = chunk?.startTime!;

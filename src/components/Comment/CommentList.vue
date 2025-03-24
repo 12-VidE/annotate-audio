@@ -10,15 +10,7 @@
 			:class="{
 				'active-comment': comment.time === activeComment?.time,
 			}"
-			@play-from="
-				(time) =>
-					setPlayerPosition(
-						player,
-						sharedRefs.chunk.value,
-						sharedRefs.currentTime,
-						time
-					)
-			"
+			@play-from="(time) => playComment(time)"
 			@edit-comment="enableEditMode"
 			:comment="comment"
 			:obsidianApp="obsidianApp"
@@ -38,7 +30,11 @@ import { SharedRefs } from "../sharedRefs";
 
 // Import - Function
 import { getCommentsArray, logRefs } from "../sharedFunc";
-import { setPlayerPosition, pausePlayer } from "../Logic/playerFunc";
+import {
+	setPlayerPosition,
+	pausePlayer,
+	playPlayer,
+} from "../Logic/playerFunc";
 
 const props = defineProps<{
 	container: HTMLElement;
@@ -121,6 +117,26 @@ function getComment(time: number): AudioComment | null {
 		(item: AudioComment) => time == item.time
 	);
 	return commentsArray[commentIndex] || null;
+}
+
+function playComment(time: number): void {
+	setPlayerPosition(
+		props.player,
+		props.sharedRefs.chunk.value,
+		props.sharedRefs.currentTime,
+		time
+	);
+
+	// Force play IF autoplay is enabled
+	if (props.sharedRefs.isAutoplay.value) {
+		playPlayer(
+			props.ctx,
+			props.container,
+			props.player,
+			props.sharedRefs.chunk.value,
+			props.sharedRefs.currentTime.value
+		);
+	}
 }
 
 /* ------------------------- */

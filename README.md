@@ -31,16 +31,17 @@ layout: 1
 
 Only `source` is required, the others are all facoltative.
 
-| Layout | Name     | Default     | Values              | Description                                                                                               |
-| ------ | -------- | ----------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
-| \*     | `source` |             |                     | WikiLink to the audio file to reproduce                                                                   |
-| \*     | `volume` | `0.5`       | `0.0` → `1.0`       | Player base volume                                                                                        |
-| \*     | `speed`  | `1`         | `0.0` → `1.0`       | Player playback speed                                                                                     |
-| \*     | `loop`   | `false`     | `true`/`false`      | Loop-back to beginning after getting to the end of the audio                                              |
-| \*     | `sticky` | `false`     | `true`/`false`      | Main controls become sticky, following you as you scroll                                                  |
-| \*     | `layout` | `1`         | `1,2`               | What player layout to display (feel free to make your own)                                                |
-| \*     | `chunk`  | `undefined` | `HH:MM:SS-HH:MM:SS` | Section of audio to play                                                                                  |
-| 1      | `title`  | `undefined` |                     | Title of the player. If not present: not shown. If not set: name of audio file (or its alias, if present) |
+| Layout | Name       | Default     | Values              | Description                                                                                               |
+| ------ | ---------- | ----------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
+| \*     | `source`   |             |                     | WikiLink to the audio file to reproduce                                                                   |
+| \*     | `volume`   | `0.5`       | `0.0` → `1.0`       | Player base volume                                                                                        |
+| \*     | `speed`    | `1`         | `0.0` → `1.0`       | Player playback speed                                                                                     |
+| \*     | `loop`     | `false`     | `true`/`false`      | Loop-back to beginning after getting to the end of the audio                                              |
+| \*     | `sticky`   | `false`     | `true`/`false`      | Main controls become sticky, following you as you scroll down                                             |
+| \*     | `layout`   | `1`         | `1,2`               | What player layout to display (feel free to make your own)                                                |
+| \*     | `chunk`    | `undefined` | `HH:MM:SS-HH:MM:SS` | Section of audio to play                                                                                  |
+| \*     | `autoplay` | `false`     | `true`/`false`      | When clicking on a comment, the player starts playing from there instead of simply moving there           |
+| 1      | `title`    | `undefined` |                     | Title of the player. If not present: not shown. If not set: name of audio file (or its alias, if present) |
 
 ### Obsidian Commands
 

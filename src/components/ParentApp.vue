@@ -22,6 +22,7 @@ import {
 	getStickySetting,
 	getChunkSetting,
 	getLayoutSetting,
+	getAutoplaySetting,
 } from "./Logic/codeblockFunc";
 import { pausePlayer, setPlayerPosition } from "./Logic/playerFunc";
 import { logRefs } from "./sharedFunc";
@@ -42,9 +43,13 @@ onBeforeMount(async () => {
 
 	// Get some default values
 	sharedRefs.isSticky.value = getStickySetting(props.ctx, props.container);
+	sharedRefs.isAutoplay.value = getAutoplaySetting(
+		props.ctx,
+		props.container
+	);
 });
 
-onMounted(async () => {
+onMounted(() => {
 	props.player.src = sharedRefs.srcPath.value;
 
 	// Initialize Event-Listeners
