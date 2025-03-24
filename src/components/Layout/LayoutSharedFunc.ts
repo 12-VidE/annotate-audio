@@ -29,27 +29,28 @@ export function displayDuration(chunk: Readonly<AudioChunk | undefined>) {
 	});
 }
 
+/**
+ * @returns title to be displayed (return false IF no title needs to be shown)
+ */
 export function displayTitle(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ) {
-	return computed(() => {
-		const title = getTitleSetting(ctx, container);
-		if (title === undefined) {
-			// Show nothing IF there's no 'title' option
-			return false;
-		} else if (title === "") {
-			const sourceValue = getSourceSetting(ctx, container);
-			if (typeof sourceValue === "string") {
-				// Use source (cleaning extension)
-				return sourceValue.replace(/\.[^/.]+$/, "");
-			} else {
-				// Use alias in the source (IF present)
-				return sourceValue[1];
-			}
+	const title = getTitleSetting(ctx, container);
+	if (title === undefined) {
+		// Show nothing IF there's no 'title' option
+		return false;
+	} else if (title === "") {
+		const sourceValue = getSourceSetting(ctx, container);
+		if (typeof sourceValue === "string") {
+			// Use source (cleaning extension)
+			return sourceValue.replace(/\.[^/.]+$/, "");
 		} else {
-			// Return 'title' option IF specied
-			return title;
+			// Use alias in the source (IF present)
+			return sourceValue[1];
 		}
-	});
+	} else {
+		// Return 'title' option IF specied
+		return title;
+	}
 }

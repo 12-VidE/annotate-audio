@@ -156,11 +156,9 @@ export function getTitleSetting(
 	container: HTMLElement
 ): string | undefined {
 	const titleRegex = new RegExp("^title: *(.*)$");
-	const titleValue: string = (
-		getCodeBlockData(ctx, container, titleRegex)[0] as string
-	).trim();
+	const titleValue = getCodeBlockData(ctx, container, titleRegex)[0];
 	if (titleValue == undefined) return defaultAudioBoxOptions.title; // Useless BUT good practice
-	return titleValue;
+	return (titleValue as string).trim();
 }
 /**
  * @param ctx - The MarkdownPostProcessorContext from the parent

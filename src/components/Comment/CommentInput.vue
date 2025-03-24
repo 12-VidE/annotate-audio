@@ -261,10 +261,6 @@ function imposeDefault(): void {
 
 const eventInsertComment = (e: Event) => {
 	const event = e as CustomEvent;
-	console.log(
-		event.detail.id,
-		`annotate-audio-${props.ctx.sourcePath}-${props.ctx.docId}`
-	);
 	if (
 		event.detail?.id ===
 		`annotate-audio-${props.ctx.sourcePath}-${props.ctx.docId}`

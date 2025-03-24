@@ -1,12 +1,15 @@
 <template>
 	<div class="layout--default">
 		<!-- Title -->
-		<div v-show="displayTitle(ctx, container)" :class="['audiobox-title']">
-			<span ref="titleIcon"></span>{{ displayTitle(ctx, container) }}
+		<div v-if="title" :class="['audiobox-title']">
+			<span ref="titleIcon"></span>{{ title }}
 		</div>
 		<!-- WaveGraph -->
 		<div
-			:class="['wavegraph', sharedRefs.isCommentInputShown && 'disabled']"
+			:class="[
+				'wavegraph',
+				sharedRefs.isCommentInputShown.value && 'disabled',
+			]"
 		>
 			<div
 				v-for="(s, i) in barHeights"
@@ -17,13 +20,16 @@
 		</div>
 		<div
 			ref="stickyContainer"
-			:class="['main-container', sharedRefs.isSticky && 'is-sticky']"
+			:class="[
+				'main-container',
+				sharedRefs.isSticky.value && 'is-sticky',
+			]"
 		>
 			<!-- Timeline -->
 			<div
 				:class="[
 					'timeline-container',
-					sharedRefs.isCommentInputShown && 'disabled',
+					sharedRefs.isCommentInputShown.value && 'disabled',
 				]"
 			>
 				<input
@@ -31,7 +37,7 @@
 					:min="sharedRefs.chunk.value?.startTime"
 					:max="sharedRefs.chunk.value?.endTime"
 					step="0.1"
-					v-model="sharedRefs.currentTime"
+					v-model="sharedRefs.currentTime.value"
 					@input="eventTimeBarInput"
 				/>
 				<div :class="['timeline-numbers']">
@@ -45,7 +51,7 @@
 			<div
 				:class="[
 					'controls-container',
-					sharedRefs.isCommentInputShown && 'disabled',
+					sharedRefs.isCommentInputShown.value && 'disabled',
 				]"
 			>
 				<div
@@ -131,6 +137,7 @@ import { togglePlayer, setPlayerPosition } from "../Logic/playerFunc";
 // Import - Type
 import type { AudioChunk } from "src/types";
 import type { SharedRefs } from "../sharedRefs";
+import { logRefs } from "../sharedFunc";
 
 const props = defineProps<{
 	container: HTMLElement;
@@ -174,6 +181,8 @@ onMounted(async () => {
 	} else {
 		await calculateWaveGraph();
 	}
+
+	logRefs(props.sharedRefs);
 });
 
 onBeforeUnmount(() => {
@@ -195,6 +204,8 @@ const currentBar = computed(() => {
 			nSamples.value
 	);
 });
+
+const title = computed(() => displayTitle(props.ctx, props.container));
 
 /* ---------------- */
 /* --- Function --- */
