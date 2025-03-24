@@ -8,7 +8,9 @@ import { AudioBox } from "./audioBox";
 import { defaultAudioBoxOptions } from "./types";
 
 export default class AnnotateAudioPlugin extends Plugin {
-	player: HTMLAudioElement;
+	playersList: Record<string, HTMLAudioElement> = {};
+	activePlayerId: string | null = null;
+
 	async onload() {
 		/* -----------------*/
 		/* --- Commands --- */
@@ -29,93 +31,95 @@ export default class AnnotateAudioPlugin extends Plugin {
 				);
 			},
 		});
-
-		/* this.addCommand({
-			id: "pause-audio",
-			name: "Pause Audio",
-            checkCallback: (checking: boolean) => {
-                if (this.activeAudioId && this.audioPlayers[this.activeAudioId]) {
-					if (!checking) {
-						new Notice("Audio paused");
-                        const ev = new Event("allpause");
-                        document.dispatchEvent(ev);
-                        this.audioPlayers[this.activeAudioId].pause();
-					}
-					return true;
-				}
-			},
-		}); */
-		/* this.addCommand({
-			id: "resume-audio",
-			name: "Resume Audio",
-            checkCallback: (checking: boolean) => {
-				const isAudioOpen = true; //#TODO
-				if (isAudioOpen) {
-					if (!checking) {
-						new Notice("Audio resumed");
-                        const ev = new Event("allresume");
-                        document.dispatchEvent(ev);
-                        if (this.player.src)
-                            this.player.play();
-					}
-					return true;
-				}
-			},
-		});*/
-		/* this.addCommand({
+		this.addCommand({
 			id: "add-comment",
-			name: "Add Comment",
+			name: "Insert comment",
 			checkCallback: (checking: boolean) => {
-				const isAudioOpen = true; //#TODO
-				if (isAudioOpen) {
+				if (this.activePlayerId) {
 					if (!checking) {
-						const ev = new Event("addcomment");
+						const ev = new CustomEvent("insertComment", {
+							detail: { id: this.activePlayerId },
+						});
 						document.dispatchEvent(ev);
 					}
 					return true;
 				}
 			},
-		}); */
-		/*
-		this.addCommand({
-			id: "audio-forward-5s",
-			name: "+5 sec",
-			checkCallback: (checking: boolean) => {
-				const isAudioOpen = true; //#TODO
-				if (isAudioOpen) {
-					if (!checking) {
-						if (this.player.src)
-                            this.player.currentTime += 5;
-					}
-					return true;
-				}
-			},
 		});
-		this.addCommand({
-			id: "audio-back-5s",
-			name: "-5 sec",
-			checkCallback: (checking: boolean) => {
-				const isAudioOpen = true; //#TODO
-				if (isAudioOpen) {
-					if (!checking) {
-						if (this.player.src)
-                            this.player.currentTime -= 5;
-					}
-					return true;
-				}
-			},
-		});*/
+
+		/* this.addCommand({
+                id: "pause-audio",
+                name: "Pause Audio",
+                checkCallback: (checking: boolean) => {
+                    if (this.activeAudioId && this.audioPlayers[this.activeAudioId]) {
+                        if (!checking) {
+                            new Notice("Audio paused");
+                            const ev = new Event("allpause");
+                            document.dispatchEvent(ev);
+                            this.audioPlayers[this.activeAudioId].pause();
+                        }
+                        return true;
+                    }
+                },
+            }); */
+		/* this.addCommand({
+                id: "resume-audio",
+                name: "Resume Audio",
+                checkCallback: (checking: boolean) => {
+                    const isAudioOpen = true; //#TODO
+                    if (isAudioOpen) {
+                        if (!checking) {
+                            new Notice("Audio resumed");
+                            const ev = new Event("allresume");
+                            document.dispatchEvent(ev);
+                            if (this.player.src)
+                                this.player.play();
+                        }
+                        return true;
+                    }
+                },
+            });*/
+
+		/*
+            this.addCommand({
+                id: "audio-forward-5s",
+                name: "+5 sec",
+                checkCallback: (checking: boolean) => {
+                    const isAudioOpen = true; //#TODO
+                    if (isAudioOpen) {
+                        if (!checking) {
+                            if (this.player.src)
+                                this.player.currentTime += 5;
+                        }
+                        return true;
+                    }
+                },
+            });
+            this.addCommand({
+                id: "audio-back-5s",
+                name: "-5 sec",
+                checkCallback: (checking: boolean) => {
+                    const isAudioOpen = true; //#TODO
+                    if (isAudioOpen) {
+                        if (!checking) {
+                            if (this.player.src)
+                                this.player.currentTime -= 5;
+                        }
+                        return true;
+                    }
+                },
+            });*/
 
 		/* this.registerObsidianProtocolHandler("audioplayer", (e) => {
-			const parameters = e as {
-				action: string;
-				playerId?: string;
-				chapter?: string;
-			};
-			if (e.das) {
-				e.das;
-			}
-		}); */
+                const parameters = e as {
+                    action: string;
+                    playerId?: string;
+                    chapter?: string;
+                };
+                if (e.das) {
+                    e.das;
+                }
+            }); */
 
 		/* -------------- */
 		/* --- Render --- */
@@ -128,6 +132,9 @@ export default class AnnotateAudioPlugin extends Plugin {
 				el: HTMLElement,
 				ctx: MarkdownPostProcessorContext
 			) => {
+				// Generate a unique ID per block
+				const uniqueId = `annotate-audio-${ctx.sourcePath}-${ctx.docId}`;
+
 				// Find source
 				const sourceRegex = /source:\s*\[\[([^|\]]+)/;
 				const sourceValue: string | undefined = sourceRegex
@@ -157,13 +164,24 @@ export default class AnnotateAudioPlugin extends Plugin {
 
 				let container = el.createDiv({
 					cls: "annotate-audio-container",
+					attr: { "data-audio-id": uniqueId, tabindex: 0 }, // Add unique ID
 				});
 
-				// Create the audio element if needed, or reuse an existing one
-				if (!this.player) {
-					this.player = document.createElement("audio");
-					container.appendChild(this.player);
+				// Store player instances
+				if (!this.playersList[uniqueId]) {
+					this.playersList[uniqueId] =
+						document.createElement("audio");
+					container.appendChild(this.playersList[uniqueId]);
 				}
+
+				// Set the currently active audio on click
+				container.addEventListener("click", () => {
+					document
+						.querySelectorAll(".annotate-audio-container")
+						.forEach((el) => el.classList.remove("active"));
+					container.classList.add("active");
+					this.activePlayerId = uniqueId;
+				});
 
 				// Register the Vue component as a child so that it persists
 				ctx.addChild(
@@ -171,7 +189,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 						container,
 						audioSource: link.path,
 						ctx,
-						player: this.player,
+						player: this.playersList[uniqueId],
 						obsidianApp: this.app,
 					})
 				);
@@ -180,6 +198,6 @@ export default class AnnotateAudioPlugin extends Plugin {
 	}
 
 	onunload() {
-		this.player.remove();
+		Object.values(this.playersList).forEach((player) => player.remove());
 	}
 }

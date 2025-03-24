@@ -1,26 +1,28 @@
 import { MarkdownPostProcessorContext } from "obsidian";
-// Import - Refs
-import { chunk, currentTime } from "../sharedRefs";
 // Import - Func
 import {
 	getVolumeSetting,
 	getPlaybackSpeedSetting,
 	getLoopSetting,
 } from "./codeblockFunc";
+// Import - Type
+import type { AudioChunk } from "src/types";
+import { Ref } from "vue";
 
 /**
- *
- * @param ctx - The MarkdownPostProcessorContext from the parent
- * @param container - The container element from the parent
- * @param player
+ * Start player audio reproduction
+ * @param chunk - SharedRef
+ * @param currentTime - SharedRef
  */
 export function playPlayer(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement,
-	player: HTMLAudioElement
+	player: HTMLAudioElement,
+	chunk: Readonly<AudioChunk | undefined>,
+	currentTime: Readonly<number>
 ): void {
 	// IF inside chunk
-	if (!chunk.value || currentTime.value <= chunk.value.endTime) {
+	if (!chunk || currentTime <= chunk.endTime) {
 		// Apply player settings
 		player.volume = getVolumeSetting(ctx, container);
 		player.playbackRate = getPlaybackSpeedSetting(ctx, container);
@@ -31,15 +33,16 @@ export function playPlayer(
 }
 
 /**
- *
- * @param ctx - The MarkdownPostProcessorContext from the parent
- * @param container - The container element from the parent
- * @param player
+ * Stop player audio reproduction
+ * @param chunk - SharedRef
+ * @param currentTime - SharedRef
  */
 export function pausePlayer(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement,
-	player: HTMLAudioElement
+	player: HTMLAudioElement,
+	chunk: Readonly<AudioChunk | undefined>,
+	currentTime: Ref<number>
 ): void {
 	currentTime.value = player.currentTime;
 
@@ -47,36 +50,43 @@ export function pausePlayer(
 }
 
 /**
- * Toggle between "play" and "pause"
- * @param ctx - The MarkdownPostProcessorContext from the parent
- * @param container - The container element from the parent
- * @param player
+ * Toggle between player "play" and "pause"
+ * @param player - SharedRef
+ * @param chunk - SharedRef
  */
 export function togglePlayer(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement,
-	player: HTMLAudioElement
+	player: HTMLAudioElement,
+	chunk: Readonly<AudioChunk | undefined>,
+	currentTime: Ref<number>
 ): void {
 	player.paused
-		? playPlayer(ctx, container, player)
-		: pausePlayer(ctx, container, player);
+		? playPlayer(ctx, container, player, chunk, currentTime.value)
+		: pausePlayer(ctx, container, player, chunk, currentTime);
 }
 
 /**
  * Set player-head position
- * @param player
- * @param time - WHERE to reproduce the audio (inside chunk)
+ * @param chunk - SharedRef
+ * @param currentTime  - SharedRef
+ * @param time - WHERE to reproduce the audio (possible inside chunk)
  */
-export function setPlayerPosition(player: HTMLAudioElement, time: number) {
+export function setPlayerPosition(
+	player: HTMLAudioElement,
+	chunk: Readonly<AudioChunk | undefined>,
+	currentTime: Ref<number>,
+	time: number
+) {
 	// IF moving within chunk
-	if (time <= chunk.value?.startTime!) {
+	if (time <= chunk?.startTime!) {
 		// IF moving BEFORE chunk, move @ start
-		player.currentTime = chunk.value?.startTime!;
-		currentTime.value = chunk.value?.startTime!;
-	} else if (time >= chunk.value?.endTime!) {
+		player.currentTime = chunk?.startTime!;
+		currentTime.value = chunk?.startTime!;
+	} else if (time >= chunk?.endTime!) {
 		// IF moving AFTER chunk, move @end
-		player.currentTime = chunk.value?.endTime!;
-		currentTime.value = chunk.value?.endTime!;
+		player.currentTime = chunk?.endTime!;
+		currentTime.value = chunk?.endTime!;
 	} else {
 		// IF moving WITHIN chunk
 		player.currentTime = time;

@@ -1,15 +1,14 @@
 <template>
-	<div class="audiobox" tabindex="0">
-		<!-- Dynamic Layout -->
-		<component
-			:is="currentLayoutComponent"
-			:container="container"
-			:ctx="ctx"
-			:audioSource="audioSource"
-			:player="player"
-			:obsidianApp="obsidianApp"
-		/>
-	</div>
+	<!-- Dynamic Layout -->
+	<component
+		:is="currentLayoutComponent"
+		:container="container"
+		:ctx="ctx"
+		:audioSource="audioSource"
+		:player="player"
+		:obsidianApp="obsidianApp"
+		:sharedRefs="sharedRefs"
+	/>
 </template>
 
 <script setup lang="ts">
@@ -25,8 +24,10 @@ import {
 	getLayoutSetting,
 } from "./Logic/codeblockFunc";
 import { pausePlayer, setPlayerPosition } from "./Logic/playerFunc";
-// Import - Ref
-import { srcPath, chunk, currentTime, isSticky, isCached } from "./sharedRefs";
+import { logRefs } from "./sharedFunc";
+// Import/Create - Ref
+import { createShareRefs } from "./sharedRefs";
+const sharedRefs = createShareRefs();
 
 const props = defineProps<{
 	container: HTMLElement;
@@ -40,23 +41,31 @@ onBeforeMount(async () => {
 	await loadFile();
 
 	// Get some default values
-	isSticky.value = getStickySetting(props.ctx, props.container);
+	sharedRefs.isSticky.value = getStickySetting(props.ctx, props.container);
 });
 
 onMounted(async () => {
-	props.player.src = srcPath.value;
+	props.player.src = sharedRefs.srcPath.value;
 
 	// Initialize Event-Listeners
 	if (props.player) {
 		props.player.addEventListener("ended", eventEndedAudio);
 	}
+
+	/* logRefs(sharedRefs); */
 });
 
 onBeforeUnmount(() => {
 	// Destroy Event-Listeners
 	props.player.removeEventListener("ended", eventEndedAudio);
 
-	pausePlayer(props.ctx, props.container, props.player);
+	pausePlayer(
+		props.ctx,
+		props.container,
+		props.player,
+		sharedRefs.chunk.value,
+		sharedRefs.currentTime
+	);
 	props.player.src = ""; // "Destroy" player
 });
 
@@ -85,7 +94,8 @@ async function loadFile(): Promise<void> {
 		);
 		if (!file || !(file instanceof TFile)) return;
 
-		srcPath.value = props.obsidianApp.vault.getResourcePath(file);
+		sharedRefs.srcPath.value =
+			props.obsidianApp.vault.getResourcePath(file);
 		const arrBuf = await props.obsidianApp.vault.adapter.readBinary(
 			file.path
 		);
@@ -98,21 +108,21 @@ async function loadFile(): Promise<void> {
 			localStorage[`${props.audioSource}_chunk`]
 		) {
 			// Initialize chunk IF it has changed
-			chunk.value = chunkOption || {
+			sharedRefs.chunk.value = chunkOption || {
 				startTime: 0,
 				endTime: Math.floor(buf.duration),
 				duration: Math.floor(buf.duration),
 			};
-			isCached.value = false;
+			sharedRefs.isCached.value = false;
 			localStorage[`${props.audioSource}_chunk`] = JSON.stringify(
-				chunk.value
+				sharedRefs.chunk.value
 			);
 			// (Force) Set time otherwise may be out-of-boundary
-			currentTime.value = chunk.value?.startTime!;
-			props.player.currentTime = currentTime.value;
+			sharedRefs.currentTime.value = sharedRefs.chunk.value?.startTime!;
+			props.player.currentTime = sharedRefs.currentTime.value;
 		} else {
-			isCached.value = true;
-			chunk.value = JSON.parse(
+			sharedRefs.isCached.value = true;
+			sharedRefs.chunk.value = JSON.parse(
 				localStorage[`${props.audioSource}_chunk`]
 			);
 		}
@@ -122,8 +132,19 @@ async function loadFile(): Promise<void> {
 }
 
 function eventEndedAudio() {
-	setPlayerPosition(props.player, chunk.value?.startTime!);
+	setPlayerPosition(
+		props.player,
+		sharedRefs.chunk.value,
+		sharedRefs.currentTime,
+		sharedRefs.chunk.value?.startTime!
+	);
 	if (!props.player.loop)
-		pausePlayer(props.ctx, props.container, props.player);
+		pausePlayer(
+			props.ctx,
+			props.container,
+			props.player,
+			sharedRefs.chunk.value,
+			sharedRefs.currentTime
+		);
 }
 </script>

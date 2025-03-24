@@ -2,6 +2,7 @@ import { getCodeBlockData } from "./Logic/codeblockFunc";
 import { MarkdownPostProcessorContext } from "obsidian";
 // Import - Type
 import type { AudioComment } from "src/types";
+import { isRef } from "vue";
 
 /* --------------- */
 /* --- Methods --- */
@@ -31,4 +32,15 @@ export function getCommentsArray(
 		})
 		.filter((item): item is AudioComment => item !== null)
 		.sort((x: AudioComment, y: AudioComment) => x.time - y.time);
+}
+
+/**
+ * DEBUG - Print all shared references
+ * @param refs = sharedRefs
+ */
+export function logRefs(refs: Record<string, any>): void {
+	Object.keys(refs).forEach((key) => {
+		const value = refs[key];
+		console.log(key, isRef(value) ? value.value : value);
+	});
 }

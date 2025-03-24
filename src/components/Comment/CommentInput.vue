@@ -1,26 +1,29 @@
 <template>
-	<div v-if="isCommentInputShown" :class="['comment-input-container']">
+	<div
+		v-if="sharedRefs.isCommentInputShown.value"
+		:class="['comment-input-container']"
+	>
 		<input
 			type="text"
 			ref="commentInput"
-			v-model="contentCommentInput"
-			:class="[isDuplicate && 'disabled']"
+			v-model="sharedRefs.contentCommentInput.value"
+			:class="[sharedRefs.isDuplicate.value && 'disabled']"
 			@keydown.escape="imposeDefault"
 			@keydown.enter="addComment"
 		/>
 		<div :class="['comment-btn-container']">
 			<button
 				ref="confirm_btn"
-				:class="[isDuplicate && 'disabled']"
+				:class="[sharedRefs.isDuplicate.value && 'disabled']"
 				@click="addComment"
 			></button>
 			<button ref="cancel_btn" @click="imposeDefault"></button>
 			<button
-				v-if="editMode"
+				v-if="sharedRefs.editMode.value"
 				ref="delete_btn"
 				@click="confirmDeleteComment"
 				:style="{
-					'background-color': deleteConfirmation
+					'background-color': sharedRefs.deleteConfirmation.value
 						? 'var(--interactive-accent)'
 						: '',
 				}"
@@ -32,27 +35,16 @@
 <script setup lang="ts">
 import { MarkdownPostProcessorContext, App, TFile, setIcon } from "obsidian";
 import {
-	inject,
+	computed,
+	onBeforeUnmount,
 	onMounted,
-	provide,
-	Ref,
 	ref,
 	useTemplateRef,
 	watch,
 } from "vue";
 // Import - Type
 import type { AudioComment } from "src/types";
-// Import - Ref
-import {
-	isCommentInputShown,
-	editMode,
-	deleteConfirmation,
-	isDuplicate,
-	currentTime,
-	editedCommentTime,
-	contentCommentInput,
-	commentInput,
-} from "../sharedRefs";
+import { SharedRefs } from "../sharedRefs";
 // Import - Function
 import { getCommentsArray } from "../sharedFunc";
 import { pausePlayer } from "../Logic/playerFunc";
@@ -63,6 +55,7 @@ const props = defineProps<{
 	audioSource: string;
 	player: HTMLAudioElement;
 	obsidianApp: App;
+	sharedRefs: SharedRefs;
 }>();
 
 /* ------------ */
@@ -71,13 +64,20 @@ const props = defineProps<{
 const confirm_btn = ref<HTMLElement | null>(null);
 const cancel_btn = ref<HTMLElement | null>(null);
 const delete_btn = ref<HTMLElement | null>(null);
-const commentInputX = useTemplateRef<HTMLInputElement>("commentInput");
+const commentInputElement = useTemplateRef<HTMLInputElement>("commentInput");
+props.sharedRefs.commentInput = computed(() => commentInputElement.value); // Expose input text
 
 onMounted(() => {
-	// Expose input text
-	commentInput.value = commentInputX.value;
+	// Initilize Event-Listeners
+	document.addEventListener("insertComment", eventInsertComment);
 });
-watch(isCommentInputShown, (value) => {
+
+onBeforeUnmount(() => {
+	// Destroy Event-Listeners
+	document.removeEventListener("insertComment", eventInsertComment);
+});
+
+watch(props.sharedRefs.isCommentInputShown, (value) => {
 	if (value) showCommentInput();
 });
 
@@ -169,34 +169,37 @@ async function editCodeblockComment(
 	}
 
 	// Impose default states
-	isCommentInputShown.value = false;
-	editMode.value = false;
-	editedCommentTime.value = null;
-	deleteConfirmation.value = false;
-	isDuplicate.value = false;
+	props.sharedRefs.isCommentInputShown.value = false;
+	props.sharedRefs.editMode.value = false;
+	props.sharedRefs.editedCommentTime.value = null;
+	props.sharedRefs.deleteConfirmation.value = false;
+	props.sharedRefs.isDuplicate.value = false;
 }
 /**
  * (Re)write comment inside commentInputBox TO codeblock
  */
 async function addComment(): Promise<void> {
-	if (contentCommentInput.value?.length == 0) return; // Empty input-box is useless
+	if (props.sharedRefs.contentCommentInput.value?.length == 0) return; // Empty input-box is useless
 
 	const commentOnFocus: AudioComment = {
-		time: editMode.value
-			? editedCommentTime.value!
-			: Math.floor(currentTime.value),
-		content: contentCommentInput.value!,
+		time: props.sharedRefs.editMode.value
+			? props.sharedRefs.editedCommentTime.value!
+			: Math.floor(props.sharedRefs.currentTime.value),
+		content: props.sharedRefs.contentCommentInput.value!,
 	};
-	await editCodeblockComment(commentOnFocus, !editMode.value);
+	await editCodeblockComment(
+		commentOnFocus,
+		!props.sharedRefs.editMode.value
+	);
 }
 
 function confirmDeleteComment() {
-	if (!deleteConfirmation.value) {
+	if (!props.sharedRefs.deleteConfirmation.value) {
 		// 1°: Set the flag to show "Sure?" on the next click
-		deleteConfirmation.value = true;
+		props.sharedRefs.deleteConfirmation.value = true;
 	} else {
 		// 2°: Trigger the actual deletion if confirmed by the user
-		deleteComment(editedCommentTime.value!);
+		deleteComment(props.sharedRefs.editedCommentTime.value!);
 	}
 }
 async function deleteComment(time: number) {
@@ -208,7 +211,16 @@ async function deleteComment(time: number) {
 }
 
 function showCommentInput(): void {
-	pausePlayer(props.ctx, props.container, props.player);
+	//Force state
+	props.sharedRefs.isCommentInputShown.value = true;
+
+	pausePlayer(
+		props.ctx,
+		props.container,
+		props.player,
+		props.sharedRefs.chunk.value,
+		props.sharedRefs.currentTime
+	);
 
 	setTimeout(() => {
 		// Initialize icons
@@ -222,25 +234,42 @@ function showCommentInput(): void {
 			props.container
 		)?.some(
 			(comment: AudioComment) =>
-				comment.time === Math.floor(currentTime.value)
+				comment.time === Math.floor(props.sharedRefs.currentTime.value)
 		);
-		if (editMode.value) {
+		if (props.sharedRefs.editMode.value) {
 			if (confirm_btn.value) setIcon(confirm_btn.value, "check");
 		} else if (isNotUnique) {
 			// IF we want to create a new comment @time WHERE already 1 exits: don't allow it
-			contentCommentInput.value = "ALREADY EXISTS!";
-			isDuplicate.value = true;
+			props.sharedRefs.contentCommentInput.value = "ALREADY EXISTS!";
+			props.sharedRefs.isDuplicate.value = true;
 		} else {
-			// Focus on commentInputBox
-			commentInput.value?.focus();
+			props.sharedRefs.contentCommentInput.value = "";
+			props.sharedRefs.commentInput.value?.focus();
 		}
 	}, 0);
 }
 
 function imposeDefault(): void {
-	contentCommentInput.value = "";
-	isDuplicate.value = false;
-	isCommentInputShown.value = false;
-	editMode.value = false;
+	props.sharedRefs.contentCommentInput.value = "";
+	props.sharedRefs.isDuplicate.value = false;
+	props.sharedRefs.isCommentInputShown.value = false;
+	props.sharedRefs.editMode.value = false;
 }
+
+/* ------------------------- */
+/* --- Function ON Event --- */
+
+const eventInsertComment = (e: Event) => {
+	const event = e as CustomEvent;
+	console.log(
+		event.detail.id,
+		`annotate-audio-${props.ctx.sourcePath}-${props.ctx.docId}`
+	);
+	if (
+		event.detail?.id ===
+		`annotate-audio-${props.ctx.sourcePath}-${props.ctx.docId}`
+	) {
+		showCommentInput();
+	}
+};
 </script>

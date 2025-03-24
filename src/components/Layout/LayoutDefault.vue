@@ -5,48 +5,59 @@
 			<span ref="titleIcon"></span>{{ displayTitle(ctx, container) }}
 		</div>
 		<!-- WaveGraph -->
-		<div :class="['wavegraph', isCommentInputShown && 'disabled']">
+		<div
+			:class="['wavegraph', sharedRefs.isCommentInputShown && 'disabled']"
+		>
 			<div
 				v-for="(s, i) in barHeights"
 				:class="{ bar: true, playedBar: i <= currentBar }"
-				:key="srcPath + i"
+				:key="props.sharedRefs.srcPath.value + i"
 				:style="{ height: s * 6 + 'rem' }"
 			></div>
 		</div>
 		<div
 			ref="stickyContainer"
-			:class="['main-container', isSticky && 'is-sticky']"
+			:class="['main-container', sharedRefs.isSticky && 'is-sticky']"
 		>
 			<!-- Timeline -->
 			<div
 				:class="[
 					'timeline-container',
-					isCommentInputShown && 'disabled',
+					sharedRefs.isCommentInputShown && 'disabled',
 				]"
 			>
 				<input
 					type="range"
-					:min="chunk?.startTime"
-					:max="chunk?.endTime"
+					:min="sharedRefs.chunk.value?.startTime"
+					:max="sharedRefs.chunk.value?.endTime"
 					step="0.1"
-					v-model="currentTime"
-					@input="onTimeBarInput"
+					v-model="sharedRefs.currentTime"
+					@input="eventTimeBarInput"
 				/>
 				<div :class="['timeline-numbers']">
-					<span>{{ displayCurrentTime }}</span>
-					<span>{{ displayDuration }}</span>
+					<span>{{
+						displayCurrentTime(sharedRefs.currentTime.value)
+					}}</span>
+					<span>{{ displayDuration(sharedRefs.chunk.value) }}</span>
 				</div>
 			</div>
 			<!-- Controls -->
 			<div
 				:class="[
 					'controls-container',
-					isCommentInputShown && 'disabled',
+					sharedRefs.isCommentInputShown && 'disabled',
 				]"
 			>
 				<div
 					:class="['control_btn', 'secondary_btn']"
-					@click="setPlayerPosition(props.player, currentTime - 5)"
+					@click="
+						setPlayerPosition(
+							player,
+							sharedRefs.chunk.value,
+							sharedRefs.currentTime,
+							sharedRefs.currentTime.value - 5
+						)
+					"
 				>
 					-5s
 				</div>
@@ -54,19 +65,32 @@
 					ref="playpause_btn"
 					:class="['control_btn']"
 					@click="
-						togglePlayer(props.ctx, props.container, props.player)
+						togglePlayer(
+							ctx,
+							container,
+							player,
+							sharedRefs.chunk.value,
+							sharedRefs.currentTime
+						)
 					"
 				></div>
 				<div
 					:class="['control_btn', 'secondary_btn']"
-					@click="setPlayerPosition(props.player, currentTime + 5)"
+					@click="
+						setPlayerPosition(
+							player,
+							sharedRefs.chunk.value,
+							sharedRefs.currentTime,
+							sharedRefs.currentTime.value + 5
+						)
+					"
 				>
 					+5s
 				</div>
 				<div
 					ref="showCommentInput_btn"
 					:class="['commentInput_btn', 'control_btn']"
-					@click="isCommentInputShown = true"
+					@click="sharedRefs.isCommentInputShown.value = true"
 				></div>
 			</div>
 			<!-- Comment Input -->
@@ -76,6 +100,7 @@
 				:audioSource="audioSource"
 				:player="player"
 				:obsidianApp="obsidianApp"
+				:sharedRefs="sharedRefs"
 			/>
 		</div>
 		<!-- Comments List -->
@@ -85,6 +110,7 @@
 			:audioSource="audioSource"
 			:player="player"
 			:obsidianApp="obsidianApp"
+			:sharedRefs="sharedRefs"
 		/>
 	</div>
 </template>
@@ -101,22 +127,10 @@ import {
 	displayTitle,
 	displayDuration,
 } from "./LayoutSharedFunc";
-import {
-	togglePlayer,
-	pausePlayer,
-	setPlayerPosition,
-} from "../Logic/playerFunc";
-// Import - Ref
-import {
-	isCommentInputShown,
-	chunk,
-	currentTime,
-	isSticky,
-	srcPath,
-	isCached,
-} from "../sharedRefs";
+import { togglePlayer, setPlayerPosition } from "../Logic/playerFunc";
 // Import - Type
-import { AudioChunk } from "src/types";
+import type { AudioChunk } from "src/types";
+import type { SharedRefs } from "../sharedRefs";
 
 const props = defineProps<{
 	container: HTMLElement;
@@ -124,6 +138,7 @@ const props = defineProps<{
 	audioSource: string;
 	player: HTMLAudioElement;
 	obsidianApp: App;
+	sharedRefs: SharedRefs;
 }>();
 
 /* ------------ */
@@ -152,7 +167,7 @@ onMounted(async () => {
 	}
 
 	// Initialize Wavegraph
-	if (isCached.value) {
+	if (props.sharedRefs.isCached.value) {
 		barHeights.value = JSON.parse(
 			localStorage[`${props.audioSource}_barHeights`]
 		);
@@ -174,8 +189,9 @@ onBeforeUnmount(() => {
 
 const currentBar = computed(() => {
 	return Math.floor(
-		((currentTime.value - chunk.value?.startTime!) /
-			chunk.value?.duration!) *
+		((props.sharedRefs.currentTime.value -
+			props.sharedRefs.chunk.value?.startTime!) /
+			props.sharedRefs.chunk.value?.duration!) *
 			nSamples.value
 	);
 });
@@ -183,12 +199,6 @@ const currentBar = computed(() => {
 /* ---------------- */
 /* --- Function --- */
 /* ---------------- */
-
-function onTimeBarInput() {
-	// Validate and update the audio's current time
-	if (!isNaN(currentTime.value) && props.player)
-		props.player.currentTime = currentTime.value;
-}
 
 async function calculateWaveGraph() {
 	// Read file from vault
@@ -208,16 +218,19 @@ async function calculateWaveGraph() {
 			const audioSampleRate = buf.sampleRate;
 			const playedChunk: AudioChunk = {
 				startTime: Math.floor(
-					chunk.value?.startTime! * audioSampleRate
+					props.sharedRefs.chunk.value?.startTime! * audioSampleRate
 				),
-				endTime: Math.floor(chunk.value?.endTime! * audioSampleRate),
+				endTime: Math.floor(
+					props.sharedRefs.chunk.value?.endTime! * audioSampleRate
+				),
 			}; // Portion of audio to play (can be entire file)
 			const barWidth = Math.floor(
 				(playedChunk.endTime - playedChunk.startTime) / nSamples.value
 			);
 			let highestBar = 0;
 			for (let i = 0; i < nSamples.value; i++) {
-				let blockStart = chunk.value?.startTime! + barWidth * i;
+				let blockStart =
+					props.sharedRefs.chunk.value?.startTime! + barWidth * i;
 				let sum = 0;
 				for (let j = 0; j < barWidth; j++) {
 					sum += Math.abs(rawData[blockStart + j]);
@@ -236,12 +249,24 @@ async function calculateWaveGraph() {
 	}
 }
 
+/* ------------------------- */
+/* --- Function ON Event --- */
+
+function eventTimeBarInput() {
+	// Validate and update the audio's current time
+	if (!isNaN(props.sharedRefs.currentTime.value) && props.player)
+		props.player.currentTime = props.sharedRefs.currentTime.value;
+}
+
 function eventTimeUpdate() {
 	// Update currentTime #TODO rendi > generico
-	currentTime.value = props.player.currentTime;
+	props.sharedRefs.currentTime.value = props.player.currentTime;
 
 	// IF outside chunk, simulate the end
-	if (currentTime.value > chunk.value?.endTime!)
+	if (
+		props.sharedRefs.currentTime.value >
+		props.sharedRefs.chunk.value?.endTime!
+	)
 		props.player.dispatchEvent(new Event("ended", { bubbles: true }));
 }
 

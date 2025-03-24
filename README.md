@@ -29,22 +29,23 @@ layout: 1
 
 ### Options
 
-| Name     | Default     | Values              | Description                                                                                              |
-| -------- | ----------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
-| `source` |             |                     | WikiLink to the audio file to reproduce                                                                  |
-| `volume` | `0.5`       | `0.0` → `1.0`       | Player base volume                                                                                       |
-| `speed`  | `1`         | `0.0` → `1.0`       | Player playback speed                                                                                    |
-| `loop`   | `false`     | `true`/`false`      | Loop-back to beginning after getting to the end of the audio                                             |
-| `sticky` | `false`     | `true`/`false`      | Main controls become sticky, following you as you scroll                                                 |
-| `title`  | `undefined` |                     | Title of the player. If not present: not shown. If not set: name of audio file (or its alias if present) |
-| `layout` | `1`         | `1,2`               | What player layout to display (feel free to make your own)                                               |
-| `chunk`  | `undefined` | `HH:MM:SS-HH:MM:SS` | Section of audio to play                                                                                 |
+| Layout | Name     | Default     | Values              | Description                                                                                              |
+| ------ | -------- | ----------- | ------------------- | -------------------------------------------------------------------------------------------------------- | --- | --- |
+| \*     | `source` |             |                     | WikiLink to the audio file to reproduce                                                                  |
+| \*     | `volume` | `0.5`       | `0.0` → `1.0`       | Player base volume                                                                                       |
+| \*     | `speed`  | `1`         | `0.0` → `1.0`       | Player playback speed                                                                                    |     | \*  |
+| \*     | `loop`   | `false`     | `true`/`false`      | Loop-back to beginning after getting to the end of the audio                                             |
+| \*     | `sticky` | `false`     | `true`/`false`      | Main controls become sticky, following you as you scroll                                                 |
+| \*     | `layout` | `1`         | `1,2`               | What player layout to display (feel free to make your own)                                               |
+| \*     | `chunk`  | `undefined` | `HH:MM:SS-HH:MM:SS` | Section of audio to play                                                                                 |
+| 1      | `title`  | `undefined` |                     | Title of the player. If not present: not shown. If not set: name of audio file (or its alias if present) |
 
 ### Obsidian Commands
 
-| Name           | Action                                             |
-| -------------- | -------------------------------------------------- |
-| `Add audiobox` | Insert an already-configured audio-box in the note |
+| Name             | Action                                             |
+| ---------------- | -------------------------------------------------- |
+| `Add audiobox`   | Insert an already-configured audio-box in the note |
+| `Insert comment` | Insert a comment in the last interacted audio-box  |
 
 ---
 
@@ -60,18 +61,20 @@ layout: 1
 ### Known Issues
 
 -   Remove `currentTime` CAUSE redundant: use `this.player.currenTime`
--   When calling a function for one instance of `annotate-audio` in a file with multiple instances, the function is triggered also for all the other instances
 -   After some seconds, it crashes the Obsidian mobile app
 -   (main.ts) Perform an onunload
--   Better cache handling. Mainly, understanding when it can use cached data
+-   Better cache handling. Mainly, understanding when it can be useful to use cached data for performance reasons
 -   (LayoutDefault.vue) The wavegraph is not always loaded reliably. Sometimes, the wrong values are cached, requiring a cleaning
--   Stattering loading
--   At first loading, the player does not start from the start of the chunk but from zero
+-   Stattering loading. Performance are bad
+-   At first load, the player does not start playing from the start of the chunk but from zero
+-   Remove `editMode` flag as it's redundant
+-   Player is umounted and mounted when a comment is added. It would be better to have an update
 
 ### Changelog
 
--   **1.0.1 (developing)**
-    -   [#1](https://github.com/12-VidE/annotate-audio/issues/1)
+-   **1.1.0 (developing)**
+    -   Allow each player to be independent by creating its props in `ParentApp.vue` and passing them as `props`. To use targeted Obsidian commands, each player is called by its `id`
+    -   feat [#1](https://github.com/12-VidE/annotate-audio/issues/1): Added Obsidian command `Insert comment`
     -   [#2](https://github.com/12-VidE/annotate-audio/issues/2)
     -   [#3](https://github.com/12-VidE/annotate-audio/issues/3)
 -   **1.0.0**
