@@ -2,7 +2,7 @@
 
 ## What is it?
 
-![Preview GIF](resources/preview.gif)
+![Preview GIF](static/preview.gif)
 
 -   Reproduce an audio file
 -   Tweak listening experience by changing: volume, playback speed, looping...
@@ -19,6 +19,7 @@ speed: 1
 loop: false
 sticky: false
 title:
+autoplay: true
 layout: 1
 
 37 --- Section 1
@@ -31,16 +32,17 @@ layout: 1
 
 Only `source` is required, the others are all facoltative.
 
-| Layout | Name     | Default     | Values              | Description                                                                                               |
-| ------ | -------- | ----------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
-| \*     | `source` |             |                     | WikiLink to the audio file to reproduce                                                                   |
-| \*     | `volume` | `0.5`       | `0.0` → `1.0`       | Player base volume                                                                                        |
-| \*     | `speed`  | `1`         | `0.0` → `1.0`       | Player playback speed                                                                                     |
-| \*     | `loop`   | `false`     | `true`/`false`      | Loop-back to beginning after getting to the end of the audio                                              |
-| \*     | `sticky` | `false`     | `true`/`false`      | Main controls become sticky, following you as you scroll                                                  |
-| \*     | `layout` | `1`         | `1,2`               | What player layout to display (feel free to make your own)                                                |
-| \*     | `chunk`  | `undefined` | `HH:MM:SS-HH:MM:SS` | Section of audio to play                                                                                  |
-| 1      | `title`  | `undefined` |                     | Title of the player. If not present: not shown. If not set: name of audio file (or its alias, if present) |
+| Layout | Name       | Default     | Values              | Description                                                                                               |
+| ------ | ---------- | ----------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
+| \*     | `source`   |             |                     | WikiLink to the audio file to reproduce                                                                   |
+| \*     | `volume`   | `0.5`       | `0.0` → `1.0`       | Player base volume                                                                                        |
+| \*     | `speed`    | `1`         | `0.0` → `1.0`       | Player playback speed                                                                                     |
+| \*     | `loop`     | `false`     | `true`/`false`      | Loop-back to beginning after getting to the end of the audio                                              |
+| \*     | `sticky`   | `false`     | `true`/`false`      | Main controls become sticky, following you as you scroll down                                             |
+| \*     | `layout`   | `1`         | `1,2`               | What player layout to display (feel free to make your own)                                                |
+| \*     | `chunk`    | `undefined` | `HH:MM:SS-HH:MM:SS` | Section of audio to play                                                                                  |
+| \*     | `autoplay` | `false`     | `true`/`false`      | When clicking on a comment, the player starts playing from there instead of simply moving there           |
+| 1      | `title`    | `undefined` |                     | Title of the player. If not present: not shown. If not set: name of audio file (or its alias, if present) |
 
 ### Obsidian Commands
 
@@ -71,11 +73,13 @@ Only `source` is required, the others are all facoltative.
 
 ### Changelog
 
--   **1.1.0 (developing)**
+-   **1.1.0**
+
     -   Allow each player to be independent by creating its props in `ParentApp.vue` and passing them as `props`. To use targeted Obsidian commands, each player is called by its `id`
     -   feat [#1](https://github.com/12-VidE/annotate-audio/issues/1): Added Obsidian command `Insert comment`
     -   fix: Render `LayoutDefault` even when property `title` is not present
-    -   [#3](https://github.com/12-VidE/annotate-audio/issues/3)
+    -   feat: [#3](https://github.com/12-VidE/annotate-audio/issues/3) Added `autoplay` option
+
 -   **1.0.0**
     -   Complete redesign, moving from Vue "Options API" to "Composition API". This will allow better flexibility in the future
     -   feat: Add ability to reproduce a `chunk` of the total audio

@@ -53,8 +53,6 @@ export const getCodeBlockData = (
 /* ------------------- */
 
 /**
- * @param ctx - The MarkdownPostProcessorContext from the parent
- * @param container - The container element from the parent
  * @returns Boundaries of the audio - default back to full audio
  */
 export async function getChunkSetting(
@@ -85,8 +83,6 @@ export async function getChunkSetting(
 	}
 }
 /**
- * @param ctx - The MarkdownPostProcessorContext from the parent
- * @param container - The container element from the parent
  * @returns Flag IF audio-controls are sticky
  */
 export function getStickySetting(
@@ -101,8 +97,6 @@ export function getStickySetting(
 	return stickyValue.toLowerCase() === "true";
 }
 /**
- *  @param ctx - The MarkdownPostProcessorContext from the parent
- * @param container - The container element from the parent
  * @returns Speed @ which to play the audio
  */
 export function getPlaybackSpeedSetting(
@@ -117,8 +111,6 @@ export function getPlaybackSpeedSetting(
 	return Math.round(playbackSpeedValue * 10) / 10; // Truncate to 1° decimal
 }
 /**
- * @param ctx - The MarkdownPostProcessorContext from the parent
- * @param container - The container element from the parent
  * @returns Flag IF audio can loop
  */
 export function getLoopSetting(
@@ -131,8 +123,6 @@ export function getLoopSetting(
 	return loopValue.toLowerCase() === "true";
 }
 /**
- * @param ctx - The MarkdownPostProcessorContext from the parent
- * @param container - The container element from the parent
  * @returns Volume @ which play the audio
  */
 export function getVolumeSetting(
@@ -147,8 +137,6 @@ export function getVolumeSetting(
 	return Math.round(volumeValue * 10) / 10; // Truncate to 1° decimal
 }
 /**
- * @param ctx - The MarkdownPostProcessorContext from the parent
- * @param container - The container element from the parent
  * @returns title to display
  */
 export function getTitleSetting(
@@ -161,8 +149,6 @@ export function getTitleSetting(
 	return (titleValue as string).trim();
 }
 /**
- * @param ctx - The MarkdownPostProcessorContext from the parent
- * @param container - The container element from the parent
  * @returns audio source
  */
 export function getSourceSetting(
@@ -179,8 +165,6 @@ export function getSourceSetting(
 	// Notice it cannot be undefined CAUSE it must exists
 }
 /**
- * @param ctx - The MarkdownPostProcessorContext from the parent
- * @param container - The container element from the parent
  * @returns what player layout to display
  */
 export function getLayoutSetting(
@@ -193,4 +177,18 @@ export function getLayoutSetting(
 	);
 	if (!layoutValue) return defaultAudioBoxOptions.layout;
 	else return layoutValue;
+}
+/**
+ * @returns Flag IF audio can autoplay WHEN selecting a comment
+ */
+export function getAutoplaySetting(
+	ctx: MarkdownPostProcessorContext,
+	container: HTMLElement
+): boolean {
+	const autoplayRegex = new RegExp("^autoplay: *(True|False)$", "i");
+	const autoplayValue = String(
+		getCodeBlockData(ctx, container, autoplayRegex)[0]
+	);
+	if (!autoplayValue) return defaultAudioBoxOptions.loop;
+	return autoplayValue.toLowerCase() === "true";
 }
