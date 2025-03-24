@@ -182,7 +182,7 @@ onMounted(async () => {
 		await calculateWaveGraph();
 	}
 
-	logRefs(props.sharedRefs);
+	/* logRefs(props.sharedRefs); */
 });
 
 onBeforeUnmount(() => {
