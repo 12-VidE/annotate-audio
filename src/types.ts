@@ -20,6 +20,7 @@ export type AudioBoxOptions = {
 	title: string | undefined;
 	layout: number;
 	chunk: AudioChunk | undefined;
+	autoplay: boolean;
 };
 
 export const defaultAudioBoxOptions: AudioBoxOptions = {
@@ -30,6 +31,7 @@ export const defaultAudioBoxOptions: AudioBoxOptions = {
 	title: undefined,
 	layout: 1,
 	chunk: undefined,
+	autoplay: false,
 };
 
 export type AudioBoxParameters = {

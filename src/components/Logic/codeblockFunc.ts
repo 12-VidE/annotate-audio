@@ -189,6 +189,6 @@ export function getAutoplaySetting(
 	const autoplayValue = String(
 		getCodeBlockData(ctx, container, autoplayRegex)[0]
 	);
-	if (!autoplayValue) return defaultAudioBoxOptions.loop;
+	if (!autoplayValue) return defaultAudioBoxOptions.autoplay;
 	return autoplayValue.toLowerCase() === "true";
 }
