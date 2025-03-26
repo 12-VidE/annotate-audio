@@ -3,9 +3,35 @@ import {
 	Plugin,
 	MarkdownPostProcessorContext,
 	Editor,
+	SuggestModal,
+	TFile,
+	App,
 } from "obsidian";
+import { createApp } from "vue";
+// Import - Function
+import { getSourceSetting } from "./components/Logic/codeblockFunc";
+// Import - Component
+import SourceSuggestion from "./components/SourceSuggestion.vue";
 import { AudioBox } from "./audioBox";
-import { defaultAudioBoxOptions } from "./types";
+// Import - Constant
+import { defaultAudioBoxOptions } from "./options";
+
+/**
+ * Audio extensions supported BY the plugin
+ */
+export const allowedAudioExtension = [
+	"mp3",
+	"wav",
+	"ogg",
+	"flac",
+	"mp4",
+	"m4a",
+	"webm",
+];
+
+/* -------------- */
+/* --- Plugin --- */
+/* -------------- */
 
 export default class AnnotateAudioPlugin extends Plugin {
 	playersList: Record<string, HTMLAudioElement> = {};
@@ -18,16 +44,25 @@ export default class AnnotateAudioPlugin extends Plugin {
 		this.addCommand({
 			id: "add-audio-box",
 			name: "Add audiobox",
-			editorCallback: (editor: Editor) => {
+			editorCallback: async (editor: Editor) => {
+				// Show modal (and await for it's result) so user can choose the source audio file
+				const sourceValue = await new sourceModal(
+					this.app
+				).openWithPromise();
+				// Transform default options into string
 				const optionsString = Object.entries(defaultAudioBoxOptions)
 					.map(
 						([key, value]) =>
 							`${key}: ${value === undefined ? "" : value}`
 					)
 					.join("\n");
-
+				// Create codeblock
 				editor.replaceSelection(
-					"```annotate-audio\nsource: \n" + optionsString + "\n\n```"
+					"```annotate-audio\nsource: " +
+						sourceValue +
+						"\n" +
+						optionsString +
+						"\n\n```"
 				);
 			},
 		});
@@ -124,7 +159,6 @@ export default class AnnotateAudioPlugin extends Plugin {
 		/* -------------- */
 		/* --- Render --- */
 		/* -------------- */
-
 		this.registerMarkdownCodeBlockProcessor(
 			"annotate-audio",
 			(
@@ -135,11 +169,11 @@ export default class AnnotateAudioPlugin extends Plugin {
 				// Generate a unique ID per block
 				const uniqueId = `annotate-audio-${ctx.sourcePath}-${ctx.docId}`;
 
-				// Find source
-				const sourceRegex = /source:\s*\[\[([^|\]]+)/;
-				const sourceValue: string | undefined = sourceRegex
-					.exec(source)
-					?.at(1);
+				// Get the source
+				const sourceValue = ((v) => (Array.isArray(v) ? v[0] : v))(
+					getSourceSetting(ctx, el)
+				);
+
 				if (!sourceValue) {
 					console.error("Specify a valid source");
 					return;
@@ -148,16 +182,8 @@ export default class AnnotateAudioPlugin extends Plugin {
 					getLinkpath(sourceValue),
 					sourceValue
 				);
-				const allowedExtensions = [
-					"mp3",
-					"wav",
-					"ogg",
-					"flac",
-					"mp4",
-					"m4a",
-					"webm",
-				];
-				if (!link || !allowedExtensions.includes(link.extension)) {
+				// Check IF valid (useful WHEN: source is removed OR user manually input it)
+				if (!link || !allowedAudioExtension.includes(link.extension)) {
 					console.error("Invalid source or extension");
 					return;
 				}
@@ -199,5 +225,69 @@ export default class AnnotateAudioPlugin extends Plugin {
 
 	onunload() {
 		Object.values(this.playersList).forEach((player) => player.remove());
+	}
+}
+
+/* -------------- */
+/* --- Modal --- */
+/* ------------- */
+
+class sourceModal extends SuggestModal<TFile> {
+	private sourcePromise!: (value: string) => void;
+	private vueSuggestions: Map<HTMLElement, any> = new Map();
+
+	constructor(obsidianApp: App) {
+		super(obsidianApp);
+		this.setPlaceholder("Select an audio file");
+	}
+
+	/**
+	 * @param query - What (audio file) to search for
+	 * @returns Files to choose from
+	 */
+	getSuggestions(query: string): TFile[] {
+		return this.app.vault.getFiles().filter((file) => {
+			// Remove non-audio file (by looking @ their extension)
+			if (!allowedAudioExtension.includes(file.extension)) return false;
+			// Return files that match the query
+			return file.basename.toLowerCase().includes(query.toLowerCase());
+		});
+	}
+
+	renderSuggestion(file: TFile, el: HTMLElement): void {
+		const app = createApp(SourceSuggestion, {
+			obsidianApp: this.app,
+			file: file,
+		});
+		// Render option
+		app.mount(el);
+		// Save option
+		this.vueSuggestions.set(el, app);
+	}
+
+	onClose() {
+		// Unmount vue apps
+		this.vueSuggestions.forEach((app) => app.unmount());
+		this.vueSuggestions.clear();
+	}
+
+	onChooseSuggestion(file: TFile, evt: MouseEvent | KeyboardEvent) {
+		// Generate link of choosen file
+		const linkText = this.app.metadataCache.fileToLinktext(file, file.path);
+		// "Return" the result (as wikilink)
+		this.sourcePromise(`[[${linkText}]]`);
+
+		this.close();
+	}
+
+	/**
+	 * Open this modal + make everything else wait for its response
+	 * @returns Wikilink to the source
+	 */
+	public openWithPromise(): Promise<string> {
+		this.open();
+		return new Promise((wikilink) => {
+			this.sourcePromise = wikilink;
+		});
 	}
 }

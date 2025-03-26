@@ -112,17 +112,25 @@
 			:sharedRefs="sharedRefs"
 		/>
 	</div>
+	<button
+		@click="
+			openPropertiesModal(props.ctx, props.container, props.obsidianApp)
+		"
+	>
+		Sett
+	</button>
 </template>
 
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from "vue";
-import { MarkdownPostProcessorContext, App, setIcon, TFile } from "obsidian";
+import { MarkdownPostProcessorContext, App, setIcon } from "obsidian";
 // Import - Component
 import CommentInput from "../Comment/CommentInput.vue";
 import CommentList from "../Comment/CommentList.vue";
 // Import - Func
 import { displayCurrentTime, displayDuration } from "./LayoutSharedFunc";
 import { togglePlayer, setPlayerPosition } from "../Logic/playerFunc";
+import { openPropertiesModal } from "src/options";
 // Import - Type
 import type { SharedRefs } from "../sharedRefs";
 import { logRefs } from "../sharedFunc";

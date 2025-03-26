@@ -1,9 +1,10 @@
-import { MarkdownPostProcessorContext } from "obsidian";
-import { defaultAudioBoxOptions } from "src/types";
+import { App, MarkdownPostProcessorContext, TFile } from "obsidian";
+import { defaultAudioBoxOptions } from "src/options";
 // Import - Func
-import { timeToSeconds } from "src/utils";
+import { secondsToTime, timeToSeconds } from "src/utils";
 // Import - Type
 import type { AudioChunk } from "src/types";
+import type { AudioBoxOptions } from "src/options";
 
 /* ------------ */
 /* --- Main --- */
@@ -48,8 +49,92 @@ export const getCodeBlockData = (
 	else return [""];
 };
 
+/**
+ * @returns Record of all the options saved inside codeblock
+ */
+export async function getAudioboxOptions(
+	ctx: MarkdownPostProcessorContext,
+	container: HTMLElement
+): Promise<AudioBoxOptions> {
+	return {
+		volume: await getVolumeSetting(ctx, container),
+		speed: await getPlaybackSpeedSetting(ctx, container),
+		loop: await getLoopSetting(ctx, container),
+		sticky: await getStickySetting(ctx, container),
+		title: await getTitleSetting(ctx, container),
+		layout: await getLayoutSetting(ctx, container),
+		chunk: await getChunkSetting(ctx, container),
+		autoplay: await getAutoplaySetting(ctx, container),
+	} as AudioBoxOptions;
+}
+
+export async function setAudioboxOptions(
+	ctx: MarkdownPostProcessorContext,
+	container: HTMLElement,
+	obsidianApp: App,
+	newOptions: AudioBoxOptions
+): Promise<boolean> {
+	// Get file full content
+	const sectionInfo = ctx.getSectionInfo(container);
+	if (!sectionInfo) return false;
+
+	const lines = sectionInfo.text.split("\n");
+	const codeblock = lines.slice(sectionInfo.lineStart, sectionInfo.lineEnd);
+
+	try {
+		let lastOptionLine = 0;
+		for (let i = 0; i < codeblock.length; i++) {
+			if (/^\d+\s*---\s*.+$/.test(codeblock[i])) {
+				lastOptionLine = i - 1;
+				break;
+			}
+		}
+		console.log(lastOptionLine);
+		const lastOptionAbsoluteLine = sectionInfo.lineStart + lastOptionLine;
+		// Check IF it's within codeblock bounds
+		if (
+			lastOptionAbsoluteLine < sectionInfo.lineStart ||
+			lastOptionAbsoluteLine > sectionInfo.lineEnd
+		)
+			return false;
+		// Convert newOptions object into an array of "key: value" strings
+		// Do it manually CAUSE simpler and more effective
+		const newOptionsArray = Object.entries(newOptions).map(
+			([key, value]) => {
+				switch (key) {
+					case "title":
+						return value ? `title: "${value}"` : "title: ";
+					case "chunk":
+						const chunk = value as AudioChunk;
+						return `chunk: ${secondsToTime(
+							chunk?.startTime
+						)}-${secondsToTime(chunk?.endTime)}`;
+					default:
+						return `${key}: ${value}`; // Default case
+				}
+			}
+		);
+		newOptionsArray.filter((line) => line.trim() !== "");
+		newOptionsArray.push("");
+		// Implement change into file
+		lines.splice(
+			lastOptionAbsoluteLine - lastOptionLine + 1,
+			lastOptionLine,
+			...newOptionsArray
+		);
+		console.log(lines);
+		// Get file & write the changes to it
+		/* const file = obsidianApp.vault.getAbstractFileByPath(ctx.sourcePath);
+		if (!file || !(file instanceof TFile)) return false;
+		await obsidianApp.vault.modify(file, lines.join("\n")); */
+	} catch (error) {
+		console.error("Cannot manage properties - ", error);
+	}
+	return true;
+}
+
 /* ------------------- */
-/* --- Specialized --- */
+/* --- Get Options --- */
 /* ------------------- */
 
 /**
@@ -154,15 +239,15 @@ export function getTitleSetting(
 export function getSourceSetting(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
-): Array<string> | string {
-	const surceRegex = new RegExp(
+): Array<string> | string | undefined {
+	const sourceRegex = new RegExp(
 		"^source: *\\[\\[([^|\\]]+)(?:\\|([^\\]]*))?\\]\\]$"
 	);
-	const sourceValue = getCodeBlockData(ctx, container, surceRegex)[0];
-	if (sourceValue[1] && sourceValue[1].length > 0)
+	const sourceValue = getCodeBlockData(ctx, container, sourceRegex)[0];
+	if (!sourceValue) return undefined;
+	else if (sourceValue[1])
 		return sourceValue; // Return both file-name and alias (if present)
 	else return sourceValue[0]; // Return only file-name (if alias doesn't exists)
-	// Notice it cannot be undefined CAUSE it must exists
 }
 /**
  * @returns what player layout to display

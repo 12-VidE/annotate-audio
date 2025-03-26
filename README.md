@@ -1,5 +1,3 @@
-> [This is a (sort of) fork of "obsidian-audio-player" by noonesimg](https://github.com/noonesimg/obsidian-audio-player)
-
 ## What is it?
 
 ![Preview GIF](static/preview.gif)
@@ -32,6 +30,8 @@ layout: 1
 
 Only `source` is required, the others are all facoltative.
 
+<!-- They can be tweaked more easly using a modal -->
+
 | Layout | Name       | Default     | Values              | Description                                                                                               |
 | ------ | ---------- | ----------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
 | \*     | `source`   |             |                     | WikiLink to the audio file to reproduce                                                                   |
@@ -46,10 +46,10 @@ Only `source` is required, the others are all facoltative.
 
 ### Obsidian Commands
 
-| Name             | Action                                             |
-| ---------------- | -------------------------------------------------- |
-| `Add audiobox`   | Insert an already-configured audio-box in the note |
-| `Insert comment` | Insert a comment in the last interacted audio-box  |
+| Name             | Action                                                 |
+| ---------------- | ------------------------------------------------------ |
+| `Add audiobox`   | Insert an already-configured audio-box inside the note |
+| `Insert comment` | Insert a comment in the last interacted audio-box      |
 
 ---
 
@@ -57,11 +57,11 @@ Only `source` is required, the others are all facoltative.
 
 ### Road-Map
 
-1. (main.ts) Use a modal to set-up an audio-box when created via Obsidian command
-2. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
-3. Better controls to manage all the options - like using a modal
-4. Cache where you left the player time
-5. Cache where you left the player time
+1. Component add when no/invalid audio source has been selected
+2. Add more useful obsidian commands
+3. Cache where you left the player time
+4. Follow native folder exclusion in the audio file search
+5. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
 
 ### Known Issues
 
@@ -71,9 +71,13 @@ Only `source` is required, the others are all facoltative.
 -   (LayoutDefault.vue) The wavegraph is not always loaded reliably. Sometimes, the wrong values are cached, requiring a cleaning
 -   Remove `editMode` flag as it's redundant
 -   Player is umounted and mounted when a comment is added. It would be better to have an update.
+-   Player time is resetted when a comment is added/modified
 
 ### Changelog
 
+-   **1.2.0 (developing)**
+    -   feat: Select audio source on `Add audiobox` command using a modal
+    -   feat: Add modal to manage player properties more easily
 -   **1.1.0**
     -   Allow each player to be independent by creating its props in `ParentApp.vue` and passing them as `props`. To use targeted Obsidian commands, each player is called by its `id`
     -   feat [#1](https://github.com/12-VidE/annotate-audio/issues/1): Added Obsidian command `Insert comment`

@@ -11,29 +11,6 @@ export type AudioChunk = {
 	duration?: number;
 };
 
-// What can be changed inside audio-box
-export type AudioBoxOptions = {
-	volume: number;
-	speed: number;
-	loop: boolean;
-	sticky: boolean;
-	title: string | undefined;
-	layout: number;
-	chunk: AudioChunk | undefined;
-	autoplay: boolean;
-};
-
-export const defaultAudioBoxOptions: AudioBoxOptions = {
-	volume: 0.5,
-	speed: 1,
-	loop: false,
-	sticky: false,
-	title: undefined,
-	layout: 1,
-	chunk: undefined,
-	autoplay: false,
-};
-
 export type AudioBoxParameters = {
 	container: HTMLElement;
 	audioSource: string;

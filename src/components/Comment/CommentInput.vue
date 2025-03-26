@@ -264,8 +264,7 @@ const eventInsertComment = (e: Event) => {
 	if (
 		event.detail?.id ===
 		`annotate-audio-${props.ctx.sourcePath}-${props.ctx.docId}`
-	) {
+	)
 		showCommentInput();
-	}
 };
 </script>

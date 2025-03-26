@@ -23,6 +23,43 @@
 	opacity: 0.6;
 }
 
+/* ----------------------- */
+/* --- SourceSuggetion --- */
+/* ----------------------- */
+.source-suggestion-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+
+	.filename {
+		font-weight: 500;
+	}
+	.extension {
+		font-weight: 400;
+		font-size: 0.8rem;
+		color: var(--color-base-60);
+		margin-left: 0.3rem;
+	}
+
+	.metadata-container {
+		padding: 0;
+		margin: 0.2rem 0 0 0;
+
+		display: flex;
+		flex-direction: row;
+		gap: 0.4rem;
+
+		font-weight: 400;
+		color: var(--color-base-60);
+
+		> i {
+			padding: 0;
+			margin: 0;
+			vertical-align: middle;
+		}
+	}
+}
+
 /* ---------------- */
 /* --- Comments --- */
 /* ---------------- */
