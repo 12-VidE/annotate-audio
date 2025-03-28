@@ -28,9 +28,8 @@ layout: 1
 
 ### Options
 
+**They can be tweaked more easly using the modal.**
 Only `source` is required, the others are all facoltative.
-
-<!-- They can be tweaked more easly using a modal -->
 
 | Layout | Name       | Default     | Values              | Description                                                                                               |
 | ------ | ---------- | ----------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -39,7 +38,7 @@ Only `source` is required, the others are all facoltative.
 | \*     | `speed`    | `1`         | `0.0` → `1.0`       | Player playback speed                                                                                     |
 | \*     | `loop`     | `false`     | `true`/`false`      | Loop-back to beginning after getting to the end of the audio                                              |
 | \*     | `sticky`   | `false`     | `true`/`false`      | Main controls become sticky, following you as you scroll down                                             |
-| \*     | `layout`   | `1`         | `1,2`               | What player layout to display (feel free to make your own)                                                |
+| \*     | `layout`   | `0`         | `0,1`               | What player layout to display (feel free to make your own)                                                |
 | \*     | `chunk`    | `undefined` | `HH:MM:SS-HH:MM:SS` | Section of audio to play                                                                                  |
 | \*     | `autoplay` | `false`     | `true`/`false`      | When clicking on a comment, the player starts playing from there instead of simply moving there           |
 | 1      | `title`    | `undefined` |                     | Title of the player. If not present: not shown. If not set: name of audio file (or its alias, if present) |
@@ -57,11 +56,13 @@ Only `source` is required, the others are all facoltative.
 
 ### Road-Map
 
-1. Component add when no/invalid audio source has been selected
+1. Display 404 component when no/invalid audio source has been selected
 2. Add more useful obsidian commands
 3. Cache where you left the player time
 4. Follow native folder exclusion in the audio file search
-5. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
+5. UI to control `chunk` (like "Aves")
+6. Layout with all the properties exposed
+7. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
 
 ### Known Issues
 
@@ -72,14 +73,17 @@ Only `source` is required, the others are all facoltative.
 -   Remove `editMode` flag as it's redundant
 -   Player is umounted and mounted when a comment is added. It would be better to have an update.
 -   Player time is resetted when a comment is added/modified
+-   After using `Add audiobox` command, better handle the rendering by moving outside
+-   `Insert comment` command is not removed when there's no active player
+-   Remove alias option as it's actually pretty stupid
 
 ### Changelog
 
--   **1.2.0 (developing)**
+-   **1.2.0**
     -   feat: Select audio source on `Add audiobox` command using a modal
     -   feat: Add modal to manage player properties more easily
 -   **1.1.0**
-    -   Allow each player to be independent by creating its props in `ParentApp.vue` and passing them as `props`. To use targeted Obsidian commands, each player is called by its `id`
+    -   Allow each player to be independent by creating its refs in `ParentApp.vue` and passing them as `props`. To use targeted Obsidian commands, each player is called by its `id`
     -   feat [#1](https://github.com/12-VidE/annotate-audio/issues/1): Added Obsidian command `Insert comment`
     -   feat: [#3](https://github.com/12-VidE/annotate-audio/issues/3) Added `autoplay` option
     -   fix: Render `LayoutDefault` even when property `title` is not present

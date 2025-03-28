@@ -15,27 +15,15 @@ import SourceSuggestion from "./components/SourceSuggestion.vue";
 import { AudioBox } from "./audioBox";
 // Import - Constant
 import { defaultAudioBoxOptions } from "./options";
-
-/**
- * Audio extensions supported BY the plugin
- */
-export const allowedAudioExtension = [
-	"mp3",
-	"wav",
-	"ogg",
-	"flac",
-	"mp4",
-	"m4a",
-	"webm",
-];
+import { allowedAudioExtension } from "./const";
 
 /* -------------- */
 /* --- Plugin --- */
 /* -------------- */
 
 export default class AnnotateAudioPlugin extends Plugin {
-	playersList: Record<string, HTMLAudioElement> = {};
-	activePlayerId: string | null = null;
+	private playersList: Record<string, HTMLAudioElement> = {};
+	private lastInteractedPlayerId: string | null = null;
 
 	async onload() {
 		/* -----------------*/
@@ -70,10 +58,10 @@ export default class AnnotateAudioPlugin extends Plugin {
 			id: "add-comment",
 			name: "Insert comment",
 			checkCallback: (checking: boolean) => {
-				if (this.activePlayerId) {
+				if (this.lastInteractedPlayerId) {
 					if (!checking) {
 						const ev = new CustomEvent("insertComment", {
-							detail: { id: this.activePlayerId },
+							detail: { id: this.lastInteractedPlayerId },
 						});
 						document.dispatchEvent(ev);
 					}
@@ -206,7 +194,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 						.querySelectorAll(".annotate-audio-container")
 						.forEach((el) => el.classList.remove("active"));
 					container.classList.add("active");
-					this.activePlayerId = uniqueId;
+					this.lastInteractedPlayerId = uniqueId;
 				});
 
 				// Register the Vue component as a child so that it persists
@@ -225,6 +213,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 
 	onunload() {
 		Object.values(this.playersList).forEach((player) => player.remove());
+		this.lastInteractedPlayerId = null;
 	}
 }
 

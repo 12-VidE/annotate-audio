@@ -1,4 +1,5 @@
 import { MarkdownPostProcessorContext, App } from "obsidian";
+import { DefineComponent } from "vue";
 
 export type AudioComment = {
 	time: number;
@@ -17,4 +18,9 @@ export type AudioBoxParameters = {
 	ctx: MarkdownPostProcessorContext;
 	player: HTMLAudioElement;
 	obsidianApp: App;
+};
+
+export type Layout = {
+	name: string;
+	component: DefineComponent<any, any, any>;
 };

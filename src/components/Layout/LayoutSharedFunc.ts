@@ -13,9 +13,12 @@ import { getTitleSetting, getSourceSetting } from "../Logic/codeblockFunc";
  * @param currentTime - sharedRef
  * @returns Time of the player
  */
-export function displayCurrentTime(currentTime: Readonly<number>) {
+export function displayCurrentTime(
+	currentTime: Readonly<number>,
+	maxTime?: number
+) {
 	return computed(() => {
-		return secondsToTime(Math.floor(currentTime));
+		return secondsToTime(Math.floor(currentTime), maxTime);
 	});
 }
 
@@ -23,9 +26,12 @@ export function displayCurrentTime(currentTime: Readonly<number>) {
  * @param chunk - sharedRef
  * @returns Time lenght of chunk
  */
-export function displayDuration(chunk: Readonly<AudioChunk | undefined>) {
+export function displayDuration(
+	chunk: Readonly<AudioChunk | undefined>,
+	maxTime?: number
+) {
 	return computed(() => {
-		return secondsToTime(chunk?.endTime!);
+		return secondsToTime(chunk?.endTime!, maxTime);
 	});
 }
 
@@ -47,7 +53,7 @@ export function displayTitle(
 			return sourceValue.replace(/\.[^/.]+$/, "");
 		} else {
 			// Use alias in the source (IF present)
-			return sourceValue[1];
+			return sourceValue![1];
 		}
 	} else {
 		// Return 'title' option IF specied

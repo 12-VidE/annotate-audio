@@ -60,6 +60,12 @@
 	}
 }
 
+/* --------------------- */
+/* --- Options Modal --- */
+/* --------------------- */
+
+/* NONE */
+
 /* ---------------- */
 /* --- Comments --- */
 /* ---------------- */
@@ -133,10 +139,10 @@
 }
 
 /* --------------------- */
-/* --- LayoutDefault --- */
+/* --- LayoutBig --- */
 /* --------------------- */
 
-.layout--default .audiobox-title {
+.layout--big .audiobox-title {
 	color: var(--text-normal);
 	> span {
 		padding-right: 0.5rem;
@@ -144,7 +150,7 @@
 	}
 }
 
-.layout--default .wavegraph {
+.layout--big .wavegraph {
 	width: 100%;
 	height: 100%;
 
@@ -161,13 +167,13 @@
 	}
 }
 
-.layout--default div.main-container {
+.layout--big div.main-container {
 	border-radius: 0 0 1rem 1rem;
 	background-color: var(--background-secondary);
 	border-color: var(--color-base-30);
 }
 
-.layout--default .timeline-container {
+.layout--big .timeline-container {
 	width: 100%;
 
 	display: flex;
@@ -189,7 +195,7 @@
 	}
 }
 
-.layout--default .controls-container {
+.layout--big .controls-container {
 	margin: auto;
 	padding-bottom: 0.3rem;
 
@@ -236,22 +242,22 @@
 }
 
 /* --------------------- */
-/* --- LayoutMinimal --- */
+/* --- LayoutDefault --- */
 /* --------------------- */
 
-.layout--minimal div.main-container {
+.layout--default div.main-container {
 	border-radius: 1rem;
 	padding: 0.5rem;
 	background-color: var(--background-secondary);
 	border-color: var(--color-base-30);
 }
 
-.layout--minimal .inputs-container {
+.layout--default .inputs-container {
 	display: flex;
 	flex-direction: row;
 }
 
-.layout--minimal .controls-container {
+.layout--default .controls-container {
 	margin: auto;
 
 	display: flex;
@@ -296,7 +302,7 @@
 	}
 }
 
-.layout--minimal .timeline-numbers {
+.layout--default .timeline-numbers {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -312,10 +318,10 @@
 	}
 }
 
-.layout--minimal .timeline-container {
+.layout--default .timeline-container {
 	width: 100%;
 	flex: 1;
-	margin-right: 1rem;
+	margin-right: 0.5rem;
 
 	display: flex;
 	flex-direction: column;
@@ -326,12 +332,23 @@
 	}
 }
 
-.layout--minimal .commentInput_btn {
-	background-color: var(--color-base-50);
-	height: 3.4rem;
-	padding: 0.3rem;
-	border-radius: 2rem 0 0 2rem;
-
+.layout--default .stacked-btns-container {
 	display: flex;
-	align-items: center;
+	flex-direction: row;
+	> .showProperties_btn {
+		padding: 0;
+		margin: 0;
+		> svg {
+			color: var(--color-base-40);
+		}
+	}
+	> .commentInput_btn {
+		background-color: var(--color-base-50);
+		height: 3.4rem;
+		padding: 0.3rem;
+		border-radius: 2rem 0 0 2rem;
+
+		display: flex;
+		align-items: center;
+	}
 }

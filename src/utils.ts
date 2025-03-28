@@ -1,5 +1,5 @@
 /**
- * Converts HH:MM:SS into SS
+ * Converts HH:mm:ss into ss
  * @param {string} str
  * @returns {number}
  */
@@ -9,17 +9,20 @@ export function timeToSeconds(str: string): number {
 }
 
 /**
- * Converts SS into HH:MM:SS
- * @param {number} num
+ * Converts ss into HH:mm:ss OR mm:ss
+ * @param num - Input to convert
+ * @param max - WHEN present, num is removed of the extra hour padding
  * @returns {string}
  */
-export function secondsToTime(num: number): string {
+export function secondsToTime(num: number, max?: number): string {
 	num = Math.floor(num);
-	const h = String(Math.floor(num / 3600)).padStart(1, "0");
-	const m = String(Math.floor((num % 3600) / 60)).padStart(2, "0");
-	const s = String(num % 60).padStart(2, "0");
+	const HH = String(Math.floor(num / 3600)).padStart(2, "0");
+	const mm = String(Math.floor((num % 3600) / 60)).padStart(2, "0");
+	const ss = String(num % 60).padStart(2, "0");
 
-	return `${h}:${m}:${s}`;
+	// Output depends on the presence of max
+	if (max !== undefined && max < 3600) return `${mm}:${ss}`;
+	else return `${HH}:${mm}:${ss}`;
 }
 
 /**

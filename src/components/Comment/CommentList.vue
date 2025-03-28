@@ -13,8 +13,9 @@
 			@play-from="(time) => playComment(time)"
 			@edit-comment="enableEditMode"
 			:comment="comment"
-			:obsidianApp="obsidianApp"
 			:key="comment.time"
+			:obsidianApp="obsidianApp"
+			:sharedRefs="sharedRefs"
 		/>
 	</div>
 </template>

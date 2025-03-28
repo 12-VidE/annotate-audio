@@ -68,6 +68,14 @@ export async function getAudioboxOptions(
 	} as AudioBoxOptions;
 }
 
+/**
+ * Write the options of a codeblock
+ * @param ctx - The MarkdownPostProcessorContext from the parent
+ * @param container - The container element from the parent
+ * @param obsidianApp
+ * @param newOptions - The new/modified codeblock options to write
+ * @returns
+ */
 export async function setAudioboxOptions(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement,
@@ -82,51 +90,60 @@ export async function setAudioboxOptions(
 	const codeblock = lines.slice(sectionInfo.lineStart, sectionInfo.lineEnd);
 
 	try {
-		let lastOptionLine = 0;
+		// Count lines (of codeblock) until it finds first comment
+		let optionsNumber: number | undefined = undefined;
 		for (let i = 0; i < codeblock.length; i++) {
 			if (/^\d+\s*---\s*.+$/.test(codeblock[i])) {
-				lastOptionLine = i - 1;
+				optionsNumber = i - 1;
 				break;
 			}
 		}
-		console.log(lastOptionLine);
-		const lastOptionAbsoluteLine = sectionInfo.lineStart + lastOptionLine;
+		if (!optionsNumber) optionsNumber = codeblock.length - 2; // WHEN there's no comment. Fallback to the codeblock lenght wihtout extremes
+
+		const lastOptionAbsoluteLine = sectionInfo.lineStart + optionsNumber;
 		// Check IF it's within codeblock bounds
 		if (
 			lastOptionAbsoluteLine < sectionInfo.lineStart ||
 			lastOptionAbsoluteLine > sectionInfo.lineEnd
 		)
 			return false;
-		// Convert newOptions object into an array of "key: value" strings
-		// Do it manually CAUSE simpler and more effective
-		const newOptionsArray = Object.entries(newOptions).map(
-			([key, value]) => {
+		// Convert newOptions object into an array
+		// Special formatting are treated separetly
+		const newOptionsArray = Object.entries(newOptions)
+			.map(([key, value]) => {
 				switch (key) {
 					case "title":
-						return value ? `title: "${value}"` : "title: ";
+						if (value == undefined) return ``;
+						else if (value == "") return `title: `;
+						else return `title: ${value}`;
 					case "chunk":
 						const chunk = value as AudioChunk;
-						return `chunk: ${secondsToTime(
-							chunk?.startTime
-						)}-${secondsToTime(chunk?.endTime)}`;
+						if (chunk.endTime > chunk.startTime)
+							return `chunk: ${secondsToTime(
+								chunk?.startTime
+							)}-${secondsToTime(chunk?.endTime)}`;
+						else return ``;
 					default:
-						return `${key}: ${value}`; // Default case
+						return `${key}: ${value}`;
 				}
-			}
-		);
-		newOptionsArray.filter((line) => line.trim() !== "");
+			})
+			.filter((option) => {
+				if (option === ``) return false; // Delete empty strings
+				return true;
+			});
 		newOptionsArray.push("");
-		// Implement change into file
+
+		// Implement change into copy of file
 		lines.splice(
-			lastOptionAbsoluteLine - lastOptionLine + 1,
-			lastOptionLine,
+			sectionInfo.lineStart + 2,
+			optionsNumber - 1,
 			...newOptionsArray
 		);
-		console.log(lines);
+
 		// Get file & write the changes to it
-		/* const file = obsidianApp.vault.getAbstractFileByPath(ctx.sourcePath);
+		const file = obsidianApp.vault.getAbstractFileByPath(ctx.sourcePath);
 		if (!file || !(file instanceof TFile)) return false;
-		await obsidianApp.vault.modify(file, lines.join("\n")); */
+		await obsidianApp.vault.modify(file, lines.join("\n"));
 	} catch (error) {
 		console.error("Cannot manage properties - ", error);
 	}
@@ -250,13 +267,13 @@ export function getSourceSetting(
 	else return sourceValue[0]; // Return only file-name (if alias doesn't exists)
 }
 /**
- * @returns what player layout to display
+ * @returns Index of what player layout to render
  */
 export function getLayoutSetting(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): number {
-	const layoutRegex = new RegExp("^layout: *([1-9])$", "i");
+	const layoutRegex = new RegExp("^layout: *([0-9])$", "i");
 	const layoutValue = Number(
 		getCodeBlockData(ctx, container, layoutRegex)[0]
 	);

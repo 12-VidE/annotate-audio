@@ -8,6 +8,7 @@ export interface SharedRefs {
 	srcPath: Ref<string>; // Path to the audio source
 	currentTime: Ref<number>; // Time playing on the track
 	chunk: Ref<AudioChunk | undefined>; // Portion of track to be reproduced
+	totalDuration: Ref<number | undefined>; // Total duration of the track
 
 	/* --------------- */
 	/* --- Comment --- */
@@ -37,6 +38,7 @@ export function createShareRefs(): SharedRefs {
 		srcPath: ref(""),
 		currentTime: ref(0),
 		chunk: ref(undefined),
+		totalDuration: ref(undefined),
 
 		commentInput: ref(null),
 		editedCommentTime: ref(null),

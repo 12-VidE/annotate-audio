@@ -4,20 +4,26 @@
 		@click.left="emitPlayFrom"
 		@click.right="emitEditComment"
 	>
-		<span class="comment-time">{{ displayCommentTime }}</span>
+		<span class="comment-time">{{
+			secondsToTime(comment.time, sharedRefs.totalDuration.value)
+		}}</span>
 		<span class="comment-content" v-html="displayCommentContent"></span>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { secondsToTime } from "src/utils";
 import { MarkdownRenderer, Component, App } from "obsidian";
+// Import - Function
+import { secondsToTime } from "src/utils";
+// Import - Type
 import type { AudioComment } from "src/types";
+import type { SharedRefs } from "../sharedRefs";
 
 const props = defineProps<{
 	comment: AudioComment;
 	obsidianApp: App;
+	sharedRefs: SharedRefs;
 }>();
 
 const emit = defineEmits<{
@@ -28,9 +34,6 @@ const emit = defineEmits<{
 /* ---------------- */
 /* --- Computed --- */
 /* ---------------- */
-const displayCommentTime = computed(() => {
-	return secondsToTime(props.comment.time);
-});
 const displayCommentContent = computed(() => {
 	const temporaryContainer = document.createElement("div");
 	const temporaryComponent = new Component();

@@ -19,7 +19,7 @@ export function getCommentsArray(
 	// Get comments FROM codeblock
 	// Format comment into AudioComment
 	// Sort comment by time (just to make sure, they should already be in order)
-	return getCodeBlockData(ctx, container, commentRegex)
+	const commentsArray = getCodeBlockData(ctx, container, commentRegex)
 		.map((item) => {
 			if (Array.isArray(item)) {
 				return {
@@ -32,6 +32,7 @@ export function getCommentsArray(
 		})
 		.filter((item): item is AudioComment => item !== null)
 		.sort((x: AudioComment, y: AudioComment) => x.time - y.time);
+	return commentsArray;
 }
 
 /**
@@ -39,8 +40,10 @@ export function getCommentsArray(
  * @param refs = sharedRefs
  */
 export function logRefs(refs: Record<string, any>): void {
+	const logObj: Record<string, any> = {};
 	Object.keys(refs).forEach((key) => {
 		const value = refs[key];
-		console.log(key, isRef(value) ? value.value : value);
+		logObj[key] = isRef(value) ? value.value : value;
 	});
+	console.log(logObj);
 }
