@@ -304,10 +304,9 @@ export class PropertiesModal extends Modal {
 					toggle
 						.setValue(this.options.title !== undefined)
 						.onChange((value: boolean) => {
-							// TODO gestisti il caso in cui devo togliere il titolo
-
-							// Toggle the visibility of the text input container
 							if (value == false) this.options.title = undefined;
+							else this.options.title = "";
+							// Toggle the visibility of the text input container
 							textContainer.style.display = value
 								? "flex"
 								: "none";
