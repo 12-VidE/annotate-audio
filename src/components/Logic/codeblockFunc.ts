@@ -23,11 +23,11 @@ export const getCodeBlockData = (
 	regex: RegExp = /^.*$/
 ): Array<string | string[]> => {
 	const sectionInfo = ctx.getSectionInfo(container);
-	const lines = sectionInfo?.text
+	const codeblockLines = sectionInfo?.text
 		.split("\n")
 		.slice(sectionInfo.lineStart + 1, sectionInfo.lineEnd);
-	if (lines)
-		return lines
+	if (codeblockLines)
+		return codeblockLines
 			.map((line: string) => {
 				const match = regex.exec(line);
 				if (match) {
@@ -100,13 +100,6 @@ export async function setAudioboxOptions(
 		}
 		if (!optionsNumber) optionsNumber = codeblock.length - 2; // WHEN there's no comment. Fallback to the codeblock lenght wihtout extremes
 
-		const lastOptionAbsoluteLine = sectionInfo.lineStart + optionsNumber;
-		// Check IF it's within codeblock bounds
-		if (
-			lastOptionAbsoluteLine < sectionInfo.lineStart ||
-			lastOptionAbsoluteLine > sectionInfo.lineEnd
-		)
-			return false;
 		// Convert newOptions object into an array
 		// Special formatting are treated separetly
 		const newOptionsArray = Object.entries(newOptions)

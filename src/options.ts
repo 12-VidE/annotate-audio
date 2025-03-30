@@ -15,17 +15,18 @@ import {
 	setAudioboxOptions,
 } from "./components/Logic/codeblockFunc";
 import { secondsToTime, timeToSeconds } from "./utils";
+import { reactive } from "vue";
 
 // What can be changed inside audio-box
 export type AudioBoxOptions = {
 	volume: number; // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/volume
 	speed: number; // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/playbackRate
 	loop: boolean;
-	sticky: boolean;
+	sticky: boolean; // IF we enable the player to be sticky
 	title: string | undefined;
 	layout: number;
-	chunk: AudioChunk | undefined;
-	autoplay: boolean;
+	chunk: AudioChunk | undefined; // Portion of track to be reproduced
+	autoplay: boolean; // WHEN clicking on a comment, the playes does NOT pause
 };
 
 export const defaultAudioBoxOptions: AudioBoxOptions = {
@@ -39,6 +40,18 @@ export const defaultAudioBoxOptions: AudioBoxOptions = {
 	autoplay: false,
 };
 
+export function createOptionRefs(): AudioBoxOptions {
+	return reactive<AudioBoxOptions>({
+		volume: 0.5,
+		speed: 1,
+		loop: false,
+		sticky: false,
+		title: undefined,
+		layout: 0,
+		chunk: undefined,
+		autoplay: false,
+	});
+}
 /* -------------- */
 /* --- Modal --- */
 /* ------------- */

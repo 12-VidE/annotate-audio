@@ -5,7 +5,7 @@
 		@click.right="emitEditComment"
 	>
 		<span class="comment-time">{{
-			secondsToTime(comment.time, sharedRefs.totalDuration.value)
+			secondsToTime(comment.time, sharedRefs.maxDuration.value)
 		}}</span>
 		<span class="comment-content" v-html="displayCommentContent"></span>
 	</div>

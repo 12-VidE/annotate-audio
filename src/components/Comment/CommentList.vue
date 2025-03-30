@@ -36,6 +36,7 @@ import {
 	pausePlayer,
 	playPlayer,
 } from "../Logic/playerFunc";
+import { AudioBoxOptions } from "src/options";
 
 const props = defineProps<{
 	container: HTMLElement;
@@ -44,6 +45,7 @@ const props = defineProps<{
 	player: HTMLAudioElement;
 	obsidianApp: App;
 	sharedRefs: SharedRefs;
+	options: AudioBoxOptions;
 }>();
 
 const activeComment = ref<AudioComment | null>(null); //
@@ -66,8 +68,8 @@ onMounted(() => {
 const filteredCommentList = computed(() => {
 	return getCommentsArray(props.ctx, props.container).filter(
 		(comment: AudioComment) =>
-			comment.time >= props.sharedRefs.chunk.value?.startTime! &&
-			comment.time <= props.sharedRefs.chunk.value?.endTime!
+			comment.time >= props.options.chunk?.startTime! &&
+			comment.time <= props.options.chunk?.endTime!
 	);
 });
 
@@ -89,7 +91,7 @@ function enableEditMode(time: number): void {
 		props.ctx,
 		props.container,
 		props.player,
-		props.sharedRefs.chunk.value,
+		props.options.chunk,
 		props.sharedRefs.currentTime
 	);
 
@@ -123,18 +125,18 @@ function getComment(time: number): AudioComment | null {
 function playComment(time: number): void {
 	setPlayerPosition(
 		props.player,
-		props.sharedRefs.chunk.value,
+		props.options.chunk,
 		props.sharedRefs.currentTime,
 		time
 	);
 
 	// Force play IF autoplay is enabled
-	if (props.sharedRefs.isAutoplay.value) {
+	if (props.options.autoplay) {
 		playPlayer(
 			props.ctx,
 			props.container,
 			props.player,
-			props.sharedRefs.chunk.value,
+			props.options.chunk,
 			props.sharedRefs.currentTime.value
 		);
 	}

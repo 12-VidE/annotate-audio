@@ -20,10 +20,7 @@
 		</div>
 		<div
 			ref="stickyContainer"
-			:class="[
-				'main-container',
-				sharedRefs.isSticky.value && 'is-sticky',
-			]"
+			:class="['main-container', options.sticky && 'is-sticky']"
 		>
 			<!-- Timeline -->
 			<div
@@ -34,8 +31,8 @@
 			>
 				<input
 					type="range"
-					:min="sharedRefs.chunk.value?.startTime"
-					:max="sharedRefs.chunk.value?.endTime"
+					:min="options.chunk?.startTime"
+					:max="options.chunk?.endTime"
 					step="0.1"
 					v-model="sharedRefs.currentTime.value"
 					@input="eventTimeBarInput"
@@ -44,7 +41,7 @@
 					<span>{{
 						displayCurrentTime(sharedRefs.currentTime.value)
 					}}</span>
-					<span>{{ displayDuration(sharedRefs.chunk.value) }}</span>
+					<span>{{ displayDuration(options.chunk) }}</span>
 				</div>
 			</div>
 			<!-- Controls -->
@@ -63,14 +60,14 @@
 							ctx,
 							container,
 							player,
-							sharedRefs.chunk.value,
+							options.chunk,
 							sharedRefs.currentTime
 						);
 						new PropertiesModal(
 							ctx,
 							container,
 							obsidianApp,
-							sharedRefs.totalDuration.value!
+							sharedRefs.maxDuration.value!
 						).openPropertiesModal();
 					"
 				></div>
@@ -80,7 +77,7 @@
 					@click="
 						setPlayerPosition(
 							player,
-							sharedRefs.chunk.value,
+							options.chunk,
 							sharedRefs.currentTime,
 							sharedRefs.currentTime.value - 5
 						)
@@ -97,7 +94,7 @@
 							ctx,
 							container,
 							player,
-							sharedRefs.chunk.value,
+							options.chunk,
 							sharedRefs.currentTime
 						)
 					"
@@ -108,7 +105,7 @@
 					@click="
 						setPlayerPosition(
 							player,
-							sharedRefs.chunk.value,
+							options.chunk,
 							sharedRefs.currentTime,
 							sharedRefs.currentTime.value + 5
 						)
@@ -131,6 +128,7 @@
 				:player="player"
 				:obsidianApp="obsidianApp"
 				:sharedRefs="sharedRefs"
+				:options="options"
 			/>
 		</div>
 		<!-- Comments List -->
@@ -141,6 +139,7 @@
 			:player="player"
 			:obsidianApp="obsidianApp"
 			:sharedRefs="sharedRefs"
+			:options="options"
 		/>
 	</div>
 </template>
@@ -152,7 +151,7 @@ import { MarkdownPostProcessorContext, App, setIcon, TFile } from "obsidian";
 import CommentInput from "../Comment/CommentInput.vue";
 import CommentList from "../Comment/CommentList.vue";
 // Import - Class
-import { PropertiesModal } from "src/options";
+import { AudioBoxOptions, PropertiesModal } from "src/options";
 // Import - Func
 import {
 	displayCurrentTime,
@@ -176,6 +175,7 @@ const props = defineProps<{
 	player: HTMLAudioElement;
 	obsidianApp: App;
 	sharedRefs: SharedRefs;
+	options: AudioBoxOptions;
 }>();
 
 /* ------------ */
@@ -207,13 +207,12 @@ onMounted(async () => {
 	}
 
 	// Initialize Wavegraph
-	if (props.sharedRefs.isCached.value) {
+	/* if (props.sharedRefs.isCached.value) {
 		barHeights.value = JSON.parse(
 			localStorage[`${props.audioSource}_barHeights`]
-		);
-	} else {
-		await calculateWaveGraph();
-	}
+		); */
+
+	await calculateWaveGraph();
 
 	/* logRefs(props.sharedRefs); */
 });
@@ -232,8 +231,8 @@ onBeforeUnmount(() => {
 const currentBar = computed(() => {
 	return Math.floor(
 		((props.sharedRefs.currentTime.value -
-			props.sharedRefs.chunk.value?.startTime!) /
-			props.sharedRefs.chunk.value?.duration!) *
+			props.options.chunk?.startTime!) /
+			props.options.chunk?.duration!) *
 			nSamples.value
 	);
 });
@@ -263,10 +262,10 @@ async function calculateWaveGraph() {
 			const audioSampleRate = buf.sampleRate;
 			const playedChunk: AudioChunk = {
 				startTime: Math.floor(
-					props.sharedRefs.chunk.value?.startTime! * audioSampleRate
+					props.options.chunk?.startTime! * audioSampleRate
 				),
 				endTime: Math.floor(
-					props.sharedRefs.chunk.value?.endTime! * audioSampleRate
+					props.options.chunk?.endTime! * audioSampleRate
 				),
 			}; // Portion of audio to play (can be entire file)
 			const barWidth = Math.floor(
@@ -274,8 +273,7 @@ async function calculateWaveGraph() {
 			);
 			let highestBar = 0;
 			for (let i = 0; i < nSamples.value; i++) {
-				let blockStart =
-					props.sharedRefs.chunk.value?.startTime! + barWidth * i;
+				let blockStart = props.options.chunk?.startTime! + barWidth * i;
 				let sum = 0;
 				for (let j = 0; j < barWidth; j++) {
 					sum += Math.abs(rawData[blockStart + j]);
@@ -309,10 +307,7 @@ function eventTimeUpdate() {
 	props.sharedRefs.currentTime.value = props.player.currentTime;
 
 	// IF outside chunk, simulate the end
-	if (
-		props.sharedRefs.currentTime.value >
-		props.sharedRefs.chunk.value?.endTime!
-	)
+	if (props.sharedRefs.currentTime.value > props.options.chunk?.endTime!)
 		props.player.dispatchEvent(new Event("ended", { bubbles: true }));
 }
 

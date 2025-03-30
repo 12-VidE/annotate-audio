@@ -2,10 +2,7 @@
 	<div class="layout--default">
 		<div
 			ref="stickyContainer"
-			:class="[
-				'main-container',
-				sharedRefs.isSticky.value && 'is-sticky',
-			]"
+			:class="['main-container', options.sticky && 'is-sticky']"
 		>
 			<div :class="['inputs-container']">
 				<!-- Player Controls -->
@@ -24,7 +21,7 @@
 								ctx,
 								container,
 								player,
-								sharedRefs.chunk.value,
+								options.chunk,
 								sharedRefs.currentTime
 							)
 						"
@@ -37,7 +34,7 @@
 							@click="
 								setPlayerPosition(
 									player,
-									sharedRefs.chunk.value,
+									options.chunk,
 									sharedRefs.currentTime,
 									sharedRefs.currentTime.value - 5
 								)
@@ -49,7 +46,7 @@
 							@click="
 								setPlayerPosition(
 									player,
-									sharedRefs.chunk.value,
+									options.chunk,
 									sharedRefs.currentTime,
 									sharedRefs.currentTime.value + 5
 								)
@@ -62,15 +59,15 @@
 					<span>{{
 						displayCurrentTime(
 							sharedRefs.currentTime.value,
-							sharedRefs.totalDuration.value
+							sharedRefs.maxDuration.value
 						)
 					}}</span>
 					<span
 						>-
 						{{
 							displayDuration(
-								sharedRefs.chunk.value,
-								sharedRefs.totalDuration.value
+								options.chunk,
+								sharedRefs.maxDuration.value
 							)
 						}}</span
 					>
@@ -84,8 +81,8 @@
 				>
 					<input
 						type="range"
-						:min="sharedRefs.chunk.value?.startTime"
-						:max="sharedRefs.chunk.value?.endTime"
+						:min="options.chunk?.startTime"
+						:max="options.chunk?.endTime"
 						step="0.1"
 						v-model="sharedRefs.currentTime.value"
 						@input="eventTimeBarInput"
@@ -102,14 +99,14 @@
 								ctx,
 								container,
 								player,
-								sharedRefs.chunk.value,
+								options.chunk,
 								sharedRefs.currentTime
 							);
 							new PropertiesModal(
 								ctx,
 								container,
 								obsidianApp,
-								sharedRefs.totalDuration.value!
+								sharedRefs.maxDuration.value!
 							).openPropertiesModal();
 						"
 					></div>
@@ -133,6 +130,7 @@
 				:player="player"
 				:obsidianApp="obsidianApp"
 				:sharedRefs="sharedRefs"
+				:options="options"
 			/>
 		</div>
 
@@ -144,6 +142,7 @@
 			:player="player"
 			:obsidianApp="obsidianApp"
 			:sharedRefs="sharedRefs"
+			:options="options"
 		/>
 	</div>
 </template>
@@ -165,7 +164,7 @@ import { logRefs } from "../sharedFunc";
 // Import - Type
 import type { SharedRefs } from "../sharedRefs";
 // Import - Class
-import { PropertiesModal } from "src/options";
+import { AudioBoxOptions, PropertiesModal } from "src/options";
 
 const props = defineProps<{
 	container: HTMLElement;
@@ -174,6 +173,7 @@ const props = defineProps<{
 	player: HTMLAudioElement;
 	obsidianApp: App;
 	sharedRefs: SharedRefs;
+	options: AudioBoxOptions;
 }>();
 
 /* ------------ */
@@ -227,15 +227,11 @@ function eventTimeBarInput() {
 }
 
 function eventTimeUpdate() {
-	console.log("time-update");
 	// Update currentTime #TODO rendi > generico
 	props.sharedRefs.currentTime.value = props.player.currentTime;
 
 	// IF outside chunk, simulate the end
-	if (
-		props.sharedRefs.currentTime.value >
-		props.sharedRefs.chunk.value?.endTime!
-	)
+	if (props.sharedRefs.currentTime.value > props.options.chunk?.endTime!)
 		props.player.dispatchEvent(new Event("ended", { bubbles: true }));
 }
 

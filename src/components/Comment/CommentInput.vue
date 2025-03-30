@@ -48,6 +48,7 @@ import { SharedRefs } from "../sharedRefs";
 // Import - Function
 import { getCommentsArray } from "../sharedFunc";
 import { pausePlayer } from "../Logic/playerFunc";
+import { AudioBoxOptions } from "src/options";
 
 const props = defineProps<{
 	container: HTMLElement;
@@ -56,6 +57,7 @@ const props = defineProps<{
 	player: HTMLAudioElement;
 	obsidianApp: App;
 	sharedRefs: SharedRefs;
+	options: AudioBoxOptions;
 }>();
 
 /* ------------ */
@@ -218,7 +220,7 @@ function showCommentInput(): void {
 		props.ctx,
 		props.container,
 		props.player,
-		props.sharedRefs.chunk.value,
+		props.options.chunk,
 		props.sharedRefs.currentTime
 	);
 

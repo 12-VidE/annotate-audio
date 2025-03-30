@@ -1,3 +1,7 @@
+/* ------------------ */
+/* --- Conversion --- */
+/* ------------------ */
+
 /**
  * Converts HH:mm:ss into ss
  * @param {string} str
@@ -25,18 +29,43 @@ export function secondsToTime(num: number, max?: number): string {
 	else return `${HH}:${mm}:${ss}`;
 }
 
+/* ------------ */
+/* --- Hash --- */
+/* ------------ */
+
 /**
- * Returns a hash code from a string
- * @param  {String} str The string to hash.
- * @return {Number}    A 32bit integer
- * @see http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+ * @param obj - Input to convert
+ * @returns SHA-256 hash of obj
  */
-export function hashCode(str: string) {
-	let hash = 0;
-	for (let i = 0, len = str.length; i < len; i++) {
-		const chr = str.charCodeAt(i);
-		hash = (hash << 5) - hash + chr;
-		hash |= 0; // Convert to 32bit integer
-	}
+export async function hashObj(obj: object): Promise<string> {
+	const str = JSON.stringify(obj); // Force it into a string
+	return await hashStr(str);
+}
+
+/**
+ * @param str - Input to convert
+ * @returns SHA-256 hash of str
+ */
+export async function hashStr(str: string): Promise<string> {
+	// Normalize
+	const normStr = canonicalStringify(str);
+	// Endoce
+	const encoder = new TextEncoder();
+	const data = encoder.encode(normStr);
+	const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+	const hash = Array.from(new Uint8Array(hashBuffer))
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
 	return hash;
+}
+
+/**
+ * Standardize input before hashing
+ * @param input - What needs to be normalized
+ * @returns Normalized version of input
+ */
+function canonicalStringify(input: any): string {
+	const str = JSON.stringify(input, Object.keys(input).sort());
+	const normalizedStr = str.replace(/\s+/g, ""); // Remove spaces
+	return normalizedStr;
 }
