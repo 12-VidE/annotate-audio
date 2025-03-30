@@ -269,15 +269,13 @@ export function getTitleSetting(
 export function getSourceSetting(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
-): Array<string> | string | undefined {
-	const sourceRegex = new RegExp(
-		"^source: *\\[\\[([^|\\]]+)(?:\\|([^\\]]*))?\\]\\]$"
+): string | undefined {
+	const sourceRegex = new RegExp("^source: *\\[\\[([^|\\]]+)\\]\\]$");
+	const sourceValue = String(
+		getCodeBlockData(ctx, container, sourceRegex)[0]
 	);
-	const sourceValue = getCodeBlockData(ctx, container, sourceRegex)[0];
 	if (!sourceValue) return undefined;
-	else if (sourceValue[1])
-		return sourceValue; // Return both file-name and alias (if present)
-	else return sourceValue[0]; // Return only file-name (if alias doesn't exists)
+	return sourceValue;
 }
 /**
  * @returns Index of what player layout to render

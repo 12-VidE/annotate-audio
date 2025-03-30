@@ -1,7 +1,7 @@
 <template>
 	<div class="layout--big">
 		<!-- Title -->
-		<div v-if="title" :class="['audiobox-title']">
+		<div v-show="title" :class="['audiobox-title']">
 			<span ref="titleIcon"></span>{{ title }}
 		</div>
 		<!-- WaveGraph -->
@@ -127,6 +127,7 @@
 				:options="options"
 			/>
 		</div>
+
 		<!-- Comments List -->
 		<CommentList
 			:container="container"
@@ -163,6 +164,8 @@ import {
 import type { AudioChunk } from "src/types";
 import type { SharedRefs } from "../sharedRefs";
 import { logRefs } from "../sharedFunc";
+import { getAudioboxOptions } from "../Logic/codeblockFunc";
+import { hashObj } from "src/utils";
 
 const props = defineProps<{
 	container: HTMLElement;
@@ -186,6 +189,10 @@ const showProperties_btn = ref<HTMLElement | null>(null);
 const nSamples = ref<number>(150); // N° of bars in WaveGraph
 const barHeights = ref<number[]>([]); // Height of the bars of the graph
 
+/* ----------------- */
+/* --- Lifecycle --- */
+/* ----------------- */
+
 onMounted(async () => {
 	// Initialize icons
 	if (titleIcon.value) setIcon(titleIcon.value, "audio-lines");
@@ -195,20 +202,28 @@ onMounted(async () => {
 	if (showProperties_btn.value)
 		setIcon(showProperties_btn.value, "settings-2");
 
+	// Initialize Wavegraph #TODO poco elegante
+	const codeblockSettings = getAudioboxOptions(
+		props.ctx,
+		props.container,
+		props.sharedRefs.maxDuration.value!
+	);
+	const newHash = await hashObj(codeblockSettings);
+	const oldHash = localStorage.getItem(`aa_${props.audioSource}_optionsHash`);
+	if (newHash === oldHash) {
+		const cachedBarHeights = localStorage.getItem(
+			`aa_${props.audioSource}_barHeights`
+		);
+		if (cachedBarHeights) barHeights.value = JSON.parse(cachedBarHeights);
+		else barHeights.value = await calculateWaveGraph();
+	} else barHeights.value = await calculateWaveGraph();
+
 	// Initialize Event-Listeners
 	if (props.player) {
 		props.player.addEventListener("timeupdate", eventTimeUpdate);
 		props.player.addEventListener("play", eventPlayerPlay);
 		props.player.addEventListener("pause", eventPlayerPause);
 	}
-
-	// Initialize Wavegraph
-	/* if (props.sharedRefs.isCached.value) {
-		barHeights.value = JSON.parse(
-			localStorage[`${props.audioSource}_barHeights`]
-		); */
-
-	await calculateWaveGraph();
 
 	/* logRefs(props.sharedRefs); */
 });
@@ -218,6 +233,12 @@ onBeforeUnmount(() => {
 	props.player.removeEventListener("timeupdate", eventTimeUpdate);
 	props.player.removeEventListener("play", eventPlayerPlay);
 	props.player.removeEventListener("pause", eventPlayerPause);
+
+	// Save cache
+	localStorage.setItem(
+		`aa_${props.audioSource}_barHeights`,
+		JSON.stringify(barHeights.value)
+	);
 });
 
 /* ---------------- */
@@ -226,21 +247,21 @@ onBeforeUnmount(() => {
 
 const currentBar = computed(() => {
 	return Math.floor(
-		((props.sharedRefs.currentTime.value -
-			props.options.chunk?.startTime!) /
-			props.options.chunk?.duration!) *
+		((props.sharedRefs.currentTime.value - props.options.chunk.startTime) /
+			props.options.chunk.duration!) *
 			nSamples.value
 	);
 });
 
-const title = computed(() => displayTitle(props.ctx, props.container));
+const title = computed(() =>
+	displayTitle(props.ctx, props.container, props.options.title)
+);
 
 /* ---------------- */
 /* --- Function --- */
 /* ---------------- */
 
-async function calculateWaveGraph() {
-	console.time("calculateWaveGraph");
+async function calculateWaveGraph(): Promise<number[]> {
 	// Read file from vault
 	const file = props.obsidianApp.vault.getAbstractFileByPath(
 		props.audioSource
@@ -280,13 +301,10 @@ async function calculateWaveGraph() {
 				if (barHeigth > highestBar) highestBar = barHeigth;
 			}
 			// Normalize & save WaveGraph
-			barHeights.value = tempArray.map((x) => x / highestBar);
-			localStorage[`${props.audioSource}_barHeights`] = JSON.stringify(
-				barHeights.value
-			);
+			return (barHeights.value = tempArray.map((x) => x / highestBar));
 		});
 	}
-	console.timeEnd("calculateWaveGraph");
+	return [];
 }
 
 /* ------------------------- */

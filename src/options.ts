@@ -280,7 +280,6 @@ export class PropertiesModal extends Modal {
 			)
 			.then((setting) => {
 				// TODO Junky ma sembra funzionare
-
 				const container = setting.settingEl.createDiv();
 				container.style.display = "flex";
 				container.style.alignItems = "center";

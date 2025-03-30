@@ -1,5 +1,4 @@
 import { ref, Ref } from "vue";
-import type { AudioChunk } from "src/types";
 
 export interface SharedRefs {
 	/* -------------- */

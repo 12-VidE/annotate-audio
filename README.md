@@ -72,7 +72,8 @@ Only `source` is required, the others are all facoltative.
 -   Player is umounted and mounted when a comment is added. It would be better to have an update.
 -   After using `Add audiobox` command, better handle the rendering by moving outside
 -   `Insert comment` command is not removed when there's no active player
--   Remove alias option as it's actually pretty stupid
+-   Better propagate the instruction to use cached values FROM "ParentApp" TO layouts
+-   Only re-calculate wavegraph IF `chunk` has changed
 
 ### Changelog
 
@@ -80,6 +81,8 @@ Only `source` is required, the others are all facoltative.
     -   feat: Select audio source on `Add audiobox` command using a modal
     -   feat: Add modal to manage player properties more easily
     -   feat: Options cache handling
+    -   fix: Removed alias as possible `title` option (useless)
+    -   fix: Cache wavegraph rendering
 -   **1.1.0**
     -   Allow each player to be independent by creating its refs in `ParentApp.vue` and passing them as `props`. To use targeted Obsidian commands, each player is called by its `id`
     -   feat [#1](https://github.com/12-VidE/annotate-audio/issues/1): Added Obsidian command `Insert comment`

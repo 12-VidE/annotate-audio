@@ -1,20 +1,28 @@
 <template>
 	<!-- Dynamic Layout -->
-	<component
-		:is="currentLayoutComponent"
-		:container="container"
-		:ctx="ctx"
-		:audioSource="audioSource"
-		:player="player"
-		:obsidianApp="obsidianApp"
-		:sharedRefs="sharedRefs"
-		:options="options"
-	/>
+	<KeepAlive>
+		<component
+			:is="currentLayoutComponent"
+			:container="container"
+			:ctx="ctx"
+			:audioSource="audioSource"
+			:player="player"
+			:obsidianApp="obsidianApp"
+			:sharedRefs="sharedRefs"
+			:options="options"
+		/>
+	</KeepAlive>
 </template>
 
 <script setup lang="ts">
 import { MarkdownPostProcessorContext, App, TFile } from "obsidian";
-import { computed, onMounted, onBeforeUnmount } from "vue";
+import {
+	computed,
+	onMounted,
+	onBeforeUnmount,
+	KeepAlive,
+	onBeforeMount,
+} from "vue";
 // Import - Components
 import { layoutsArray } from "src/const";
 // Import - Function
@@ -47,7 +55,6 @@ onMounted(async () => {
 	console.time("loadFile");
 	await loadFile();
 	console.timeEnd("loadFile");
-
 	// Initialize Player
 	props.player.src = sharedRefs.srcPath.value;
 	props.player.currentTime = sharedRefs.currentTime.value;

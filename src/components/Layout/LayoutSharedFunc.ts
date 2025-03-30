@@ -26,12 +26,9 @@ export function displayCurrentTime(
  * @param chunk - sharedRef
  * @returns Time lenght of chunk
  */
-export function displayDuration(
-	chunk: Readonly<AudioChunk | undefined>,
-	maxTime?: number
-) {
+export function displayDuration(chunk: Readonly<AudioChunk>, maxTime?: number) {
 	return computed(() => {
-		return secondsToTime(chunk?.endTime!, maxTime);
+		return secondsToTime(chunk.endTime, maxTime);
 	});
 }
 
@@ -40,23 +37,17 @@ export function displayDuration(
  */
 export function displayTitle(
 	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-) {
-	const title = getTitleSetting(ctx, container);
+	container: HTMLElement,
+	title: string | undefined
+): boolean | string {
 	if (title === undefined) {
 		// Show nothing IF there's no 'title' option
 		return false;
 	} else if (title === "") {
+		// Use source (cleaning extension)
 		const sourceValue = getSourceSetting(ctx, container);
-		if (typeof sourceValue === "string") {
-			// Use source (cleaning extension)
-			return sourceValue.replace(/\.[^/.]+$/, "");
-		} else {
-			// Use alias in the source (IF present)
-			return sourceValue![1];
-		}
-	} else {
-		// Return 'title' option IF specied
-		return title;
+		return sourceValue!.replace(/\.[^/.]+$/, "");
 	}
+	// Return 'title' option IF specified
+	return title;
 }
