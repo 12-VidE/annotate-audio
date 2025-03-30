@@ -18,8 +18,6 @@
 						:class="['playpause_btn']"
 						@click="
 							togglePlayer(
-								ctx,
-								container,
 								player,
 								options.chunk,
 								sharedRefs.currentTime
@@ -96,8 +94,6 @@
 						:class="['showProperties_btn']"
 						@click="
 							pausePlayer(
-								ctx,
-								container,
 								player,
 								options.chunk,
 								sharedRefs.currentTime

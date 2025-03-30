@@ -25,22 +25,21 @@ export type AudioBoxOptions = {
 	sticky: boolean; // IF we enable the player to be sticky
 	title: string | undefined;
 	layout: number;
-	chunk: AudioChunk | undefined; // Portion of track to be reproduced
+	chunk: AudioChunk; // Portion of track to be reproduced
 	autoplay: boolean; // WHEN clicking on a comment, the playes does NOT pause
 };
 
-export const defaultAudioBoxOptions: AudioBoxOptions = {
+export const defaultAudioBoxOptions: Omit<AudioBoxOptions, "chunk"> = {
 	volume: 0.5,
 	speed: 1,
 	loop: false,
 	sticky: false,
 	title: undefined,
 	layout: 0,
-	chunk: undefined,
 	autoplay: false,
 };
 
-export function createOptionRefs(): AudioBoxOptions {
+export function createOptions(): AudioBoxOptions {
 	return reactive<AudioBoxOptions>({
 		volume: 0.5,
 		speed: 1,
@@ -48,7 +47,7 @@ export function createOptionRefs(): AudioBoxOptions {
 		sticky: false,
 		title: undefined,
 		layout: 0,
-		chunk: undefined,
+		chunk: reactive({ startTime: 0, endTime: 0 }),
 		autoplay: false,
 	});
 }
@@ -78,7 +77,11 @@ export class PropertiesModal extends Modal {
 	}
 
 	private async init() {
-		this.options = await getAudioboxOptions(this.ctx, this.container);
+		this.options = getAudioboxOptions(
+			this.ctx,
+			this.container,
+			this.totalDuration
+		);
 		if (!this.options.chunk) {
 			this.options.chunk = { startTime: 0, endTime: 0 };
 		}

@@ -217,8 +217,6 @@ function showCommentInput(): void {
 	props.sharedRefs.isCommentInputShown.value = true;
 
 	pausePlayer(
-		props.ctx,
-		props.container,
 		props.player,
 		props.options.chunk,
 		props.sharedRefs.currentTime

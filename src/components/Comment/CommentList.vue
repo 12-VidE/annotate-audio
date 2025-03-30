@@ -50,6 +50,10 @@ const props = defineProps<{
 
 const activeComment = ref<AudioComment | null>(null); //
 
+/* ----------------- */
+/* --- Lifecycle --- */
+/* ----------------- */
+
 onMounted(() => {
 	// Initialize Event-Listeners
 	if (props.player)
@@ -66,11 +70,12 @@ onMounted(() => {
  * @returns Comments inside the chunk (CANNOT do it inside getCommentsArray otherwise it's difficult to add comment)
  */
 const filteredCommentList = computed(() => {
-	return getCommentsArray(props.ctx, props.container).filter(
+	const filteredComment = getCommentsArray(props.ctx, props.container).filter(
 		(comment: AudioComment) =>
-			comment.time >= props.options.chunk?.startTime! &&
-			comment.time <= props.options.chunk?.endTime!
+			comment.time >= props.options.chunk.startTime &&
+			comment.time <= props.options.chunk.endTime
 	);
+	return filteredComment;
 });
 
 /* ----------------- */
@@ -88,8 +93,6 @@ function enableEditMode(time: number): void {
 	props.sharedRefs.editedCommentTime.value = time;
 
 	pausePlayer(
-		props.ctx,
-		props.container,
 		props.player,
 		props.options.chunk,
 		props.sharedRefs.currentTime
@@ -133,8 +136,6 @@ function playComment(time: number): void {
 	// Force play IF autoplay is enabled
 	if (props.options.autoplay) {
 		playPlayer(
-			props.ctx,
-			props.container,
 			props.player,
 			props.options.chunk,
 			props.sharedRefs.currentTime.value

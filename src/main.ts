@@ -196,7 +196,6 @@ export default class AnnotateAudioPlugin extends Plugin {
 					container.classList.add("active");
 					this.lastInteractedPlayerId = uniqueId;
 				});
-
 				// Register the Vue component as a child so that it persists
 				ctx.addChild(
 					new AudioBox({

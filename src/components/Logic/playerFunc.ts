@@ -1,47 +1,29 @@
-import { MarkdownPostProcessorContext } from "obsidian";
-// Import - Func
-import {
-	getVolumeSetting,
-	getPlaybackSpeedSetting,
-	getLoopSetting,
-} from "./codeblockFunc";
 // Import - Type
 import type { AudioChunk } from "src/types";
 import { Ref } from "vue";
 
 /**
  * Start player audio reproduction
- * @param chunk - SharedRef
- * @param currentTime - SharedRef
+ * @param chunk option
+ * @param currentTime SharedRef
  */
 export function playPlayer(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement,
 	player: HTMLAudioElement,
-	chunk: Readonly<AudioChunk | undefined>,
+	chunk: Readonly<AudioChunk>,
 	currentTime: Readonly<number>
 ): void {
 	// IF inside chunk
-	if (!chunk || currentTime <= chunk.endTime) {
-		// Apply player settings
-		player.volume = getVolumeSetting(ctx, container);
-		player.playbackRate = getPlaybackSpeedSetting(ctx, container);
-		player.loop = getLoopSetting(ctx, container);
-		// Play
-		player.play();
-	}
+	if (currentTime <= chunk.endTime) player.play();
 }
 
 /**
  * Stop player audio reproduction
- * @param chunk - SharedRef
+ * @param chunk - option
  * @param currentTime - SharedRef
  */
 export function pausePlayer(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement,
 	player: HTMLAudioElement,
-	chunk: Readonly<AudioChunk | undefined>,
+	chunk: Readonly<AudioChunk>,
 	currentTime: Ref<number>
 ): void {
 	currentTime.value = player.currentTime;
@@ -51,19 +33,17 @@ export function pausePlayer(
 
 /**
  * Toggle between player "play" and "pause"
- * @param player - SharedRef
- * @param chunk - SharedRef
+ * @param chunk - option
+ * @param currentTime - SharedRef
  */
 export function togglePlayer(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement,
 	player: HTMLAudioElement,
-	chunk: Readonly<AudioChunk | undefined>,
+	chunk: Readonly<AudioChunk>,
 	currentTime: Ref<number>
 ): void {
 	player.paused
-		? playPlayer(ctx, container, player, chunk, currentTime.value)
-		: pausePlayer(ctx, container, player, chunk, currentTime);
+		? playPlayer(player, chunk, currentTime.value)
+		: pausePlayer(player, chunk, currentTime);
 }
 
 /**

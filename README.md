@@ -58,21 +58,18 @@ Only `source` is required, the others are all facoltative.
 
 1. Display 404 component when no/invalid audio source has been selected
 2. Add more useful obsidian commands
-3. Cache where you left the player time
-4. Follow native folder exclusion in the audio file search
-5. UI to control `chunk` (like "Aves")
-6. Layout with all the properties exposed
-7. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
+3. Follow native folder exclusion in the audio file search
+4. UI to control `chunk` (like "Aves")
+5. Layout with all the properties exposed
+6. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
 
 ### Known Issues
 
 -   Remove `currentTime` CAUSE redundant: use `this.player.currenTime`
 -   After some seconds, it crashes the Obsidian mobile app
--   Better cache handling. Mainly, understanding when it can be useful to use cached data for performance reasons
 -   (LayoutDefault.vue) The wavegraph is not always loaded reliably. Sometimes, the wrong values are cached, requiring a cleaning
 -   Remove `editMode` flag as it's redundant
 -   Player is umounted and mounted when a comment is added. It would be better to have an update.
--   Player time is resetted when a comment is added/modified
 -   After using `Add audiobox` command, better handle the rendering by moving outside
 -   `Insert comment` command is not removed when there's no active player
 -   Remove alias option as it's actually pretty stupid
@@ -82,6 +79,7 @@ Only `source` is required, the others are all facoltative.
 -   **1.2.0**
     -   feat: Select audio source on `Add audiobox` command using a modal
     -   feat: Add modal to manage player properties more easily
+    -   feat: Options cache handling
 -   **1.1.0**
     -   Allow each player to be independent by creating its refs in `ParentApp.vue` and passing them as `props`. To use targeted Obsidian commands, each player is called by its `id`
     -   feat [#1](https://github.com/12-VidE/annotate-audio/issues/1): Added Obsidian command `Insert comment`

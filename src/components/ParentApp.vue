@@ -14,25 +14,19 @@
 
 <script setup lang="ts">
 import { MarkdownPostProcessorContext, App, TFile } from "obsidian";
-import { computed, onMounted, onBeforeMount, onBeforeUnmount } from "vue";
+import { computed, onMounted, onBeforeUnmount } from "vue";
 // Import - Components
 import { layoutsArray } from "src/const";
 // Import - Function
-import {
-	getStickySetting,
-	getChunkSetting,
-	getLayoutSetting,
-	getAutoplaySetting,
-	getAudioboxOptions,
-} from "./Logic/codeblockFunc";
-import { hashObj, hashStr } from "src/utils";
+import { getLayoutSetting, getAudioboxOptions } from "./Logic/codeblockFunc";
+import { hashObj } from "src/utils";
 import { pausePlayer, setPlayerPosition } from "./Logic/playerFunc";
 import { logRefs } from "./sharedFunc";
 // Import/Create - Ref
 import { createShareRefs } from "./sharedRefs";
 const sharedRefs = createShareRefs();
-import { AudioBoxOptions, createOptionRefs } from "src/options";
-let options = createOptionRefs();
+import { createOptions } from "src/options";
+let options = createOptions();
 
 const props = defineProps<{
 	container: HTMLElement;
@@ -46,24 +40,20 @@ const props = defineProps<{
 /* --- Lifecycle --- */
 /* ----------------- */
 
-onBeforeMount(async () => {
-	console.log("onBeforeMount");
-	// Nothing...
-});
-
 onMounted(async () => {
 	console.log("Mounted");
 
-	await tryLoadCache();
+	await loadCacheOrFallback();
 	console.time("loadFile");
 	await loadFile();
 	console.timeEnd("loadFile");
 
-	// Get some default values
-	options.sticky = getStickySetting(props.ctx, props.container);
-	options.autoplay = getAutoplaySetting(props.ctx, props.container);
+	// Initialize Player
 	props.player.src = sharedRefs.srcPath.value;
 	props.player.currentTime = sharedRefs.currentTime.value;
+	props.player.volume = options.volume;
+	props.player.playbackRate = options.speed;
+	props.player.loop = options.loop;
 
 	// Initialize Event-Listeners
 	if (props.player) {
@@ -75,18 +65,12 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
 	console.log("unmounted");
+
+	pausePlayer(props.player, options.chunk, sharedRefs.currentTime);
+	saveCache();
+
 	// Destroy Event-Listeners
 	props.player.removeEventListener("ended", eventEndedAudio);
-
-	pausePlayer(
-		props.ctx,
-		props.container,
-		props.player,
-		options.chunk,
-		sharedRefs.currentTime
-	);
-
-	saveCache();
 });
 
 /* ---------------- */
@@ -130,44 +114,54 @@ async function loadFile(): Promise<AudioBuffer | undefined> {
 	return;
 }
 
-async function tryLoadCache(): Promise<void> {
-	// Get new options in block
-	const codeblockSettings = await getAudioboxOptions(
+async function loadCacheOrFallback(): Promise<void> {
+	const codeblockSettings = getAudioboxOptions(
 		props.ctx,
-		props.container
+		props.container,
+		sharedRefs.maxDuration.value!
 	);
 	const newHash = await hashObj(codeblockSettings);
-	const oldHash = localStorage.getItem("optionsHash");
+	const oldHash = localStorage.getItem(`aa_${props.audioSource}_optionsHash`);
 
 	if (newHash === oldHash) {
-		// Cache CAN be used
-		const optionsCache = localStorage.getItem("optionsCache");
+		// Cached options CAN be used
+		const optionsCache = localStorage.getItem(
+			`aa_${props.audioSource}_options`
+		);
 		Object.assign(options, JSON.parse(optionsCache!));
-		const currentTimeCache = localStorage.getItem("optionsCurrentTime");
-		sharedRefs.currentTime.value = Number(currentTimeCache);
 	} else {
-		// Cache CANNOT be used
-		options = codeblockSettings;
+		// Cached options CANNOT be used
 		console.log("⚠️");
-		// (Force) Set time otherwise may be out-of-boundary
-		sharedRefs.currentTime.value = options.chunk?.startTime!;
+		Object.assign(options, codeblockSettings);
 	}
 
-	/* 
-		// Initialize chunk OR use "default"
-		const newChunk = await getChunkSetting(props.ctx, props.container);
-		sharedRefs.chunk.value = newChunk || {
-			startTime: 0,
-			endTime: sharedRefs.maxDuration.value,
-			duration: sharedRefs.maxDuration.value,
-		};*/
+	// Set time
+	const currentTimeCache = Number(
+		localStorage.getItem(`aa_${props.audioSource}_currentTime`)
+	);
+	if (
+		currentTimeCache >= options.chunk.startTime &&
+		currentTimeCache <= options.chunk.endTime
+	) {
+		// Inside chunk - Safe to use cache
+		sharedRefs.currentTime.value = currentTimeCache;
+	} else {
+		// Out-of-bounadry - Fall back to safe place
+		sharedRefs.currentTime.value = options.chunk?.startTime!;
+	}
 }
 
 async function saveCache(): Promise<void> {
-	localStorage.setItem("optionsHash", await hashObj(options));
-	localStorage.setItem("optionsCache", JSON.stringify(options));
 	localStorage.setItem(
-		"optionsCurrentTime",
+		`aa_${props.audioSource}_optionsHash`,
+		await hashObj(options)
+	);
+	localStorage.setItem(
+		`aa_${props.audioSource}_options`,
+		JSON.stringify(options)
+	);
+	localStorage.setItem(
+		`aa_${props.audioSource}_currentTime`,
 		JSON.stringify(props.player.currentTime)
 	);
 }
@@ -183,12 +177,6 @@ function eventEndedAudio() {
 		options.chunk?.startTime!
 	);
 	if (!props.player.loop)
-		pausePlayer(
-			props.ctx,
-			props.container,
-			props.player,
-			options.chunk,
-			sharedRefs.currentTime
-		);
+		pausePlayer(props.player, options.chunk, sharedRefs.currentTime);
 }
 </script>

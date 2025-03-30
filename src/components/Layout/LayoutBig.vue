@@ -57,8 +57,6 @@
 					:class="['commentInput_btn', 'control_btn']"
 					@click="
 						pausePlayer(
-							ctx,
-							container,
 							player,
 							options.chunk,
 							sharedRefs.currentTime
@@ -91,8 +89,6 @@
 					:class="['control_btn']"
 					@click="
 						togglePlayer(
-							ctx,
-							container,
 							player,
 							options.chunk,
 							sharedRefs.currentTime

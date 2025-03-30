@@ -52,19 +52,20 @@ export const getCodeBlockData = (
 /**
  * @returns Record of all the options saved inside codeblock
  */
-export async function getAudioboxOptions(
+export function getAudioboxOptions(
 	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-): Promise<AudioBoxOptions> {
+	container: HTMLElement,
+	maxDuration: number
+): AudioBoxOptions {
 	return {
-		volume: await getVolumeSetting(ctx, container),
-		speed: await getPlaybackSpeedSetting(ctx, container),
-		loop: await getLoopSetting(ctx, container),
-		sticky: await getStickySetting(ctx, container),
-		title: await getTitleSetting(ctx, container),
-		layout: await getLayoutSetting(ctx, container),
-		chunk: await getChunkSetting(ctx, container),
-		autoplay: await getAutoplaySetting(ctx, container),
+		volume: getVolumeSetting(ctx, container),
+		speed: getPlaybackSpeedSetting(ctx, container),
+		loop: getLoopSetting(ctx, container),
+		sticky: getStickySetting(ctx, container),
+		title: getTitleSetting(ctx, container),
+		layout: getLayoutSetting(ctx, container),
+		chunk: getChunkSetting(ctx, container, maxDuration),
+		autoplay: getAutoplaySetting(ctx, container),
 	} as AudioBoxOptions;
 }
 
@@ -150,25 +151,23 @@ export async function setAudioboxOptions(
 /**
  * @returns Boundaries of the audio - default back to full audio
  */
-export async function getChunkSetting(
+function getChunkSetting(
 	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-): Promise<AudioChunk | undefined> {
+	container: HTMLElement,
+	maxDuration: number
+): AudioChunk {
 	// Check IF exists the option
 	const chunkRegex = new RegExp(
 		"^chunk: *(\\d{2}:\\d{2}:\\d{2}) *- *(\\d{2}:\\d{2}:\\d{2})$"
 	);
 	const chunkData = getCodeBlockData(ctx, container, chunkRegex)[0];
-	if (chunkData === undefined)
-		return defaultAudioBoxOptions.chunk; // Useless BUT good practice
-	else {
+	if (chunkData !== undefined) {
 		// IF the option exists
 		const startTime = timeToSeconds(chunkData[0]);
 		const endTime = timeToSeconds(chunkData[1]);
 		if (startTime >= endTime) {
-			// IF out of boundary: fall back to default
+			// IF out of boundary
 			console.warn("Annotate-Audio: Impossible audio chunk");
-			return defaultAudioBoxOptions.chunk; // Useless BUT good practice
 		} else
 			return {
 				startTime,
@@ -176,11 +175,17 @@ export async function getChunkSetting(
 				duration: endTime - startTime,
 			} as AudioChunk;
 	}
+	// Fallback - It's the entire audiofile
+	return {
+		startTime: 0,
+		endTime: maxDuration,
+		duration: maxDuration,
+	};
 }
 /**
  * @returns Flag IF audio-controls are sticky
  */
-export function getStickySetting(
+function getStickySetting(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): boolean {
@@ -194,7 +199,7 @@ export function getStickySetting(
 /**
  * @returns Speed @ which to play the audio
  */
-export function getPlaybackSpeedSetting(
+function getPlaybackSpeedSetting(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): number {
@@ -208,7 +213,7 @@ export function getPlaybackSpeedSetting(
 /**
  * @returns Flag IF audio can loop
  */
-export function getLoopSetting(
+function getLoopSetting(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): boolean {
@@ -220,7 +225,7 @@ export function getLoopSetting(
 /**
  * @returns Volume @ which play the audio
  */
-export function getVolumeSetting(
+function getVolumeSetting(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): number {
@@ -231,6 +236,21 @@ export function getVolumeSetting(
 	if (!volumeValue || volumeValue > 1) return defaultAudioBoxOptions.volume;
 	return Math.round(volumeValue * 10) / 10; // Truncate to 1° decimal
 }
+/**
+ * @returns Flag IF audio can autoplay WHEN selecting a comment
+ */
+function getAutoplaySetting(
+	ctx: MarkdownPostProcessorContext,
+	container: HTMLElement
+): boolean {
+	const autoplayRegex = new RegExp("^autoplay: *(True|False)$", "i");
+	const autoplayValue = String(
+		getCodeBlockData(ctx, container, autoplayRegex)[0]
+	);
+	if (!autoplayValue) return defaultAudioBoxOptions.autoplay;
+	return autoplayValue.toLowerCase() === "true";
+}
+
 /**
  * @returns title to display
  */
@@ -272,18 +292,4 @@ export function getLayoutSetting(
 	);
 	if (!layoutValue) return defaultAudioBoxOptions.layout;
 	else return layoutValue;
-}
-/**
- * @returns Flag IF audio can autoplay WHEN selecting a comment
- */
-export function getAutoplaySetting(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-): boolean {
-	const autoplayRegex = new RegExp("^autoplay: *(True|False)$", "i");
-	const autoplayValue = String(
-		getCodeBlockData(ctx, container, autoplayRegex)[0]
-	);
-	if (!autoplayValue) return defaultAudioBoxOptions.autoplay;
-	return autoplayValue.toLowerCase() === "true";
 }
