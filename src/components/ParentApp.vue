@@ -42,9 +42,9 @@ const props = defineProps<{
 
 onMounted(async () => {
 	await loadCacheOrFallback();
-	console.time("loadFile");
+	/* console.time("loadFile"); */
 	await loadFile();
-	console.timeEnd("loadFile");
+	/* console.timeEnd("loadFile"); */
 	// Initialize Player
 	props.player.src = sharedRefs.srcPath.value;
 	props.player.currentTime = sharedRefs.currentTime.value;
@@ -120,14 +120,14 @@ async function loadCacheOrFallback(): Promise<void> {
 
 	if (newHash === oldHash) {
 		// Cached options CAN be used
-		console.log("✔️");
+		/* console.log("✔️"); */
 		const optionsCache = localStorage.getItem(
 			`aa_${props.audioSource}_options`
 		);
 		Object.assign(options, JSON.parse(optionsCache!));
 	} else {
 		// Cached options CANNOT be used
-		console.log("❌");
+		/* console.log("❌"); */
 		Object.assign(options, codeblockSettings);
 	}
 
