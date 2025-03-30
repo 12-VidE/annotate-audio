@@ -9,7 +9,7 @@ import {
 } from "obsidian";
 import { createApp } from "vue";
 // Import - Function
-import { getSourceSetting } from "./components/Logic/codeblockFunc";
+import { getSourceOption } from "./components/Logic/codeblockFunc";
 // Import - Component
 import SourceSuggestion from "./components/SourceSuggestion.vue";
 import { AudioBox } from "./audioBox";
@@ -33,11 +33,12 @@ export default class AnnotateAudioPlugin extends Plugin {
 			id: "add-audio-box",
 			name: "Add audiobox",
 			editorCallback: async (editor: Editor) => {
-				// Show modal (and await for it's result) so user can choose the source audio file
-				const sourceValue = await new sourceModal(
+				let defaultOptions = defaultAudioBoxOptions;
+				// Show modal to select source audio file
+				defaultOptions.source = `[[${await new sourceModal(
 					this.app
-				).openWithPromise();
-				// Transform default options into string
+				).openWithPromise()}]]`;
+				// Convert options into formatted string
 				const optionsString = Object.entries(defaultAudioBoxOptions)
 					.map(
 						([key, value]) =>
@@ -46,11 +47,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 					.join("\n");
 				// Create codeblock
 				editor.replaceSelection(
-					"```annotate-audio\nsource: " +
-						sourceValue +
-						"\n" +
-						optionsString +
-						"\n\n```"
+					"```annotate-audio\n" + optionsString + "\n\n```"
 				);
 			},
 		});
@@ -154,27 +151,24 @@ export default class AnnotateAudioPlugin extends Plugin {
 				el: HTMLElement,
 				ctx: MarkdownPostProcessorContext
 			) => {
+				// Get the source
+				let audioSource: string = "";
+				const sourceValue: string | undefined = getSourceOption(
+					ctx,
+					el
+				);
+				if (sourceValue) {
+					const link = this.app.metadataCache.getFirstLinkpathDest(
+						getLinkpath(sourceValue),
+						sourceValue
+					);
+					// Check IF valid
+					if (link && allowedAudioExtension.includes(link.extension))
+						audioSource = link.path;
+				}
+
 				// Generate a unique ID per block
 				const uniqueId = `annotate-audio-${ctx.sourcePath}-${ctx.docId}`;
-
-				// Get the source
-				const sourceValue = ((v) => (Array.isArray(v) ? v[0] : v))(
-					getSourceSetting(ctx, el)
-				);
-
-				if (!sourceValue) {
-					console.error("Specify a valid source");
-					return;
-				}
-				const link = this.app.metadataCache.getFirstLinkpathDest(
-					getLinkpath(sourceValue),
-					sourceValue
-				);
-				// Check IF valid (useful WHEN: source is removed OR user manually input it)
-				if (!link || !allowedAudioExtension.includes(link.extension)) {
-					console.error("Invalid source or extension");
-					return;
-				}
 
 				let container = el.createDiv({
 					cls: "annotate-audio-container",
@@ -196,11 +190,12 @@ export default class AnnotateAudioPlugin extends Plugin {
 					container.classList.add("active");
 					this.lastInteractedPlayerId = uniqueId;
 				});
-				// Register the Vue component as a child so that it persists
+
+				// Render
 				ctx.addChild(
 					new AudioBox({
 						container,
-						audioSource: link.path,
+						audioSource,
 						ctx,
 						player: this.playersList[uniqueId],
 						obsidianApp: this.app,
@@ -220,7 +215,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 /* --- Modal --- */
 /* ------------- */
 
-class sourceModal extends SuggestModal<TFile> {
+export class sourceModal extends SuggestModal<TFile> {
 	private sourcePromise!: (value: string) => void;
 	private vueSuggestions: Map<HTMLElement, any> = new Map();
 
@@ -262,8 +257,8 @@ class sourceModal extends SuggestModal<TFile> {
 	onChooseSuggestion(file: TFile, evt: MouseEvent | KeyboardEvent) {
 		// Generate link of choosen file
 		const linkText = this.app.metadataCache.fileToLinktext(file, file.path);
-		// "Return" the result (as wikilink)
-		this.sourcePromise(`[[${linkText}]]`);
+		// "Return" the result
+		this.sourcePromise(linkText);
 
 		this.close();
 	}

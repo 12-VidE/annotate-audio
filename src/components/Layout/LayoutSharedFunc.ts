@@ -4,7 +4,7 @@ import { MarkdownPostProcessorContext } from "obsidian";
 import type { AudioChunk } from "src/types";
 // Import - Functions
 import { secondsToTime } from "src/utils";
-import { getTitleSetting, getSourceSetting } from "../Logic/codeblockFunc";
+import { getTitleOption, getSourceOption } from "../Logic/codeblockFunc";
 
 /* ---------------- */
 /* --- Computed --- */
@@ -45,7 +45,7 @@ export function displayTitle(
 		return false;
 	} else if (title === "") {
 		// Use source (cleaning extension)
-		const sourceValue = getSourceSetting(ctx, container);
+		const sourceValue = getSourceOption(ctx, container);
 		return sourceValue!.replace(/\.[^/.]+$/, "");
 	}
 	// Return 'title' option IF specified

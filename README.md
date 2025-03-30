@@ -29,7 +29,7 @@ layout: 1
 ### Options
 
 **They can be tweaked more easly using the modal.**
-Only `source` is required, the others are all facoltative.
+Only `source` is required, the others are all facoltative. The order is not important but it need to have the options before the comments.
 
 | Layout | Name       | Default     | Values              | Description                                                                                               |
 | ------ | ---------- | ----------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -56,7 +56,7 @@ Only `source` is required, the others are all facoltative.
 
 ### Road-Map
 
-1. Display 404 component when no/invalid audio source has been selected
+1. Use Web Workers to optimize audio loading
 2. Add more useful obsidian commands
 3. Follow native folder exclusion in the audio file search
 4. UI to control `chunk` (like "Aves")
@@ -74,6 +74,7 @@ Only `source` is required, the others are all facoltative.
 -   `Insert comment` command is not removed when there's no active player
 -   Better propagate the instruction to use cached values FROM "ParentApp" TO layouts
 -   Only re-calculate wavegraph IF `chunk` has changed
+-   "maxDuration" reference is not correctly passed to "getChunkOption"
 
 ### Changelog
 
@@ -81,6 +82,7 @@ Only `source` is required, the others are all facoltative.
     -   feat: Select audio source on `Add audiobox` command using a modal
     -   feat: Add modal to manage player properties more easily
     -   feat: Options cache handling
+    -   feat: Render "404" block when `source` is invalid/absent
     -   fix: Removed alias as possible `title` option (useless)
     -   fix: Cache wavegraph rendering
 -   **1.1.0**

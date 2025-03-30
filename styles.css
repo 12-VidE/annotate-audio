@@ -66,6 +66,47 @@
 
 /* NONE */
 
+/* ----------- */
+/* --- 404 --- */
+/* ----------- */
+.layout--404 {
+	background-color: var(--background-secondary);
+	border-radius: 1rem;
+	padding: 0.2rem;
+
+	display: flex;
+	flex-direction: column;
+	> div {
+		width: 100%;
+		height: 100%;
+		padding: 0.4rem 0.2rem;
+		border: 0.2rem solid var(--color-accent-1);
+		border-radius: 1rem;
+
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		> .main_content {
+			display: flex;
+			justify-content: center;
+			/* Icon */
+			> span {
+				display: flex;
+				align-items: center;
+				margin-right: 0.5rem;
+			}
+		}
+		> .minor {
+			margin-right: 1rem;
+
+			text-align: end;
+			font-style: italic;
+			font-size: 0.8rem;
+			color: var(--color-base-40);
+		}
+	}
+}
+
 /* ---------------- */
 /* --- Comments --- */
 /* ---------------- */
@@ -138,9 +179,9 @@
 	}
 }
 
-/* --------------------- */
+/* ----------------- */
 /* --- LayoutBig --- */
-/* --------------------- */
+/* ----------------- */
 
 .layout--big .audiobox-title {
 	color: var(--text-normal);

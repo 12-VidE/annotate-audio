@@ -172,15 +172,16 @@ const props = defineProps<{
 	options: AudioBoxOptions;
 }>();
 
-/* ------------ */
-/* --- Refs --- */
-/* ------------ */
 // UI
 const playpause_btn = ref<HTMLElement | null>(null);
 const showCommentInput_btn = ref<HTMLElement | null>(null);
 const showProperties_btn = ref<HTMLElement | null>(null);
 const backward_btn = ref<HTMLElement | null>(null);
 const forward_btn = ref<HTMLElement | null>(null);
+
+/* ----------------- */
+/* --- Lifecycle --- */
+/* ----------------- */
 
 onMounted(async () => {
 	// Initialize icons
@@ -216,13 +217,13 @@ onBeforeUnmount(() => {
 /* ------------------------- */
 /* --- Function ON Event --- */
 
-function eventTimeBarInput() {
+function eventTimeBarInput(): void {
 	// Validate and update the audio's current time
 	if (!isNaN(props.sharedRefs.currentTime.value) && props.player)
 		props.player.currentTime = props.sharedRefs.currentTime.value;
 }
 
-function eventTimeUpdate() {
+function eventTimeUpdate(): void {
 	// Update currentTime #TODO rendi > generico
 	props.sharedRefs.currentTime.value = props.player.currentTime;
 
@@ -231,12 +232,12 @@ function eventTimeUpdate() {
 		props.player.dispatchEvent(new Event("ended", { bubbles: true }));
 }
 
-function eventPlayerPlay() {
+function eventPlayerPlay(): void {
 	// Update icon
 	setIcon(playpause_btn.value!, "pause");
 }
 
-function eventPlayerPause() {
+function eventPlayerPause(): void {
 	// Update icon
 	setIcon(playpause_btn.value!, "play");
 }

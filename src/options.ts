@@ -19,6 +19,7 @@ import { reactive } from "vue";
 
 // What can be changed inside audio-box
 export type AudioBoxOptions = {
+	source: string;
 	volume: number; // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/volume
 	speed: number; // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/playbackRate
 	loop: boolean;
@@ -30,6 +31,7 @@ export type AudioBoxOptions = {
 };
 
 export const defaultAudioBoxOptions: Omit<AudioBoxOptions, "chunk"> = {
+	source: "",
 	volume: 0.5,
 	speed: 1,
 	loop: false,
@@ -41,6 +43,7 @@ export const defaultAudioBoxOptions: Omit<AudioBoxOptions, "chunk"> = {
 
 export function createOptions(): AudioBoxOptions {
 	return reactive<AudioBoxOptions>({
+		source: "",
 		volume: 0.5,
 		speed: 1,
 		loop: false,

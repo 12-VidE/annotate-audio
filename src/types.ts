@@ -14,7 +14,7 @@ export type AudioChunk = {
 
 export type AudioBoxParameters = {
 	container: HTMLElement;
-	audioSource: string;
+	audioSource: string | null;
 	ctx: MarkdownPostProcessorContext;
 	player: HTMLAudioElement;
 	obsidianApp: App;

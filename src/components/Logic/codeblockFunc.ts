@@ -58,14 +58,15 @@ export function getAudioboxOptions(
 	maxDuration: number
 ): AudioBoxOptions {
 	return {
-		volume: getVolumeSetting(ctx, container),
-		speed: getPlaybackSpeedSetting(ctx, container),
-		loop: getLoopSetting(ctx, container),
-		sticky: getStickySetting(ctx, container),
-		title: getTitleSetting(ctx, container),
-		layout: getLayoutSetting(ctx, container),
-		chunk: getChunkSetting(ctx, container, maxDuration),
-		autoplay: getAutoplaySetting(ctx, container),
+		source: getSourceOption(ctx, container),
+		volume: getVolumeOption(ctx, container),
+		speed: getPlaybackSpeedOption(ctx, container),
+		loop: getLoopOption(ctx, container),
+		sticky: getStickyOption(ctx, container),
+		title: getTitleOption(ctx, container),
+		layout: getLayoutOption(ctx, container),
+		chunk: getChunkOption(ctx, container, maxDuration),
+		autoplay: getAutoplayOption(ctx, container),
 	} as AudioBoxOptions;
 }
 
@@ -99,13 +100,15 @@ export async function setAudioboxOptions(
 				break;
 			}
 		}
-		if (!optionsNumber) optionsNumber = codeblock.length - 2; // WHEN there's no comment. Fallback to the codeblock lenght wihtout extremes
+		if (!optionsNumber) optionsNumber = codeblock.length - 1; // WHEN there's no comment. Fallback to the codeblock lenght wihtout extremes
 
 		// Convert newOptions object into an array
 		// Special formatting are treated separetly
 		const newOptionsArray = Object.entries(newOptions)
 			.map(([key, value]) => {
 				switch (key) {
+					case "source":
+						return `source: [[${value}]]`;
 					case "title":
 						if (value == undefined) return ``;
 						else if (value == "") return `title: `;
@@ -129,8 +132,8 @@ export async function setAudioboxOptions(
 
 		// Implement change into copy of file
 		lines.splice(
-			sectionInfo.lineStart + 2,
-			optionsNumber - 1,
+			sectionInfo.lineStart + 1,
+			optionsNumber,
 			...newOptionsArray
 		);
 
@@ -151,10 +154,10 @@ export async function setAudioboxOptions(
 /**
  * @returns Boundaries of the audio - default back to full audio
  */
-function getChunkSetting(
+function getChunkOption(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement,
-	maxDuration: number
+	maxDuration: number = 3600
 ): AudioChunk {
 	// Check IF exists the option
 	const chunkRegex = new RegExp(
@@ -185,7 +188,7 @@ function getChunkSetting(
 /**
  * @returns Flag IF audio-controls are sticky
  */
-function getStickySetting(
+function getStickyOption(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): boolean {
@@ -199,7 +202,7 @@ function getStickySetting(
 /**
  * @returns Speed @ which to play the audio
  */
-function getPlaybackSpeedSetting(
+function getPlaybackSpeedOption(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): number {
@@ -213,7 +216,7 @@ function getPlaybackSpeedSetting(
 /**
  * @returns Flag IF audio can loop
  */
-function getLoopSetting(
+function getLoopOption(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): boolean {
@@ -225,7 +228,7 @@ function getLoopSetting(
 /**
  * @returns Volume @ which play the audio
  */
-function getVolumeSetting(
+function getVolumeOption(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): number {
@@ -239,7 +242,7 @@ function getVolumeSetting(
 /**
  * @returns Flag IF audio can autoplay WHEN selecting a comment
  */
-function getAutoplaySetting(
+function getAutoplayOption(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): boolean {
@@ -254,7 +257,7 @@ function getAutoplaySetting(
 /**
  * @returns title to display
  */
-export function getTitleSetting(
+export function getTitleOption(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): string | undefined {
@@ -266,7 +269,7 @@ export function getTitleSetting(
 /**
  * @returns audio source
  */
-export function getSourceSetting(
+export function getSourceOption(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): string | undefined {
@@ -280,7 +283,7 @@ export function getSourceSetting(
 /**
  * @returns Index of what player layout to render
  */
-export function getLayoutSetting(
+export function getLayoutOption(
 	ctx: MarkdownPostProcessorContext,
 	container: HTMLElement
 ): number {

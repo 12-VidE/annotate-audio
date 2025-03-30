@@ -1,32 +1,24 @@
 <template>
 	<!-- Dynamic Layout -->
-	<KeepAlive>
-		<component
-			:is="currentLayoutComponent"
-			:container="container"
-			:ctx="ctx"
-			:audioSource="audioSource"
-			:player="player"
-			:obsidianApp="obsidianApp"
-			:sharedRefs="sharedRefs"
-			:options="options"
-		/>
-	</KeepAlive>
+	<component
+		:is="currentLayoutComponent"
+		:container="container"
+		:ctx="ctx"
+		:audioSource="audioSource"
+		:player="player"
+		:obsidianApp="obsidianApp"
+		:sharedRefs="sharedRefs"
+		:options="options"
+	/>
 </template>
 
 <script setup lang="ts">
 import { MarkdownPostProcessorContext, App, TFile } from "obsidian";
-import {
-	computed,
-	onMounted,
-	onBeforeUnmount,
-	KeepAlive,
-	onBeforeMount,
-} from "vue";
+import { computed, onMounted, onBeforeUnmount } from "vue";
 // Import - Components
 import { layoutsArray } from "src/const";
 // Import - Function
-import { getLayoutSetting, getAudioboxOptions } from "./Logic/codeblockFunc";
+import { getLayoutOption, getAudioboxOptions } from "./Logic/codeblockFunc";
 import { hashObj } from "src/utils";
 import { pausePlayer, setPlayerPosition } from "./Logic/playerFunc";
 import { logRefs } from "./sharedFunc";
@@ -49,8 +41,6 @@ const props = defineProps<{
 /* ----------------- */
 
 onMounted(async () => {
-	console.log("Mounted");
-
 	await loadCacheOrFallback();
 	console.time("loadFile");
 	await loadFile();
@@ -71,8 +61,6 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-	console.log("unmounted");
-
 	pausePlayer(props.player, options.chunk, sharedRefs.currentTime);
 	saveCache();
 
@@ -88,7 +76,7 @@ onBeforeUnmount(() => {
  * Select which player layout to display
  */
 const currentLayoutComponent = computed(() => {
-	const layoutIndex: number = getLayoutSetting(props.ctx, props.container);
+	const layoutIndex: number = getLayoutOption(props.ctx, props.container);
 	return layoutsArray[layoutIndex].component;
 });
 
@@ -132,13 +120,14 @@ async function loadCacheOrFallback(): Promise<void> {
 
 	if (newHash === oldHash) {
 		// Cached options CAN be used
+		console.log("✔️");
 		const optionsCache = localStorage.getItem(
 			`aa_${props.audioSource}_options`
 		);
 		Object.assign(options, JSON.parse(optionsCache!));
 	} else {
 		// Cached options CANNOT be used
-		console.log("⚠️");
+		console.log("❌");
 		Object.assign(options, codeblockSettings);
 	}
 
@@ -149,13 +138,11 @@ async function loadCacheOrFallback(): Promise<void> {
 	if (
 		currentTimeCache >= options.chunk.startTime &&
 		currentTimeCache <= options.chunk.endTime
-	) {
+	)
 		// Inside chunk - Safe to use cache
 		sharedRefs.currentTime.value = currentTimeCache;
-	} else {
-		// Out-of-bounadry - Fall back to safe place
-		sharedRefs.currentTime.value = options.chunk?.startTime!;
-	}
+	// Out-of-bounadry - Fall back to safe place
+	else sharedRefs.currentTime.value = options.chunk?.startTime!;
 }
 
 async function saveCache(): Promise<void> {
