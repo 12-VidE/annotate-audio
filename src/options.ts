@@ -91,7 +91,7 @@ export class PropertiesModal extends Modal {
 		/* ----------------------- */
 		/* --- Options - Audio --- */
 		/* ----------------------- */
-		contentEl.createEl("h3", { text: "Audio preferences" });
+		new Setting(contentEl).setName("Audio preferences").setHeading();
 		// Volume
 		new Setting(contentEl).setName("Volume").then((setting) => {
 			// Create the value label first
@@ -241,7 +241,7 @@ export class PropertiesModal extends Modal {
 		/* ------------------------ */
 		/* --- Options - Player --- */
 		/* ------------------------ */
-		contentEl.createEl("h3", { text: "Player preferences" });
+		new Setting(contentEl).setName("Player preferences").setHeading();
 
 		// Layout
 		new Setting(contentEl).setName("Layout").addDropdown((dropdown) => {
