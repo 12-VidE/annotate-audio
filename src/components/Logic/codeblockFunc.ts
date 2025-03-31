@@ -59,13 +59,16 @@ export function getAudioboxOptions(
 ): AudioBoxOptions {
 	return {
 		source: getSourceOption(ctx, container),
+		// Player
+		chunk: getChunkOption(ctx, container, maxDuration),
 		volume: getVolumeOption(ctx, container),
 		speed: getPlaybackSpeedOption(ctx, container),
 		loop: getLoopOption(ctx, container),
+		// UI
+		layout: getLayoutOption(ctx, container),
 		sticky: getStickyOption(ctx, container),
 		title: getTitleOption(ctx, container),
-		layout: getLayoutOption(ctx, container),
-		chunk: getChunkOption(ctx, container, maxDuration),
+		// Comments
 		autoplay: getAutoplayOption(ctx, container),
 	} as AudioBoxOptions;
 }

@@ -1,13 +1,13 @@
 ## What is it?
 
-![Preview GIF](static/preview.gif)
+![Preview GIF](static/preview2.gif)
 
 -   Reproduce an audio file
 -   Tweak listening experience by changing: volume, playback speed, looping...
 -   Add comments to desired timestamps
 -   Quickly jump to a specific timestamp by left-clicking on the related comment
 -   Modify/Delete a comment by right-clicking on it
--   Inuitive keyboard shortcut
+-   Inuitive keyboard shortcuts
 
 ````
 ``` annotate-audio
@@ -16,9 +16,9 @@ volume: 0.5
 speed: 1
 loop: false
 sticky: false
-title:
-autoplay: true
-layout: 1
+layout: 0
+chunk: 00:00:00-00:02:52
+autoplay: false
 
 37 --- Section 1
 162 --- Section 2
@@ -28,8 +28,8 @@ layout: 1
 
 ### Options
 
-**They can be tweaked more easly using the modal.**
-Only `source` is required, the others are all facoltative. The order is not important but it need to have the options before the comments.
+Each audio-box has its owns. They can be tweaked manually or, more easily, **using the dedicated modal**.
+(Their order is not important but they need to be placed before the comments)
 
 | Layout | Name       | Default     | Values              | Description                                                                                               |
 | ------ | ---------- | ----------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -56,33 +56,30 @@ Only `source` is required, the others are all facoltative. The order is not impo
 
 ### Road-Map
 
-1. Use Web Workers to optimize audio loading
-2. Add more useful obsidian commands
-3. Follow native folder exclusion in the audio file search
-4. UI to control `chunk` (like "Aves")
-5. Layout with all the properties exposed
-6. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
+1. Add more useful obsidian commands
+2. Follow native folder exclusion in the audio file search
+3. UI to control `chunk` (like "Aves")
+4. Layout with all the properties exposed
+5. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
 
 ### Known Issues
 
 -   Remove `currentTime` CAUSE redundant: use `this.player.currenTime`
 -   After some seconds, it crashes the Obsidian mobile app
--   (LayoutDefault.vue) The wavegraph is not always loaded reliably. Sometimes, the wrong values are cached, requiring a cleaning
 -   Remove `editMode` flag as it's redundant
 -   Player is umounted and mounted when a comment is added. It would be better to have an update.
 -   After using `Add audiobox` command, better handle the rendering by moving outside
 -   `Insert comment` command is not removed when there's no active player
 -   Better propagate the instruction to use cached values FROM "ParentApp" TO layouts
--   Only re-calculate wavegraph IF `chunk` has changed
--   "maxDuration" reference is not correctly passed to "getChunkOption"
 
 ### Changelog
 
+-   **1.2.1**
+    -   feat: Read audio duration from metadata. It drastically decreases loading time
 -   **1.2.0**
     -   feat: Select audio source on `Add audiobox` command using a modal
     -   feat: Add modal to manage player properties more easily
-    -   feat: Options cache handling
-    -   feat: Wavegraph rendering cache
+    -   feat: Options + Wavegraph cache handling
     -   feat: Render "404" block when `source` is invalid/absent
     -   fix: Removed alias as possible `title` option (useless)
 -   **1.1.0**
