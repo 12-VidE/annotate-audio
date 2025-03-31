@@ -14,8 +14,9 @@ import { getSourceOption } from "./components/Logic/codeblockFunc";
 import SourceSuggestion from "./components/SourceSuggestion.vue";
 import { AudioBox } from "./audioBox";
 // Import - Constant
-import { defaultAudioBoxOptions } from "./options";
+import { defaultAudioBoxOptions, formatOptions } from "./options";
 import { allowedAudioExtension } from "./const";
+import { retriveDuration } from "./components/sharedFunc";
 
 /* -------------- */
 /* --- Plugin --- */
@@ -35,19 +36,27 @@ export default class AnnotateAudioPlugin extends Plugin {
 			editorCallback: async (editor: Editor) => {
 				let defaultOptions = defaultAudioBoxOptions;
 				// Show modal to select source audio file
-				defaultOptions.source = `[[${await new sourceModal(
+				defaultOptions.source = await new sourceModal(
 					this.app
-				).openWithPromise()}]]`;
+				).openWithPromise();
+
+				// Add the CORRECT default chunk
+				let file = this.app.metadataCache.getFirstLinkpathDest(
+					defaultOptions.source,
+					""
+				);
+				const file2 = this.app.vault.getResourcePath(file!);
+				defaultOptions.chunk = {
+					startTime: 0,
+					endTime: await retriveDuration(file2),
+				};
 				// Convert options into formatted string
-				const optionsString = Object.entries(defaultAudioBoxOptions)
-					.map(
-						([key, value]) =>
-							`${key}: ${value === undefined ? "" : value}`
-					)
-					.join("\n");
+				const optionsString: string = formatOptions(
+					defaultAudioBoxOptions
+				).join("\n");
 				// Create codeblock
 				editor.replaceSelection(
-					"```annotate-audio\n" + optionsString + "\n\n```"
+					"```annotate-audio\n" + optionsString + "\n```"
 				);
 			},
 		});

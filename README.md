@@ -82,9 +82,9 @@ Only `source` is required, the others are all facoltative. The order is not impo
     -   feat: Select audio source on `Add audiobox` command using a modal
     -   feat: Add modal to manage player properties more easily
     -   feat: Options cache handling
+    -   feat: Wavegraph rendering cache
     -   feat: Render "404" block when `source` is invalid/absent
     -   fix: Removed alias as possible `title` option (useless)
-    -   fix: Cache wavegraph rendering
 -   **1.1.0**
     -   Allow each player to be independent by creating its refs in `ParentApp.vue` and passing them as `props`. To use targeted Obsidian commands, each player is called by its `id`
     -   feat [#1](https://github.com/12-VidE/annotate-audio/issues/1): Added Obsidian command `Insert comment`

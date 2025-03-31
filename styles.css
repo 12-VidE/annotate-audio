@@ -30,6 +30,7 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	gap: 0.2rem;
 
 	.filename {
 		font-weight: 500;
@@ -38,21 +39,21 @@
 		font-weight: 400;
 		font-size: 0.8rem;
 		color: var(--color-base-60);
-		margin-left: 0.3rem;
+		margin-left: 0.2rem;
 	}
 
 	.metadata-container {
 		padding: 0;
-		margin: 0.2rem 0 0 0;
+		margin: 0;
 
 		display: flex;
 		flex-direction: row;
-		gap: 0.4rem;
+		gap: 0.2rem;
 
 		font-weight: 400;
 		color: var(--color-base-60);
 
-		> i {
+		i {
 			padding: 0;
 			margin: 0;
 			vertical-align: middle;

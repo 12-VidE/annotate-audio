@@ -21,7 +21,7 @@ import { layoutsArray } from "src/const";
 import { getLayoutOption, getAudioboxOptions } from "./Logic/codeblockFunc";
 import { hashObj } from "src/utils";
 import { pausePlayer, setPlayerPosition } from "./Logic/playerFunc";
-import { logRefs } from "./sharedFunc";
+import { retriveDuration, logRefs } from "./sharedFunc";
 // Import/Create - Ref
 import { createShareRefs } from "./sharedRefs";
 const sharedRefs = createShareRefs();
@@ -42,9 +42,19 @@ const props = defineProps<{
 
 onMounted(async () => {
 	await loadCacheOrFallback();
-	/* console.time("loadFile"); */
-	await loadFile();
-	/* console.timeEnd("loadFile"); */
+
+	// Read file from vault
+	const file = props.obsidianApp.vault.getAbstractFileByPath(
+		props.audioSource
+	);
+	if (!file || !(file instanceof TFile)) return;
+	sharedRefs.srcPath.value = props.obsidianApp.vault.getResourcePath(file);
+
+	// Get duration
+	sharedRefs.maxDuration.value = await retriveDuration(
+		sharedRefs.srcPath.value
+	);
+
 	// Initialize Player
 	props.player.src = sharedRefs.srcPath.value;
 	props.player.currentTime = sharedRefs.currentTime.value;
@@ -84,31 +94,6 @@ const currentLayoutComponent = computed(() => {
 /* --- Function --- */
 /* ---------------- */
 
-async function loadFile(): Promise<AudioBuffer | undefined> {
-	try {
-		// Read file from vault
-		const file = props.obsidianApp.vault.getAbstractFileByPath(
-			props.audioSource
-		);
-		if (!file || !(file instanceof TFile)) return;
-
-		const arrBuf = await props.obsidianApp.vault.adapter.readBinary(
-			file.path
-		);
-		const audioContext = new AudioContext();
-
-		const buf = await audioContext.decodeAudioData(arrBuf);
-		// Save infos
-		sharedRefs.maxDuration.value = Math.floor(buf.duration);
-		sharedRefs.srcPath.value =
-			props.obsidianApp.vault.getResourcePath(file);
-		return buf;
-	} catch (error) {
-		console.error("loadFile → ", error);
-	}
-	return;
-}
-
 async function loadCacheOrFallback(): Promise<void> {
 	const codeblockSettings = getAudioboxOptions(
 		props.ctx,
@@ -120,14 +105,12 @@ async function loadCacheOrFallback(): Promise<void> {
 
 	if (newHash === oldHash) {
 		// Cached options CAN be used
-		/* console.log("✔️"); */
 		const optionsCache = localStorage.getItem(
 			`aa_${props.audioSource}_options`
 		);
 		Object.assign(options, JSON.parse(optionsCache!));
 	} else {
 		// Cached options CANNOT be used
-		/* console.log("❌"); */
 		Object.assign(options, codeblockSettings);
 	}
 

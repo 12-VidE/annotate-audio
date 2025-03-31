@@ -20,6 +20,7 @@ export const allowedAudioExtension = [
 /**
  * List of all possible layouts
  */
+// WARNING: Ignore IDE error on this Array
 export const layoutsArray: Array<Layout> = [
 	{ name: "Default", component: LayoutDefault },
 	{ name: "Big", component: LayoutBig },
