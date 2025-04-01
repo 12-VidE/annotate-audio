@@ -75,7 +75,7 @@ Each audio-box has its owns. They can be tweaked manually or, more easily, **usi
 
 ### Changelog
 
--   **1.3.0**
+-   **1.3.0 (developing)**
     -   The plugin is now supported on mobile! (Not tested on iPhone)
 -   **1.2.1**
     -   fix: Read audio duration from metadata. It drastically decreases loading time
