@@ -94,6 +94,7 @@ function enableEditMode(time: number): void {
 
 	pausePlayer(
 		props.player,
+		props.audioSource,
 		props.options.chunk,
 		props.sharedRefs.currentTime
 	);
@@ -137,6 +138,7 @@ function playComment(time: number): void {
 	if (props.options.autoplay) {
 		playPlayer(
 			props.player,
+			props.audioSource,
 			props.options.chunk,
 			props.sharedRefs.currentTime.value
 		);

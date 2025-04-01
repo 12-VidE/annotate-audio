@@ -23,7 +23,7 @@ import { retriveDuration } from "./components/sharedFunc";
 /* -------------- */
 
 export default class AnnotateAudioPlugin extends Plugin {
-	private playersList: Record<string, HTMLAudioElement> = {};
+	private playersList: Map<string, HTMLAudioElement> = new Map();
 	private lastInteractedPlayerId: string | null = null;
 
 	async onload() {
@@ -177,19 +177,21 @@ export default class AnnotateAudioPlugin extends Plugin {
 				}
 
 				// Generate a unique ID per block
-				const uniqueId = `annotate-audio-${ctx.sourcePath}-${ctx.docId}`;
+				const uniqueKey = `annotate-audio-${ctx.sourcePath}-${ctx.docId}`;
+				// Check if an existing player already exists for this audio source
+				let player: HTMLAudioElement;
+				if (this.playersList.has(uniqueKey))
+					player = this.playersList.get(uniqueKey)!;
+				else {
+					player = document.createElement("audio");
+					this.playersList.set(uniqueKey, player);
+				}
 
+				// Set up the container
 				let container = el.createDiv({
 					cls: "annotate-audio-container",
-					attr: { "data-audio-id": uniqueId, tabindex: 0 }, // Add unique ID
+					attr: { "data-audio-id": uniqueKey, tabindex: 0 }, // Add unique ID
 				});
-
-				// Store player instances
-				if (!this.playersList[uniqueId]) {
-					this.playersList[uniqueId] =
-						document.createElement("audio");
-					container.appendChild(this.playersList[uniqueId]);
-				}
 
 				// Set the currently active audio on click
 				container.addEventListener("click", () => {
@@ -197,7 +199,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 						.querySelectorAll(".annotate-audio-container")
 						.forEach((el) => el.classList.remove("active"));
 					container.classList.add("active");
-					this.lastInteractedPlayerId = uniqueId;
+					this.lastInteractedPlayerId = uniqueKey;
 				});
 
 				// Render
@@ -206,7 +208,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 						container,
 						audioSource,
 						ctx,
-						player: this.playersList[uniqueId],
+						player,
 						obsidianApp: this.app,
 					})
 				);
@@ -215,7 +217,11 @@ export default class AnnotateAudioPlugin extends Plugin {
 	}
 
 	onunload() {
-		Object.values(this.playersList).forEach((player) => player.remove());
+		Object.values(this.playersList).forEach((player) => {
+			player.pause();
+			player.remove();
+		});
+		this.playersList.clear();
 		this.lastInteractedPlayerId = null;
 	}
 }

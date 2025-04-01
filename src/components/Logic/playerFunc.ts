@@ -3,17 +3,27 @@ import type { AudioChunk } from "src/types";
 import { Ref } from "vue";
 
 /**
- * Start player audio reproduction
+ * Start player audio reproduction (pausing all the others)
+ * @param audioSource ID
  * @param chunk option
  * @param currentTime SharedRef
  */
 export function playPlayer(
 	player: HTMLAudioElement,
+	audioSource: string,
 	chunk: Readonly<AudioChunk>,
 	currentTime: Readonly<number>
 ): void {
 	// IF inside chunk
-	if (currentTime <= chunk.endTime) player.play();
+	if (currentTime <= chunk.endTime) {
+		// Pause all other players
+		const ev = new CustomEvent("pauseAllPlayers", {
+			detail: { emitingPlayerId: audioSource },
+		});
+		document.dispatchEvent(ev);
+		// Force this player to start
+		player.play();
+	}
 }
 
 /**
@@ -23,6 +33,7 @@ export function playPlayer(
  */
 export function pausePlayer(
 	player: HTMLAudioElement,
+	audioSource: string,
 	chunk: Readonly<AudioChunk>,
 	currentTime: Ref<number>
 ): void {
@@ -38,12 +49,13 @@ export function pausePlayer(
  */
 export function togglePlayer(
 	player: HTMLAudioElement,
+	audioSource: string,
 	chunk: Readonly<AudioChunk>,
 	currentTime: Ref<number>
 ): void {
 	player.paused
-		? playPlayer(player, chunk, currentTime.value)
-		: pausePlayer(player, chunk, currentTime);
+		? playPlayer(player, audioSource, chunk, currentTime.value)
+		: pausePlayer(player, audioSource, chunk, currentTime);
 }
 
 /**

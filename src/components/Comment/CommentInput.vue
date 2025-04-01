@@ -218,6 +218,7 @@ function showCommentInput(): void {
 
 	pausePlayer(
 		props.player,
+		props.audioSource,
 		props.options.chunk,
 		props.sharedRefs.currentTime
 	);

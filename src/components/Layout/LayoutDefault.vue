@@ -19,6 +19,7 @@
 						@click="
 							togglePlayer(
 								player,
+								audioSource,
 								options.chunk,
 								sharedRefs.currentTime
 							)
@@ -95,6 +96,7 @@
 						@click="
 							pausePlayer(
 								player,
+								audioSource,
 								options.chunk,
 								sharedRefs.currentTime
 							);

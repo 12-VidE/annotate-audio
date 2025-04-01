@@ -31,17 +31,22 @@ autoplay: false
 Each audio-box has its owns. They can be tweaked manually or, more easily, **using the dedicated modal**.
 (Their order is not important but they need to be placed before the comments)
 
-| Layout | Name       | Default     | Values              | Description                                                                                               |
-| ------ | ---------- | ----------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
-| \*     | `source`   |             |                     | WikiLink to the audio file to reproduce                                                                   |
-| \*     | `volume`   | `0.5`       | `0.0` → `1.0`       | Player base volume                                                                                        |
-| \*     | `speed`    | `1`         | `0.0` → `1.0`       | Player playback speed                                                                                     |
-| \*     | `loop`     | `false`     | `true`/`false`      | Loop-back to beginning after getting to the end of the audio                                              |
-| \*     | `sticky`   | `false`     | `true`/`false`      | Main controls become sticky, following you as you scroll down                                             |
-| \*     | `layout`   | `0`         | `0,1`               | What player layout to display (feel free to make your own)                                                |
-| \*     | `chunk`    | `undefined` | `HH:MM:SS-HH:MM:SS` | Section of audio to play                                                                                  |
-| \*     | `autoplay` | `false`     | `true`/`false`      | When clicking on a comment, the player starts playing from there instead of simply moving there           |
-| 1      | `title`    | `undefined` |                     | Title of the player. If not present: not shown. If not set: name of audio file (or its alias, if present) |
+| Name       | Default     | Values              | Description                                                                                                                                                             |
+| ---------- | ----------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `source`   |             |                     | WikiLink to the audio file to reproduce. **It behaves like an ID**: the plugin doesn't work correctly with duplicate names or more audiobox pointing to the same source |
+| `volume`   | `0.5`       | `0.0` → `1.0`       | Player base volume                                                                                                                                                      |
+| `speed`    | `1`         | `0.0` → `1.0`       | Player playback speed                                                                                                                                                   |
+| `loop`     | `false`     | `true`/`false`      | Loop-back to beginning after getting to the end of the audio                                                                                                            |
+| `sticky`   | `false`     | `true`/`false`      | Main controls become sticky, following you as you scroll down                                                                                                           |
+| `layout`   | `0`         | `0,1`               | What player layout to display (feel free to make your own)                                                                                                              |
+| `chunk`    | `undefined` | `HH:MM:SS-HH:MM:SS` | Section of audio to play                                                                                                                                                |
+| `autoplay` | `false`     | `true`/`false`      | When clicking on a comment, the player starts playing from there instead of simply moving there                                                                         |
+|            |
+
+There are some options only available in some `layout`s
+| Layout | Name | Default | Values | Description |
+| ------ | ---------- | ----------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | `title` | `undefined` | | Title of the player. If not present: not shown. If not set: name of audio file (or its alias, if present)
 
 ### Obsidian Commands
 
@@ -57,11 +62,11 @@ Each audio-box has its owns. They can be tweaked manually or, more easily, **usi
 ### Road-Map
 
 1. Ability to remove the `chunk` option
-1. Add more useful obsidian commands
-1. Follow native folder exclusion in the audio file search
-1. UI to control `chunk` (like "Aves")
-1. Layout with all the properties exposed
-1. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
+2. Add more useful obsidian commands
+3. Follow native folder exclusion in the audio file search
+4. UI to control `chunk` (like "Aves")
+5. Layout with all the properties exposed
+6. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
 
 ### Known Issues
 
@@ -72,11 +77,14 @@ Each audio-box has its owns. They can be tweaked manually or, more easily, **usi
 -   After using `Add audiobox` command, better handle the rendering by moving outside
 -   `Insert comment` command is not removed when there's no active player
 -   Better propagate the instruction to use cached values FROM "ParentApp" TO layouts
+-   Players don't work independetly when in "Reading" view
 
 ### Changelog
 
 -   **1.3.0 (developing)**
-    -   The plugin is now supported on mobile! (Not tested on iPhone)
+    -   [#4](https://github.com/12-VidE/annotate-audio/issues/4) The plugin is now supported on mobile! (Not tested on iPhone)
+    -   fix [#5](https://github.com/12-VidE/annotate-audio/issues/5): Stop audiobox when another one start playing
+    -
 -   **1.2.1**
     -   fix: Read audio duration from metadata. It drastically decreases loading time
 -   **1.2.0**

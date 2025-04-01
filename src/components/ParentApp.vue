@@ -66,16 +66,23 @@ onMounted(async () => {
 	if (props.player) {
 		props.player.addEventListener("ended", eventEndedAudio);
 	}
+	document.addEventListener("pauseAllPlayers", eventPausePlayer);
 
 	/* logRefs(sharedRefs); */
 });
 
 onBeforeUnmount(() => {
-	pausePlayer(props.player, options.chunk, sharedRefs.currentTime);
+	pausePlayer(
+		props.player,
+		props.audioSource,
+		options.chunk,
+		sharedRefs.currentTime
+	);
 	saveCache();
 
 	// Destroy Event-Listeners
 	props.player.removeEventListener("ended", eventEndedAudio);
+	document.removeEventListener("pauseAllPlayers", eventPausePlayer);
 });
 
 /* ---------------- */
@@ -154,6 +161,24 @@ function eventEndedAudio() {
 		options.chunk?.startTime!
 	);
 	if (!props.player.loop)
-		pausePlayer(props.player, options.chunk, sharedRefs.currentTime);
+		pausePlayer(
+			props.player,
+			props.audioSource,
+			options.chunk,
+			sharedRefs.currentTime
+		);
 }
+
+const eventPausePlayer = (event: Event) => {
+	const customEvent = event as CustomEvent;
+	// Pause every player, excluding the one that gave the initial comand
+	if (customEvent.detail.emitingPlayerId !== props.audioSource) {
+		pausePlayer(
+			props.player,
+			props.audioSource,
+			options.chunk,
+			sharedRefs.currentTime
+		);
+	}
+};
 </script>
