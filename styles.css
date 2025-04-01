@@ -177,6 +177,14 @@
 		> .comment-time {
 			color: var(--color-base-50);
 		}
+		/* Edit-Comment btn */
+		> i {
+			margin-left: auto;
+			color: var(--color-base-50);
+
+			display: flex;
+			align-items: center;
+		}
 	}
 }
 

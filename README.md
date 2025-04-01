@@ -56,11 +56,12 @@ Each audio-box has its owns. They can be tweaked manually or, more easily, **usi
 
 ### Road-Map
 
+1. Ability to remove the `chunk` option
 1. Add more useful obsidian commands
-2. Follow native folder exclusion in the audio file search
-3. UI to control `chunk` (like "Aves")
-4. Layout with all the properties exposed
-5. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
+1. Follow native folder exclusion in the audio file search
+1. UI to control `chunk` (like "Aves")
+1. Layout with all the properties exposed
+1. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
 
 ### Known Issues
 
@@ -74,8 +75,10 @@ Each audio-box has its owns. They can be tweaked manually or, more easily, **usi
 
 ### Changelog
 
+-   **1.3.0 (developing)**
+    -   The plugin is now supported on mobile! (Not tested on iPhone)
 -   **1.2.1**
-    -   feat: Read audio duration from metadata. It drastically decreases loading time
+    -   fix: Read audio duration from metadata. It drastically decreases loading time
 -   **1.2.0**
     -   feat: Select audio source on `Add audiobox` command using a modal
     -   feat: Add modal to manage player properties more easily
