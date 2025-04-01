@@ -183,7 +183,7 @@ const forward_btn = ref<HTMLElement | null>(null);
 /* --- Lifecycle --- */
 /* ----------------- */
 
-onMounted(async () => {
+onMounted(() => {
 	// Initialize icons
 	if (playpause_btn.value) setIcon(playpause_btn.value, "play");
 	if (showCommentInput_btn.value)
