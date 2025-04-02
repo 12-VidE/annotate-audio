@@ -61,12 +61,11 @@ There are some options only available in some `layout`s
 
 ### Road-Map
 
-1. Ability to remove the `chunk` option
-2. Add more useful obsidian commands
-3. Follow native folder exclusion in the audio file search
-4. UI to control `chunk` (like "Aves")
-5. Layout with all the properties exposed
-6. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
+1. Add more useful obsidian commands
+2. Follow native folder exclusion in the audio file search
+3. UI to control `chunk` (like "Aves")
+4. Layout with all the properties exposed
+5. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
 
 ### Known Issues
 
@@ -78,13 +77,14 @@ There are some options only available in some `layout`s
 -   `Insert comment` command is not removed when there's no active player
 -   Better propagate the instruction to use cached values FROM "ParentApp" TO layouts
 -   Players don't work independetly when in "Reading" view
+-   `title` option inside modal is not displayed correctly on mobile
 
 ### Changelog
 
 -   **1.3.0 (developing)**
     -   [#4](https://github.com/12-VidE/annotate-audio/issues/4) The plugin is now supported on mobile! (Not tested on iPhone)
+    -   feat: Reset `chunk` option from the modal
     -   fix [#5](https://github.com/12-VidE/annotate-audio/issues/5): Stop audiobox when another one start playing
-    -
 -   **1.2.1**
     -   fix: Read audio duration from metadata. It drastically decreases loading time
 -   **1.2.0**

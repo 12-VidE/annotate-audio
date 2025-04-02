@@ -190,6 +190,12 @@ export class PropertiesModal extends Modal {
 		new Setting(contentEl)
 			.setName("Chunk")
 			.setDesc("What part of the audio track to reproduce")
+			.addExtraButton((btn) =>
+				btn.setIcon("trash-2").onClick(() => {
+					chunkStartTime?.setValue("00:00:00");
+					chunkEndTime?.setValue(secondsToTime(this.totalDuration));
+				})
+			)
 			.addText((text) => {
 				// Chunk start
 				chunkStartTime = text;
