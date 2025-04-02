@@ -17,8 +17,8 @@ export function playPlayer(
 	// IF inside chunk
 	if (currentTime <= chunk.endTime) {
 		// Pause all other players
-		const ev = new CustomEvent("pauseAllPlayers", {
-			detail: { emitingPlayerId: audioSource },
+		const ev = new CustomEvent("pause-other-players", {
+			detail: { id: audioSource },
 		});
 		document.dispatchEvent(ev);
 		// Force this player to start
@@ -53,9 +53,11 @@ export function togglePlayer(
 	chunk: Readonly<AudioChunk>,
 	currentTime: Ref<number>
 ): void {
-	player.paused
-		? playPlayer(player, audioSource, chunk, currentTime.value)
-		: pausePlayer(player, audioSource, chunk, currentTime);
+	if (player.paused) {
+		playPlayer(player, audioSource, chunk, currentTime.value);
+	} else {
+		pausePlayer(player, audioSource, chunk, currentTime);
+	}
 }
 
 /**

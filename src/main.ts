@@ -6,6 +6,7 @@ import {
 	SuggestModal,
 	TFile,
 	App,
+	Notice,
 } from "obsidian";
 import { createApp } from "vue";
 // Import - Function
@@ -23,13 +24,14 @@ import { retriveDuration } from "./components/sharedFunc";
 /* -------------- */
 
 export default class AnnotateAudioPlugin extends Plugin {
-	private playersList: Map<string, HTMLAudioElement> = new Map();
-	private lastInteractedPlayerId: string | null = null;
+	private audioboxList: Map<string, HTMLAudioElement> = new Map();
+	private lastInteractedAudioboxId: string | null = null;
 
 	async onload() {
 		/* -----------------*/
 		/* --- Commands --- */
 		/* ---------------- */
+		// Add audiobox
 		this.addCommand({
 			id: "add-audio-box",
 			name: "Add audiobox",
@@ -60,84 +62,110 @@ export default class AnnotateAudioPlugin extends Plugin {
 				);
 			},
 		});
+		// Add comment
 		this.addCommand({
 			id: "add-comment",
 			name: "Insert comment",
 			checkCallback: (checking: boolean) => {
-				if (this.lastInteractedPlayerId) {
-					if (!checking) {
-						const ev = new CustomEvent("insertComment", {
-							detail: { id: this.lastInteractedPlayerId },
-						});
-						document.dispatchEvent(ev);
-					}
-					return true;
+				if (!this.lastInteractedAudioboxId) return false;
+				if (!checking) {
+					const ev = new CustomEvent("add-comment", {
+						detail: { id: this.lastInteractedAudioboxId },
+					});
+					document.dispatchEvent(ev);
 				}
+				return true;
 			},
 		});
-
-		/* this.addCommand({
-                id: "pause-audio",
-                name: "Pause Audio",
-                checkCallback: (checking: boolean) => {
-                    if (this.activeAudioId && this.audioPlayers[this.activeAudioId]) {
-                        if (!checking) {
-                            new Notice("Audio paused");
-                            const ev = new Event("allpause");
-                            document.dispatchEvent(ev);
-                            this.audioPlayers[this.activeAudioId].pause();
-                        }
-                        return true;
-                    }
-                },
-            }); */
-		/* this.addCommand({
-                id: "resume-audio",
-                name: "Resume Audio",
-                checkCallback: (checking: boolean) => {
-                    const isAudioOpen = true; //#TODO
-                    if (isAudioOpen) {
-                        if (!checking) {
-                            new Notice("Audio resumed");
-                            const ev = new Event("allresume");
-                            document.dispatchEvent(ev);
-                            if (this.player.src)
-                                this.player.play();
-                        }
-                        return true;
-                    }
-                },
-            });*/
-
-		/*
-            this.addCommand({
-                id: "audio-forward-5s",
-                name: "+5 sec",
-                checkCallback: (checking: boolean) => {
-                    const isAudioOpen = true; //#TODO
-                    if (isAudioOpen) {
-                        if (!checking) {
-                            if (this.player.src)
-                                this.player.currentTime += 5;
-                        }
-                        return true;
-                    }
-                },
-            });
-            this.addCommand({
-                id: "audio-back-5s",
-                name: "-5 sec",
-                checkCallback: (checking: boolean) => {
-                    const isAudioOpen = true; //#TODO
-                    if (isAudioOpen) {
-                        if (!checking) {
-                            if (this.player.src)
-                                this.player.currentTime -= 5;
-                        }
-                        return true;
-                    }
-                },
-            });*/
+		// Pause audiobox
+		this.addCommand({
+			id: "pause-audiobox",
+			name: "Pause audiobox",
+			checkCallback: (checking: boolean) => {
+				if (
+					!this.lastInteractedAudioboxId ||
+					this.audioboxList.get(this.lastInteractedAudioboxId)?.paused
+				)
+					return false;
+				if (!checking) {
+					const ev = new CustomEvent("pause-audiobox", {
+						detail: { id: this.lastInteractedAudioboxId },
+					});
+					document.dispatchEvent(ev);
+					new Notice("Audiobox has been paused");
+				}
+				return true;
+			},
+		});
+		// Play audiobox
+		this.addCommand({
+			id: "play-audiobox",
+			name: "Play audiobox",
+			checkCallback: (checking: boolean) => {
+				if (
+					!this.lastInteractedAudioboxId ||
+					!this.audioboxList.get(this.lastInteractedAudioboxId)
+						?.paused
+				)
+					return false;
+				if (!checking) {
+					const ev = new CustomEvent("play-audiobox", {
+						detail: { id: this.lastInteractedAudioboxId },
+					});
+					document.dispatchEvent(ev);
+					new Notice("Audiobox is playing");
+				}
+				return true;
+			},
+		});
+		// Toggle audiobox
+		this.addCommand({
+			id: "toggle-audiobox",
+			name: "Toggle audiobox",
+			checkCallback: (checking: boolean) => {
+				if (!this.lastInteractedAudioboxId) return false;
+				if (!checking) {
+					const ev = new CustomEvent("toggle-audiobox", {
+						detail: { id: this.lastInteractedAudioboxId },
+					});
+					document.dispatchEvent(ev);
+					new Notice("Audiobox has been toggled");
+				}
+				return true;
+			},
+		});
+		// Forward
+		this.addCommand({
+			id: "audiobox-forward",
+			name: "Move forward",
+			checkCallback: (checking: boolean) => {
+				if (!this.lastInteractedAudioboxId) return false;
+				if (!checking) {
+					const ev = new CustomEvent("audiobox-forward", {
+						detail: { id: this.lastInteractedAudioboxId },
+					});
+					document.dispatchEvent(ev);
+					new Notice("Audiobox is moving forward");
+				}
+				return true;
+			},
+		});
+		// Backward
+		this.addCommand({
+			id: "audiobox-backward",
+			name: "Move backward",
+			checkCallback: (checking: boolean) => {
+				if (!this.lastInteractedAudioboxId) return false;
+				if (!checking) {
+					const ev = new CustomEvent("audiobox-backward", {
+						detail: { id: this.lastInteractedAudioboxId },
+					});
+					document.dispatchEvent(ev);
+					new Notice("Audiobox is moving backward");
+				}
+				return true;
+			},
+		});
 
 		/* this.registerObsidianProtocolHandler("audioplayer", (e) => {
                 const parameters = e as {
@@ -177,29 +205,30 @@ export default class AnnotateAudioPlugin extends Plugin {
 				}
 
 				// Generate a unique ID per block
-				const uniqueKey = `annotate-audio-${ctx.sourcePath}-${ctx.docId}`;
+				const audioboxId =
+					audioSource ||
+					`annotate-audio-${ctx.sourcePath}-${ctx.docId}`;
+
 				// Check if an existing player already exists for this audio source
 				let player: HTMLAudioElement;
-				if (this.playersList.has(uniqueKey))
-					player = this.playersList.get(uniqueKey)!;
+
+				if (this.audioboxList.has(audioboxId))
+					player = this.audioboxList.get(audioboxId)!;
 				else {
 					player = document.createElement("audio");
-					this.playersList.set(uniqueKey, player);
+					this.audioboxList.set(audioboxId, player);
 				}
 
 				// Set up the container
 				let container = el.createDiv({
 					cls: "annotate-audio-container",
-					attr: { "data-audio-id": uniqueKey, tabindex: 0 }, // Add unique ID
+					attr: { "data-audio-id": audioboxId, tabindex: 0 },
 				});
+				container.appendChild(player);
 
 				// Set the currently active audio on click
 				container.addEventListener("click", () => {
-					document
-						.querySelectorAll(".annotate-audio-container")
-						.forEach((el) => el.classList.remove("active"));
-					container.classList.add("active");
-					this.lastInteractedPlayerId = uniqueKey;
+					this.lastInteractedAudioboxId = audioboxId;
 				});
 
 				// Render
@@ -217,12 +246,13 @@ export default class AnnotateAudioPlugin extends Plugin {
 	}
 
 	onunload() {
-		Object.values(this.playersList).forEach((player) => {
+		Object.values(this.audioboxList).forEach((player) => {
 			player.pause();
 			player.remove();
+			player.source = "";
 		});
-		this.playersList.clear();
-		this.lastInteractedPlayerId = null;
+		this.audioboxList.clear();
+		this.lastInteractedAudioboxId = null;
 	}
 }
 

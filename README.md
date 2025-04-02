@@ -6,8 +6,10 @@
 -   Tweak listening experience by changing: volume, playback speed, looping...
 -   Add comments to desired timestamps
 -   Quickly jump to a specific timestamp by left-clicking on the related comment
--   Modify/Delete a comment by right-clicking on it
+-   Modify/Delete a comment by right-clicking on it (dedicated button for mobile)
 -   Inuitive keyboard shortcuts
+-   Mobile compatible
+-   Controllabe with obsdian commands
 
 ````
 ``` annotate-audio
@@ -31,29 +33,34 @@ autoplay: false
 Each audio-box has its owns. They can be tweaked manually or, more easily, **using the dedicated modal**.
 (Their order is not important but they need to be placed before the comments)
 
-| Name       | Default     | Values              | Description                                                                                                                                                             |
-| ---------- | ----------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `source`   |             |                     | WikiLink to the audio file to reproduce. **It behaves like an ID**: the plugin doesn't work correctly with duplicate names or more audiobox pointing to the same source |
-| `volume`   | `0.5`       | `0.0` → `1.0`       | Player base volume                                                                                                                                                      |
-| `speed`    | `1`         | `0.0` → `1.0`       | Player playback speed                                                                                                                                                   |
-| `loop`     | `false`     | `true`/`false`      | Loop-back to beginning after getting to the end of the audio                                                                                                            |
-| `sticky`   | `false`     | `true`/`false`      | Main controls become sticky, following you as you scroll down                                                                                                           |
-| `layout`   | `0`         | `0,1`               | What player layout to display (feel free to make your own)                                                                                                              |
-| `chunk`    | `undefined` | `HH:MM:SS-HH:MM:SS` | Section of audio to play                                                                                                                                                |
-| `autoplay` | `false`     | `true`/`false`      | When clicking on a comment, the player starts playing from there instead of simply moving there                                                                         |
+| Name       | Default     | Values              | Description                                                                                                                 |
+| ---------- | ----------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `source`   |             |                     | WikiLink to the audio file to reproduce. **It behaves like an ID**: you can only have 1 audiobox active for each audio file |
+| `volume`   | `0.5`       | `0.0` → `1.0`       | Player base volume                                                                                                          |
+| `speed`    | `1`         | `0.0` → `1.0`       | Player playback speed                                                                                                       |
+| `loop`     | `false`     | `true`/`false`      | Loop-back to beginning after getting to the end of the audio                                                                |
+| `sticky`   | `false`     | `true`/`false`      | Main controls become sticky, following you as you scroll down                                                               |
+| `layout`   | `0`         | `0,1`               | What player layout to display (feel free to make your own)                                                                  |
+| `chunk`    | `undefined` | `HH:MM:SS-HH:MM:SS` | Section of audio to play                                                                                                    |
+| `autoplay` | `false`     | `true`/`false`      | When clicking on a comment, the player starts playing from there instead of simply moving there                             |
 |            |
 
-There are some options only available in some `layout`s
+There are also some options only available in specific `layout`s
 | Layout | Name | Default | Values | Description |
 | ------ | ---------- | ----------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1 | `title` | `undefined` | | Title of the player. If not present: not shown. If not set: name of audio file (or its alias, if present)
 
 ### Obsidian Commands
 
-| Name             | Action                                                 |
-| ---------------- | ------------------------------------------------------ |
-| `Add audiobox`   | Insert an already-configured audio-box inside the note |
-| `Insert comment` | Insert a comment in the last interacted audio-box      |
+| Name              | Action                                                 |
+| ----------------- | ------------------------------------------------------ |
+| `Add audiobox`    | Insert an already-configured audio-box inside the note |
+| `Insert comment`  | Insert a comment in the last interacted audiobox       |
+| `Pause audiobox`  | Pause player in the last interact audiobox             |
+| `Play audiobox`   | Play player in the last interact audiobox              |
+| `Toggle audiobox` | Toggle player in the last interact audiobox            |
+| `Move forward`    | Move player forward in the last interact audiobox      |
+| `Move backward`   | Move player backward in the last interact audiobox     |
 
 ---
 
@@ -61,11 +68,10 @@ There are some options only available in some `layout`s
 
 ### Road-Map
 
-1. Add more useful obsidian commands
-2. Follow native folder exclusion in the audio file search
-3. UI to control `chunk` (like "Aves")
-4. Layout with all the properties exposed
-5. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
+1. Follow native folder exclusion in the audio file search
+2. UI to control `chunk` (like "Aves")
+3. Layout with all the properties exposed
+4. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
 
 ### Known Issues
 
@@ -74,9 +80,8 @@ There are some options only available in some `layout`s
 -   Remove `editMode` flag as it's redundant
 -   Player is umounted and mounted when a comment is added. It would be better to have an update.
 -   After using `Add audiobox` command, better handle the rendering by moving outside
--   `Insert comment` command is not removed when there's no active player
+-   Obsidian commands are not removed when there's no active player
 -   Better propagate the instruction to use cached values FROM "ParentApp" TO layouts
--   Players don't work independetly when in "Reading" view
 -   `title` option inside modal is not displayed correctly on mobile
 
 ### Changelog
@@ -84,6 +89,7 @@ There are some options only available in some `layout`s
 -   **1.3.0 (developing)**
     -   [#4](https://github.com/12-VidE/annotate-audio/issues/4) The plugin is now supported on mobile! (Not tested on iPhone)
     -   feat: Reset `chunk` option from the modal
+    -   feat: More Obsidian commands
     -   fix [#5](https://github.com/12-VidE/annotate-audio/issues/5): Stop audiobox when another one start playing
 -   **1.2.1**
     -   fix: Read audio duration from metadata. It drastically decreases loading time

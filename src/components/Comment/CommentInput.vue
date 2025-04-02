@@ -71,12 +71,12 @@ props.sharedRefs.commentInput = computed(() => commentInputElement.value); // Ex
 
 onMounted(() => {
 	// Initilize Event-Listeners
-	document.addEventListener("insertComment", eventInsertComment);
+	document.addEventListener("add-comment", eventInsertComment);
 });
 
 onBeforeUnmount(() => {
 	// Destroy Event-Listeners
-	document.removeEventListener("insertComment", eventInsertComment);
+	document.removeEventListener("add-comment", eventInsertComment);
 });
 
 watch(props.sharedRefs.isCommentInputShown, (value) => {
@@ -262,10 +262,7 @@ function imposeDefault(): void {
 
 const eventInsertComment = (e: Event) => {
 	const event = e as CustomEvent;
-	if (
-		event.detail?.id ===
-		`annotate-audio-${props.ctx.sourcePath}-${props.ctx.docId}`
-	)
-		showCommentInput();
+	// Show this player commentInput
+	if (event.detail?.id == props.audioSource) showCommentInput();
 };
 </script>

@@ -20,7 +20,12 @@ import { layoutsArray } from "src/const";
 // Import - Function
 import { getLayoutOption, getAudioboxOptions } from "./Logic/codeblockFunc";
 import { hashObj } from "src/utils";
-import { pausePlayer, setPlayerPosition } from "./Logic/playerFunc";
+import {
+	pausePlayer,
+	playPlayer,
+	setPlayerPosition,
+	togglePlayer,
+} from "./Logic/playerFunc";
 import { retriveDuration, logRefs } from "./sharedFunc";
 // Import/Create - Ref
 import { createShareRefs } from "./sharedRefs";
@@ -66,7 +71,12 @@ onMounted(async () => {
 	if (props.player) {
 		props.player.addEventListener("ended", eventEndedAudio);
 	}
-	document.addEventListener("pauseAllPlayers", eventPausePlayer);
+	document.addEventListener("pause-other-players", eventPauseOtherPlayers);
+	document.addEventListener("pause-audiobox", eventPausePlayer);
+	document.addEventListener("play-audiobox", eventPlayPlayer);
+	document.addEventListener("toggle-audiobox", eventTogglePlayer);
+	document.addEventListener("audiobox-forward", eventForwardPlayer);
+	document.addEventListener("audiobox-backward", eventBackwardPlayer);
 
 	/* logRefs(sharedRefs); */
 });
@@ -82,7 +92,12 @@ onBeforeUnmount(() => {
 
 	// Destroy Event-Listeners
 	props.player.removeEventListener("ended", eventEndedAudio);
-	document.removeEventListener("pauseAllPlayers", eventPausePlayer);
+	document.removeEventListener("pause-other-players", eventPauseOtherPlayers);
+	document.removeEventListener("pause-audiobox", eventPausePlayer);
+	document.removeEventListener("play-audiobox", eventPlayPlayer);
+	document.removeEventListener("toggle-audiobox", eventTogglePlayer);
+	document.removeEventListener("audiobox-forward", eventForwardPlayer);
+	document.removeEventListener("audiobox-backward", eventBackwardPlayer);
 });
 
 /* ---------------- */
@@ -160,7 +175,7 @@ function eventEndedAudio() {
 		sharedRefs.currentTime,
 		options.chunk?.startTime!
 	);
-	if (!props.player.loop)
+	if (!options.loop)
 		pausePlayer(
 			props.player,
 			props.audioSource,
@@ -169,15 +184,80 @@ function eventEndedAudio() {
 		);
 }
 
-const eventPausePlayer = (event: Event) => {
-	const customEvent = event as CustomEvent;
+const eventPauseOtherPlayers = (e: Event) => {
+	const event = e as CustomEvent;
 	// Pause every player, excluding the one that gave the initial comand
-	if (customEvent.detail.emitingPlayerId !== props.audioSource) {
+	if (event.detail?.id !== props.audioSource) {
 		pausePlayer(
 			props.player,
 			props.audioSource,
 			options.chunk,
 			sharedRefs.currentTime
+		);
+	}
+};
+
+const eventPausePlayer = (e: Event) => {
+	const event = e as CustomEvent;
+	// Pause this player
+	if (event.detail?.id == props.audioSource) {
+		pausePlayer(
+			props.player,
+			props.audioSource,
+			options.chunk,
+			sharedRefs.currentTime
+		);
+	}
+};
+
+const eventPlayPlayer = (e: Event) => {
+	const event = e as CustomEvent;
+	// Play this player
+	if (event.detail?.id == props.audioSource) {
+		playPlayer(
+			props.player,
+			props.audioSource,
+			options.chunk,
+			sharedRefs.currentTime.value
+		);
+	}
+};
+
+const eventTogglePlayer = (e: Event) => {
+	const event = e as CustomEvent;
+	// Toggle this player
+	if (event.detail?.id == props.audioSource) {
+		togglePlayer(
+			props.player,
+			props.audioSource,
+			options.chunk,
+			sharedRefs.currentTime
+		);
+	}
+};
+
+const eventForwardPlayer = (e: Event) => {
+	const event = e as CustomEvent;
+	// Forward this player
+	if (event.detail?.id == props.audioSource) {
+		setPlayerPosition(
+			props.player,
+			options.chunk,
+			sharedRefs.currentTime,
+			sharedRefs.currentTime.value + 5
+		);
+	}
+};
+
+const eventBackwardPlayer = (e: Event) => {
+	const event = e as CustomEvent;
+	// Backward this player
+	if (event.detail?.id == props.audioSource) {
+		setPlayerPosition(
+			props.player,
+			options.chunk,
+			sharedRefs.currentTime,
+			sharedRefs.currentTime.value - 5
 		);
 	}
 };
