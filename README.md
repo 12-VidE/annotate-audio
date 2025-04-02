@@ -79,7 +79,6 @@ There are also some options only available in specific `layout`s
 -   After some seconds, it crashes the Obsidian mobile app
 -   Remove `editMode` flag as it's redundant
 -   Player is umounted and mounted when a comment is added. It would be better to have an update.
--   After using `Add audiobox` command, better handle the rendering by moving outside
 -   Obsidian commands are not removed when there's no active player
 -   Better propagate the instruction to use cached values FROM "ParentApp" TO layouts
 -   `title` option inside modal is not displayed correctly on mobile

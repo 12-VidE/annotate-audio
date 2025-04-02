@@ -43,23 +43,24 @@ export default class AnnotateAudioPlugin extends Plugin {
 				).openWithPromise();
 
 				// Add the CORRECT default chunk
-				let file = this.app.metadataCache.getFirstLinkpathDest(
+				const file = this.app.metadataCache.getFirstLinkpathDest(
 					defaultOptions.source,
 					""
 				);
-				const file2 = this.app.vault.getResourcePath(file!);
+				const filePath = this.app.vault.getResourcePath(file!);
 				defaultOptions.chunk = {
 					startTime: 0,
-					endTime: await retriveDuration(file2),
+					endTime: await retriveDuration(filePath),
 				};
 				// Convert options into formatted string
 				const optionsString: string = formatOptions(
 					defaultAudioBoxOptions
 				).join("\n");
-				// Create codeblock
-				editor.replaceSelection(
-					"```annotate-audio\n" + optionsString + "\n```"
-				);
+				const codeblock =
+					"```annotate-audio\n" + optionsString + "\n```\n";
+				// Print codeblock + move outside
+				const cursor = editor.getCursor(); // Get the current cursor position
+				editor.replaceSelection(codeblock); // Place codeblock
 			},
 		});
 		// Add comment
