@@ -82,7 +82,7 @@ There are also some options only available in specific `layout`s
 
 ### Changelog
 
--   **1.3.0 (developing)**
+-   **1.3.0**
     -   [#4](https://github.com/12-VidE/annotate-audio/issues/4) The plugin is now supported on mobile! (Not tested on iPhone)
     -   feat: Reset `chunk` option from the modal
     -   feat: More Obsidian commands
