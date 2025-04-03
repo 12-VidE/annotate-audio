@@ -9,9 +9,16 @@ import type { AudioBoxParameters } from "./types";
 export class AudioBox extends MarkdownRenderChild {
 	vueApp: App<Element>;
 	container: HTMLElement;
-	constructor(options: AudioBoxParameters) {
+	audioboxId: string;
+	onUnload: (id: string) => void;
+
+	constructor(options: AudioBoxParameters, onUnload: (id: string) => void) {
 		super(options.container);
+		// Copy to class
 		this.container = options.container;
+		this.onUnload = onUnload;
+		this.audioboxId = options.audioSource!;
+
 		// Select who to render based on necessity
 		const selectedComponent = options.audioSource ? ParentApp : NotFoundApp;
 
@@ -29,6 +36,9 @@ export class AudioBox extends MarkdownRenderChild {
 	}
 
 	onunload(): void {
+		// Remove audiobox from the list
+		this.onUnload(this.audioboxId);
+
 		this.vueApp.unmount();
 	}
 }

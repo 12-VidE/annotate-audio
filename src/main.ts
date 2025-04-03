@@ -234,13 +234,28 @@ export default class AnnotateAudioPlugin extends Plugin {
 
 				// Render
 				ctx.addChild(
-					new AudioBox({
-						container,
-						audioSource,
-						ctx,
-						player,
-						obsidianApp: this.app,
-					})
+					new AudioBox(
+						{
+							container,
+							audioSource,
+							ctx,
+							player,
+							obsidianApp: this.app,
+						},
+						// Function to perfome WHEN 1 audiobox is unloaded
+						(id: string) => {
+							// Clean it an remove it
+							const unloadedAudiobox = this.audioboxList.get(id);
+							if (unloadedAudiobox) {
+								unloadedAudiobox.pause();
+								unloadedAudiobox.remove();
+								this.audioboxList.delete(id);
+							}
+							// Check IF it's the last interacted one and remove it
+							if (this.lastInteractedAudioboxId === id)
+								this.lastInteractedAudioboxId = null;
+						}
+					)
 				);
 			}
 		);

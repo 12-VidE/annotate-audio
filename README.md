@@ -76,10 +76,7 @@ There are also some options only available in specific `layout`s
 ### Known Issues
 
 -   Remove `currentTime` CAUSE redundant: use `this.player.currenTime`
--   After some seconds, it crashes the Obsidian mobile app
 -   Remove `editMode` flag as it's redundant
--   Player is umounted and mounted when a comment is added. It would be better to have an update.
--   Obsidian commands are not removed when there's no active player
 -   Better propagate the instruction to use cached values FROM "ParentApp" TO layouts
 -   `title` option inside modal is not displayed correctly on mobile
 
@@ -90,6 +87,7 @@ There are also some options only available in specific `layout`s
     -   feat: Reset `chunk` option from the modal
     -   feat: More Obsidian commands
     -   fix [#5](https://github.com/12-VidE/annotate-audio/issues/5): Stop audiobox when another one start playing
+    -   fix: Obsidian commands are shown only when they can be correctly applied
 -   **1.2.1**
     -   fix: Read audio duration from metadata. It drastically decreases loading time
 -   **1.2.0**
