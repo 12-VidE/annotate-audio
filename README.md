@@ -14,12 +14,12 @@
 ````
 ``` annotate-audio
 source: [[My Audio.mp3]]
+chunk: 00:00:00-00:02:52
 volume: 0.5
 speed: 1
 loop: false
-sticky: false
 layout: 0
-chunk: 00:00:00-00:02:52
+sticky: false
 autoplay: false
 
 37 --- Section 1
@@ -115,6 +115,8 @@ There are also some options only available in specific `layout`s
 ---
 
 ## Credits
+
+These are the sources on which I've initially developed this plugin:
 
 -   **Original Repo:** ["obsidian-audio-player" by noonesimg](https://github.com/noonesimg/obsidian-audio-player)
 -   **Other Fork:** ["obsidian-enhanced-audio-player" by Yidaotus](https://github.com/Yidaotus/obsidian-enhanced-audio-player)
