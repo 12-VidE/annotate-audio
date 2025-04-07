@@ -276,9 +276,7 @@ const currentBar = computed(() => {
 	);
 });
 
-const title = computed(() =>
-	displayTitle(props.ctx, props.container, props.options.title)
-);
+const title = computed(() => displayTitle(props.source, props.options.title));
 
 /* ---------------- */
 /* --- Function --- */

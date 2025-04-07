@@ -358,9 +358,7 @@ onBeforeUnmount(() => {
 /* --- Computed --- */
 /* ---------------- */
 
-const title = computed(() =>
-	displayTitle(props.ctx, props.container, props.options.title)
-);
+const title = computed(() => displayTitle(props.source, props.options.title));
 
 const volume = computed(() => Number(props.options.volume).toFixed(1));
 

@@ -36,8 +36,7 @@ export function displayDuration(chunk: Readonly<AudioChunk>, maxTime?: number) {
  * @returns title to be displayed (return false IF no title needs to be shown)
  */
 export function displayTitle(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement,
+	source: string,
 	title: string | undefined
 ): boolean | string {
 	if (title === undefined) {
@@ -45,7 +44,7 @@ export function displayTitle(
 		return false;
 	} else if (title === "") {
 		// Use source (cleaning extension)
-		const sourceValue = getSourceOption(ctx, container);
+		const sourceValue = getSourceOption(source);
 		return sourceValue!.replace(/\.[^/.]+$/, "");
 	}
 	// Return 'title' option IF specified

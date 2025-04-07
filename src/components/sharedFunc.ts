@@ -1,5 +1,4 @@
-import { getCodeBlockData, getCodeBlockData } from "./Logic/codeblockFunc";
-import { MarkdownPostProcessorContext, TFile } from "obsidian";
+import { getCodeBlockData } from "./Logic/codeblockFunc";
 // Import - Type
 import type { AudioComment } from "src/types";
 import { isRef } from "vue";
