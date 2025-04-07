@@ -45,16 +45,15 @@
 				</div>
 			</div>
 			<!-- Controls -->
-			<div
-				:class="[
-					'controls-container',
-					sharedRefs.isCommentInputShown.value && 'disabled',
-				]"
-			>
+			<div :class="['controls-container']">
 				<!-- Properies -->
 				<div
 					ref="showProperties_btn"
-					:class="['commentInput_btn', 'control_btn']"
+					:class="[
+						'commentInput_btn',
+						'control_btn',
+						sharedRefs.isCommentInputShown.value && 'disabled',
+					]"
 					@click="
 						pausePlayer(player, sharedRefs.currentTime);
 						new PropertiesModal(
@@ -68,7 +67,13 @@
 				></div>
 				<!-- Backward -->
 				<div
-					:class="['control_btn', 'secondary_btn']"
+					:class="[
+						'control_btn',
+						'secondary_btn',
+						sharedRefs.isCommentInputShown.value &&
+							!options.unstoppable &&
+							'disabled',
+					]"
 					@click="
 						setPlayerPosition(
 							player,
@@ -83,7 +88,12 @@
 				<!-- Play/Pause -->
 				<div
 					ref="playpause_btn"
-					:class="['control_btn']"
+					:class="[
+						'control_btn',
+						sharedRefs.isCommentInputShown.value &&
+							!options.unstoppable &&
+							'disabled',
+					]"
 					@click="
 						togglePlayer(
 							id,
@@ -95,7 +105,13 @@
 				></div>
 				<!-- Forward -->
 				<div
-					:class="['control_btn', 'secondary_btn']"
+					:class="[
+						'control_btn',
+						'secondary_btn',
+						sharedRefs.isCommentInputShown.value &&
+							!options.unstoppable &&
+							'disabled',
+					]"
 					@click="
 						setPlayerPosition(
 							player,
@@ -110,7 +126,11 @@
 				<!-- Add Comment -->
 				<div
 					ref="showCommentInput_btn"
-					:class="['commentInput_btn', 'control_btn']"
+					:class="[
+						'commentInput_btn',
+						'control_btn',
+						sharedRefs.isCommentInputShown.value && 'disabled',
+					]"
 					@click="sharedRefs.isCommentInputShown.value = true"
 				></div>
 			</div>

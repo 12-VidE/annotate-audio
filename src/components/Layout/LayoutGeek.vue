@@ -9,12 +9,7 @@
 			:class="['main-container', options.sticky && 'is-sticky']"
 		>
 			<!-- Main Controls -->
-			<div
-				:class="[
-					'main-controls-container',
-					sharedRefs.isCommentInputShown.value && 'disabled',
-				]"
-			>
+			<div :class="['main-controls-container']">
 				<span :class="['timeline-number']">{{
 					displayCurrentTime(
 						sharedRefs.currentTime.value,
@@ -22,10 +17,15 @@
 					)
 				}}</span>
 
-				<div :class="['controls-container', ,]">
+				<div :class="['controls-container']">
+					<!-- Properties -->
 					<div
 						ref="showProperties_btn"
-						:class="['commentInput_btn', 'control_btn']"
+						:class="[
+							'commentInput_btn',
+							'control_btn',
+							sharedRefs.isCommentInputShown.value && 'disabled',
+						]"
 						@click="
 							pausePlayer(player, sharedRefs.currentTime);
 							new PropertiesModal(
@@ -39,7 +39,13 @@
 					></div>
 					<!-- Backward -->
 					<div
-						:class="['control_btn', 'secondary_btn']"
+						:class="[
+							'control_btn',
+							'secondary_btn',
+							sharedRefs.isCommentInputShown.value &&
+								!options.unstoppable &&
+								'disabled',
+						]"
 						@click="
 							setPlayerPosition(
 								player,
@@ -54,7 +60,12 @@
 					<!-- Play/Pause -->
 					<div
 						ref="playpause_btn"
-						:class="['control_btn']"
+						:class="[
+							'control_btn',
+							sharedRefs.isCommentInputShown.value &&
+								!options.unstoppable &&
+								'disabled',
+						]"
 						@click="
 							togglePlayer(
 								id,
@@ -66,7 +77,13 @@
 					></div>
 					<!-- Forward -->
 					<div
-						:class="['control_btn', 'secondary_btn']"
+						:class="[
+							'control_btn',
+							'secondary_btn',
+							sharedRefs.isCommentInputShown.value &&
+								!options.unstoppable &&
+								'disabled',
+						]"
 						@click="
 							setPlayerPosition(
 								player,
@@ -81,7 +98,11 @@
 					<!-- Add Comment -->
 					<div
 						ref="showCommentInput_btn"
-						:class="['commentInput_btn', 'control_btn']"
+						:class="[
+							'commentInput_btn',
+							'control_btn',
+							sharedRefs.isCommentInputShown.value && 'disabled',
+						]"
 						@click="sharedRefs.isCommentInputShown.value = true"
 					></div>
 				</div>
@@ -109,28 +130,40 @@
 			</div>
 
 			<!-- Secondary Controls -->
-			<div class="secondary-controls-container">
+			<div
+				:class="[
+					'secondary-controls-container',
+					sharedRefs.isCommentInputShown.value && 'disabled',
+				]"
+			>
 				<!-- 1° Row -->
 				<div class="row">
 					<!-- Loop -->
 					<i
 						ref="loop_toggle"
 						:class="{ active: options.loop }"
-						@click="togglePlayerLoop"
+						@click="options.loop = !options.loop"
 					>
 					</i>
 					<!-- Autoplay -->
 					<i
 						ref="autoplay_toggle"
 						:class="{ active: options.autoplay }"
-						@click="togglePlayerAutoplay"
+						@click="options.autoplay = !options.autoplay"
+					>
+					</i>
+					<!-- Unstoppable -->
+					<i
+						ref="unstoppable_toggle"
+						:class="{ active: options.unstoppable }"
+						@click="options.unstoppable = !options.unstoppable"
 					>
 					</i>
 					<!-- Sticky -->
 					<i
 						ref="sticky_toggle"
 						:class="{ active: options.sticky }"
-						@click="togglePlayerSticky"
+						@click="options.sticky = !options.sticky"
 					>
 					</i>
 					<!-- Chunk -->
@@ -147,7 +180,7 @@
 							max="1"
 							step="0.1"
 							v-model="options.volume"
-							@change="setVolume"
+							@change="player.volume = options.volume"
 						/>
 						<span class="label">{{ volume }}</span>
 					</div>
@@ -160,7 +193,7 @@
 							max="4"
 							step="0.1"
 							v-model="options.speed"
-							@change="setSpeed"
+							@change="player.playbackRate = options.speed"
 						/>
 						<span class="label">{{ speed }}</span>
 					</div>
@@ -248,6 +281,7 @@ const showProperties_btn = ref<HTMLElement | null>(null);
 // UI - Secondary Controls
 const loop_toggle = ref<HTMLElement | null>(null);
 const autoplay_toggle = ref<HTMLElement | null>(null);
+const unstoppable_toggle = ref<HTMLElement | null>(null);
 const sticky_toggle = ref<HTMLElement | null>(null);
 const chunk_btn = ref<HTMLElement | null>(null);
 const volume_icon = ref<HTMLElement | null>(null);
@@ -273,6 +307,10 @@ onMounted(async () => {
 	if (autoplay_toggle.value) {
 		setIcon(autoplay_toggle.value, "square-play");
 		setTooltip(autoplay_toggle.value, "Autoplay");
+	}
+	if (unstoppable_toggle.value) {
+		setIcon(unstoppable_toggle.value, "shield");
+		setTooltip(unstoppable_toggle.value, "Unstoppable");
 	}
 	if (sticky_toggle.value) {
 		setIcon(sticky_toggle.value, "pin");
@@ -332,18 +370,6 @@ const speed = computed(() => Number(props.options.speed).toFixed(1));
 /* --- Function --- */
 /* ---------------- */
 
-function togglePlayerLoop() {
-	props.options.loop = !props.options.loop;
-}
-
-function togglePlayerAutoplay() {
-	props.options.autoplay = !props.options.autoplay;
-}
-
-function togglePlayerSticky() {
-	props.options.sticky = !props.options.sticky;
-}
-
 function setupChunkBnt() {
 	if (props.options.chunk.startTime == 0) {
 		// Set chunk startTime
@@ -378,16 +404,6 @@ function manageChunk() {
 			endTime: Math.floor(props.sharedRefs.maxDuration.value!),
 		};
 	}
-}
-
-function setVolume() {
-	// Manually overwrite it
-	props.player.volume = props.options.volume;
-}
-
-function setSpeed() {
-	// Manually overwrite it
-	props.player.playbackRate = props.options.speed;
 }
 /* ------------------------- */
 /* --- Function ON Event --- */

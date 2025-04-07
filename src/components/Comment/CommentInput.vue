@@ -222,7 +222,8 @@ function showCommentInput(): void {
 	//Force state
 	props.sharedRefs.isCommentInputShown.value = true;
 
-	pausePlayer(props.player, props.sharedRefs.currentTime);
+	if (!props.options.unstoppable)
+		pausePlayer(props.player, props.sharedRefs.currentTime);
 
 	// Wait for it to open
 	setTimeout(() => {

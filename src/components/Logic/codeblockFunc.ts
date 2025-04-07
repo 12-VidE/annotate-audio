@@ -64,6 +64,7 @@ export function getAudioboxOptions(
 		title: getTitleOption(source),
 		// Comments
 		autoplay: getAutoplayOption(source),
+		unstoppable: getUnstoppableOption(source),
 	} as AudioBoxOptions;
 }
 
@@ -97,7 +98,6 @@ export async function setAudioboxOptions(
 				break;
 			}
 		}
-		console.log(optionsNumber);
 		if (!optionsNumber) optionsNumber = codeblock.length - 1; // WHEN there's no comment. Fallback to the codeblock lenght wihtout extremes
 
 		const newOptionsArray = formatOptions(newOptions);
@@ -194,14 +194,19 @@ function getVolumeOption(source: string): number {
 	if (!volumeValue || volumeValue > 1) return defaultAudioBoxOptions.volume;
 	return Math.round(volumeValue * 10) / 10; // Truncate to 1° decimal
 }
-/**
- * @returns Flag IF audio can autoplay WHEN selecting a comment
- */
 function getAutoplayOption(source: string): boolean {
 	const autoplayRegex = new RegExp("^autoplay: *(True|False)$", "i");
 	const autoplayValue = String(getCodeBlockData(source, autoplayRegex)[0]);
 	if (!autoplayValue) return defaultAudioBoxOptions.autoplay;
 	return autoplayValue.toLowerCase() === "true";
+}
+function getUnstoppableOption(source: string): boolean {
+	const unstoppableRegex = new RegExp("^unstoppable: *(True|False)$", "i");
+	const unstoppableValue = String(
+		getCodeBlockData(source, unstoppableRegex)[0]
+	);
+	if (!unstoppableValue) return defaultAudioBoxOptions.unstoppable;
+	return unstoppableValue.toLowerCase() === "true";
 }
 
 /**

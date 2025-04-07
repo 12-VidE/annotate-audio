@@ -31,6 +31,7 @@ export type AudioBoxOptions = {
 	title: string | undefined;
 	// Comments
 	autoplay: boolean; // WHEN clicking on a comment, the playes does NOT pause
+	unstoppable: boolean; // Player doesn't stop WHEN adding a comment
 };
 
 export const defaultAudioBoxOptions: AudioBoxOptions = {
@@ -46,6 +47,7 @@ export const defaultAudioBoxOptions: AudioBoxOptions = {
 	title: undefined,
 	// Comments
 	autoplay: false,
+	unstoppable: false,
 };
 
 export function createOptions(): AudioBoxOptions {
@@ -62,6 +64,7 @@ export function createOptions(): AudioBoxOptions {
 		title: undefined,
 		// Comments
 		autoplay: false,
+		unstoppable: false,
 	});
 }
 /* -------------- */
@@ -291,6 +294,20 @@ export class PropertiesModal extends Modal {
 					.setValue(this.options.sticky)
 					.onChange((value: boolean) => {
 						this.options.sticky = value;
+					})
+			);
+
+		// Unstoppable
+		new Setting(contentEl)
+			.setName("Unstoppable")
+			.setDesc(
+				"The audio will continue playing even when adding/modifing a comment"
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.options.unstoppable)
+					.onChange((value: boolean) => {
+						this.options.unstoppable = value;
 					})
 			);
 

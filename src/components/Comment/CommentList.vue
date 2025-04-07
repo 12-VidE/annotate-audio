@@ -88,7 +88,8 @@ function enableEditMode(time: number): void {
 	props.sharedRefs.editMode.value = true;
 	props.sharedRefs.editedCommentTime.value = time;
 
-	pausePlayer(props.player, props.sharedRefs.currentTime);
+	if (!props.options.unstoppable)
+		pausePlayer(props.player, props.sharedRefs.currentTime);
 
 	props.sharedRefs.contentCommentInput.value = getComment(time)!.content;
 

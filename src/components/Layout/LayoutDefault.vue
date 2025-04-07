@@ -6,16 +6,16 @@
 		>
 			<div :class="['inputs-container']">
 				<!-- Player Controls -->
-				<div
-					:class="[
-						'controls-container',
-						sharedRefs.isCommentInputShown.value && 'disabled',
-					]"
-				>
+				<div :class="['controls-container']">
 					<!-- Play/Pause Control -->
 					<div
 						ref="playpause_btn"
-						:class="['playpause_btn']"
+						:class="[
+							'playpause_btn',
+							sharedRefs.isCommentInputShown.value &&
+								!options.unstoppable &&
+								'disabled',
+						]"
 						@click="
 							togglePlayer(
 								id,
@@ -26,7 +26,14 @@
 						"
 					></div>
 					<!-- Movement Controls -->
-					<div :class="['movement-container']">
+					<div
+						:class="[
+							'movement-container',
+							sharedRefs.isCommentInputShown.value &&
+								!options.unstoppable &&
+								'disabled',
+						]"
+					>
 						<div
 							ref="backward_btn"
 							:class="['movement-btn']"
@@ -88,7 +95,12 @@
 					/>
 				</div>
 				<!-- Stacked Buttons -->
-				<div :class="['stacked-btns-container']">
+				<div
+					:class="[
+						'stacked-btns-container',
+						sharedRefs.isCommentInputShown.value && 'disabled',
+					]"
+				>
 					<!-- "Properies" Button-->
 					<div
 						ref="showProperties_btn"
