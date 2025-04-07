@@ -71,6 +71,7 @@ const commentInputElement = useTemplateRef<HTMLInputElement>("commentInput");
 props.sharedRefs.commentInput = computed(() => commentInputElement.value); // Expose input text
 
 let deleteConfirmation = ref<boolean>(false); // IF the user confirm he wants to delete the comment
+let workingTimestamp = ref<number | null>(null);
 /* ----------------- */
 /* --- Lifecycle --- */
 /* ----------------- */
@@ -182,6 +183,7 @@ async function editCodeblockComment(
 	props.sharedRefs.editedCommentTime.value = null;
 	deleteConfirmation.value = false;
 	props.sharedRefs.isDuplicate.value = false;
+	props.sharedRefs.resume.value = true;
 }
 /**
  * (Re)write comment inside commentInputBox TO codeblock
@@ -192,7 +194,7 @@ async function addComment(): Promise<void> {
 	const commentOnFocus: AudioComment = {
 		time: props.sharedRefs.editMode.value
 			? props.sharedRefs.editedCommentTime.value!
-			: Math.floor(props.sharedRefs.currentTime.value),
+			: workingTimestamp.value!,
 		content: props.sharedRefs.contentCommentInput.value!,
 	};
 	await editCodeblockComment(
@@ -219,13 +221,16 @@ async function deleteComment(time: number) {
 }
 
 function showCommentInput(): void {
+	// Save time
+	workingTimestamp.value = Math.floor(props.player.currentTime);
+
 	//Force state
 	props.sharedRefs.isCommentInputShown.value = true;
 
 	if (!props.options.unstoppable)
 		pausePlayer(props.player, props.sharedRefs.currentTime);
 
-	// Wait for it to open
+	// "Wait" for it to open
 	setTimeout(() => {
 		// Initialize icons
 		if (confirm_btn.value) setIcon(confirm_btn.value, "plus");
@@ -234,8 +239,7 @@ function showCommentInput(): void {
 
 		// Check IF it's a valid time
 		const isNotUnique: boolean = getCommentsArray(props.source)?.some(
-			(comment: AudioComment) =>
-				comment.time === Math.floor(props.sharedRefs.currentTime.value)
+			(comment: AudioComment) => comment.time === workingTimestamp.value
 		);
 		if (props.sharedRefs.editMode.value) {
 			if (confirm_btn.value) setIcon(confirm_btn.value, "check");

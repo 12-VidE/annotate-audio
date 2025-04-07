@@ -20,7 +20,8 @@ export interface SharedRefs {
 	/* -------------- */
 	isDuplicate: Ref<boolean>; // WHEN we want to create a comment WHERE it already exists
 	editMode: Ref<boolean>; // IF we are editing a comment (NOT creating a new one)
-	isCommentInputShown: Ref<boolean>; // IF the input-box for a comment is displayed}
+	isCommentInputShown: Ref<boolean>; // IF the input-box for a comment is displayed
+	resume: Ref<boolean>; // IF the player should resume after the re-render
 }
 /**
  * Create the (initialized) necessary refs for each codeblock that are shared between components
@@ -39,5 +40,6 @@ export function createShareRefs(): SharedRefs {
 		isDuplicate: ref(false),
 		editMode: ref(false),
 		isCommentInputShown: ref(false),
+		resume: ref(false),
 	};
 }

@@ -16,6 +16,7 @@ import {
 } from "./components/Logic/codeblockFunc";
 import { secondsToTime, timeToSeconds } from "./utils";
 import { reactive } from "vue";
+import { playPlayer } from "./components/Logic/playerFunc";
 
 // What can be changed inside audio-box
 export type AudioBoxOptions = {

@@ -29,7 +29,7 @@ autoplay: false
 ```
 ````
 
-> The first line is the ID. You are free to personalize it (# + 16 characters hexadecimal) but dont move it around
+> The first line is the ID. You are free to personalize it (# + 16 characters hexadecimal) but don't move it around
 
 ### Options
 
@@ -82,8 +82,7 @@ There are also some options only available in specific `layout`s
 -   Better propagate the instruction to use cached values FROM "ParentApp" TO layouts
 -   `title` option inside modal is not displayed correctly on mobile
 -   Cache the total duration of the file
--   Resume player if it has been stopped after changing an option because of the re-render
--   Save new options only on unload
+-   Write new options only on unload (preventing pointless re-renders)
 -   Remove "defaultAudioBoxOptions" because redundant
 
 ### Changelog
@@ -92,7 +91,7 @@ There are also some options only available in specific `layout`s
     -   feat[#4](https://github.com/12-VidE/annotate-audio/issues/4): Each codeblock now has its own ID to better handle them
     -   feat[#6](https://github.com/12-VidE/annotate-audio/issues/6): New option `unstoppable`
     -   feat: new "Geek" `layout`
-    -   fix[#6](https://github.com/12-VidE/annotate-audio/issues/6): Audio resumes after the comment is confirm
+    -   fix[#6](https://github.com/12-VidE/annotate-audio/issues/6): Audio resumes after a comment is created/deleted
     -   fix: `chunk` is resetted correctly
 -   **1.3.0**
     -   [#4](https://github.com/12-VidE/annotate-audio/issues/4) The plugin is now supported on mobile! (Not tested on iPhone)

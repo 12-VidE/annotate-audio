@@ -85,8 +85,10 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-	pausePlayer(props.player, sharedRefs.currentTime);
+	console.log(sharedRefs.resume.value);
 	saveCache();
+
+	pausePlayer(props.player, sharedRefs.currentTime);
 
 	// Destroy Event-Listeners
 	props.player.removeEventListener("ended", eventEndedAudio);
@@ -132,16 +134,28 @@ async function loadCacheOrFallback(): Promise<void> {
 		Object.assign(options, codeblockSettings);
 	}
 
-	// Set time
+	// Set time + Resume
 	const currentTimeCache = Number(
 		localStorage.getItem(`aa_${props.id}_currentTime`)
 	);
 	if (
 		currentTimeCache >= options.chunk.startTime &&
 		currentTimeCache <= options.chunk.endTime
-	)
+	) {
 		// Inside chunk - Safe to use cache
 		sharedRefs.currentTime.value = currentTimeCache;
+		// Resume audio
+		const resumeCache: boolean =
+			localStorage.getItem(`aa_${props.id}_resume`) === "true";
+		if (resumeCache)
+			playPlayer(
+				props.id,
+				props.player,
+				options.chunk,
+				sharedRefs.currentTime.value
+			);
+	}
+
 	// Out-of-bounadry - Fall back to safe place
 	else sharedRefs.currentTime.value = options.chunk?.startTime!;
 }
@@ -152,6 +166,10 @@ async function saveCache(): Promise<void> {
 	localStorage.setItem(
 		`aa_${props.id}_currentTime`,
 		JSON.stringify(props.player.currentTime)
+	);
+	localStorage.setItem(
+		`aa_${props.id}_resume`,
+		JSON.stringify(sharedRefs.resume.value)
 	);
 }
 

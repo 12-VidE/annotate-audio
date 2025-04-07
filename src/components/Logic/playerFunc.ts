@@ -8,12 +8,12 @@ import { Ref } from "vue";
  * @param chunk option
  * @param currentTime SharedRef
  */
-export function playPlayer(
+export async function playPlayer(
 	id: string,
 	player: HTMLAudioElement,
 	chunk: Readonly<AudioChunk>,
 	currentTime: Readonly<number>
-): void {
+): Promise<void> {
 	// IF inside chunk
 	if (currentTime <= chunk.endTime) {
 		// Pause all other players
@@ -22,7 +22,7 @@ export function playPlayer(
 		});
 		document.dispatchEvent(ev);
 		// Force this player to start
-		player.play();
+		await player.play();
 	}
 }
 
@@ -45,13 +45,13 @@ export function pausePlayer(
  * @param chunk - option
  * @param currentTime - SharedRef
  */
-export function togglePlayer(
+export async function togglePlayer(
 	id: string,
 	player: HTMLAudioElement,
 	chunk: Readonly<AudioChunk>,
 	currentTime: Ref<number>
-): void {
-	if (player.paused) playPlayer(id, player, chunk, currentTime.value);
+): Promise<void> {
+	if (player.paused) await playPlayer(id, player, chunk, currentTime.value);
 	else pausePlayer(player, currentTime);
 }
 
