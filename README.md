@@ -83,14 +83,16 @@ There are also some options only available in specific `layout`s
 -   `title` option inside modal is not displayed correctly on mobile
 -   Cache the total duration of the file
 -   Resume player if it has been stopped after changing an option because of the re-render
--   `chunk` option is not resetted correctly
 -   Save new options only on unload
 
 ### Changelog
 
 -   **1.4.0 (developing)**
-    -   feat: Each codeblock now has its own ID to better handle them
+    -   feat[#4](https://github.com/12-VidE/annotate-audio/issues/4): Each codeblock now has its own ID to better handle them
+    -   feat[#6](https://github.com/12-VidE/annotate-audio/issues/6): New option `unstoppable`
     -   feat: new "Geek" `layout`
+    -   fix[#6](https://github.com/12-VidE/annotate-audio/issues/6): Audio resumes after the comment is confirm
+    -   fix: `chunk` is resetted correctly
 -   **1.3.0**
     -   [#4](https://github.com/12-VidE/annotate-audio/issues/4) The plugin is now supported on mobile! (Not tested on iPhone)
     -   feat: Reset `chunk` option from the modal

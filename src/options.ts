@@ -193,6 +193,10 @@ export class PropertiesModal extends Modal {
 				btn.setIcon("trash-2").onClick(() => {
 					chunkStartTime?.setValue("00:00:00");
 					chunkEndTime?.setValue(secondsToTime(this.totalDuration));
+					this.options.chunk = {
+						startTime: 0,
+						endTime: this.totalDuration,
+					};
 				})
 			)
 			.addText((text) => {
