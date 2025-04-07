@@ -53,11 +53,9 @@ export function togglePlayer(
 	chunk: Readonly<AudioChunk>,
 	currentTime: Ref<number>
 ): void {
-	if (player.paused) {
+	if (player.paused)
 		playPlayer(player, audioSource, chunk, currentTime.value);
-	} else {
-		pausePlayer(player, audioSource, chunk, currentTime);
-	}
+	else pausePlayer(player, audioSource, chunk, currentTime);
 }
 
 /**

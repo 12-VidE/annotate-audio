@@ -46,9 +46,10 @@ Each audio-box has its owns. They can be tweaked manually or, more easily, **usi
 |            |
 
 There are also some options only available in specific `layout`s
-| Layout | Name | Default | Values | Description |
-| ------ | ---------- | ----------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1 | `title` | `undefined` | | Title of the player. If not present: not shown. If not set: name of audio file (or its alias, if present)
+
+| Layout | Name    | Default     | Values | Description                                                                                               |
+| ------ | ------- | ----------- | ------ | --------------------------------------------------------------------------------------------------------- |
+| 1      | `title` | `undefined` |        | Title of the player. If not present: not shown. If not set: name of audio file (or its alias, if present) |
 
 ### Obsidian Commands
 
@@ -68,20 +69,24 @@ There are also some options only available in specific `layout`s
 
 ### Road-Map
 
-1. Follow native folder exclusion in the audio file search
-2. UI to control `chunk` (like "Aves")
-3. Layout with all the properties exposed
-4. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
+1. Add i18n support
+2. Follow native folder exclusion in the audio file search
+3. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
 
 ### Known Issues
 
--   Remove `currentTime` CAUSE redundant: use `this.player.currenTime`
 -   Remove `editMode` flag as it's redundant
 -   Better propagate the instruction to use cached values FROM "ParentApp" TO layouts
 -   `title` option inside modal is not displayed correctly on mobile
+-   Cache the total duration of the file
+-   Resume player if it has been stopped after chaning an option because of the re-render
+-   `chunk` option is not resetted correctly
 
 ### Changelog
 
+-   **1.4.0 (developing)**
+    -   feat: Each codeblock now has its own ID to better handle them
+    -   feat: new "Geek" `layout`
 -   **1.3.0**
     -   [#4](https://github.com/12-VidE/annotate-audio/issues/4) The plugin is now supported on mobile! (Not tested on iPhone)
     -   feat: Reset `chunk` option from the modal
