@@ -17,12 +17,14 @@ export class AudioBox extends MarkdownRenderChild {
 		// Copy to class
 		this.container = options.container;
 		this.onUnload = onUnload;
-		this.audioboxId = options.audioSource!;
+		this.audioboxId = options.id;
 
 		// Select who to render based on necessity
 		const selectedComponent = options.audioSource ? ParentApp : NotFoundApp;
 
 		this.vueApp = createApp(selectedComponent, {
+			id: options.id,
+			source: options.source,
 			container: options.container,
 			audioSource: options.audioSource,
 			ctx: options.ctx,

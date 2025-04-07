@@ -43,16 +43,21 @@ const emit = defineEmits<{
 /* ----------------- */
 
 onMounted(() => {
+	// Initialize icons
 	if (edit_btn.value) setIcon(edit_btn.value, "pencil");
 });
 
 /* ---------------- */
 /* --- Computed --- */
 /* ---------------- */
+
+/**
+ * Markdown rendered comment content
+ */
 const displayCommentContent = computed(() => {
+	// Create temporary container to render markdown inside
 	const temporaryContainer = document.createElement("div");
 	const temporaryComponent = new Component();
-	// Render markdown into the container element:
 	MarkdownRenderer.render(
 		props.obsidianApp,
 		props.comment.content,
@@ -61,12 +66,13 @@ const displayCommentContent = computed(() => {
 		temporaryComponent
 	);
 	temporaryComponent.unload();
+
 	return temporaryContainer.innerHTML || "";
 });
 
-/* --------------- */
-/* --- Methods --- */
-/* --------------- */
+/* ------------ */
+/* --- Emit --- */
+/* ------------ */
 function emitPlayFrom(): void {
 	emit("play-from", props.comment.time);
 }

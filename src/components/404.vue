@@ -18,6 +18,7 @@ import { sourceModal } from "src/main";
 const disk_icon = ref<HTMLElement | null>(null);
 
 const props = defineProps<{
+	source: string;
 	container: HTMLElement;
 	ctx: MarkdownPostProcessorContext;
 	obsidianApp: App;
@@ -44,7 +45,8 @@ async function eventAddSource(): Promise<void> {
 	let options: AudioBoxOptions = getAudioboxOptions(
 		props.ctx,
 		props.container,
-		0
+		0,
+		props.source
 	);
 	options.source = await new sourceModal(props.obsidianApp).openWithPromise();
 	setAudioboxOptions(props.ctx, props.container, props.obsidianApp, options);

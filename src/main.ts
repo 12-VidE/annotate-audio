@@ -10,7 +10,10 @@ import {
 } from "obsidian";
 import { createApp } from "vue";
 // Import - Function
-import { getSourceOption } from "./components/Logic/codeblockFunc";
+import {
+	getAudioboxId,
+	getSourceOption,
+} from "./components/Logic/codeblockFunc";
 // Import - Component
 import SourceSuggestion from "./components/SourceSuggestion.vue";
 import { AudioBox } from "./audioBox";
@@ -37,6 +40,13 @@ export default class AnnotateAudioPlugin extends Plugin {
 			name: "Add audiobox",
 			editorCallback: async (editor: Editor) => {
 				let defaultOptions = defaultAudioBoxOptions;
+				// Create ID
+				const bytes = new Uint8Array(8); // 8 bytes = 16 hex characters
+				crypto.getRandomValues(bytes);
+				const audioboxId = Array.from(bytes, (b) =>
+					b.toString(16).padStart(2, "0")
+				).join("");
+
 				// Show modal to select source audio file
 				defaultOptions.source = await new sourceModal(
 					this.app
@@ -57,7 +67,11 @@ export default class AnnotateAudioPlugin extends Plugin {
 					defaultAudioBoxOptions
 				).join("\n");
 				const codeblock =
-					"```annotate-audio\n" + optionsString + "\n```\n";
+					"```annotate-audio\n#" +
+					audioboxId +
+					"\n" +
+					optionsString +
+					"\n```\n";
 				// Print codeblock + move outside
 				const cursor = editor.getCursor(); // Get the current cursor position
 				editor.replaceSelection(codeblock); // Place codeblock
@@ -191,10 +205,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 			) => {
 				// Get the source
 				let audioSource: string = "";
-				const sourceValue: string | undefined = getSourceOption(
-					ctx,
-					el
-				);
+				const sourceValue: string | undefined = getSourceOption(source);
 				if (sourceValue) {
 					const link = this.app.metadataCache.getFirstLinkpathDest(
 						getLinkpath(sourceValue),
@@ -205,10 +216,13 @@ export default class AnnotateAudioPlugin extends Plugin {
 						audioSource = link.path;
 				}
 
-				// Generate a unique ID per block
-				const audioboxId =
-					audioSource ||
-					`annotate-audio-${ctx.sourcePath}-${ctx.docId}`;
+				// Get block ID
+
+				const audioboxId = getAudioboxId(source);
+				if (!audioboxId) {
+					console.error("No ID");
+					return;
+				}
 
 				// Check if an existing player already exists for this audio source
 				let player: HTMLAudioElement;
@@ -236,6 +250,8 @@ export default class AnnotateAudioPlugin extends Plugin {
 				ctx.addChild(
 					new AudioBox(
 						{
+							id: audioboxId,
+							source,
 							container,
 							audioSource,
 							ctx,

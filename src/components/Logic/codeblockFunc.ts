@@ -12,20 +12,15 @@ import type { AudioBoxOptions } from "src/options";
 
 /**
  * Find matching-groups inside code-block, line-by-line
- * @param ctx - The MarkdownPostProcessorContext from the parent
- * @param container - The container element from the parent
- * @param regex - Regex w/ 1+ matching group to apply inside code-block
+ * @param source Codeblock content
+ * @param regex Regex w/ 1+ matching group to apply inside code-block
  * @returns What's inside matching group. Each line may for an array IF there are 2+ matching groups
  */
 export const getCodeBlockData = (
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement,
+	source: string,
 	regex: RegExp = /^.*$/
 ): Array<string | string[]> => {
-	const sectionInfo = ctx.getSectionInfo(container);
-	const codeblockLines = sectionInfo?.text
-		.split("\n")
-		.slice(sectionInfo.lineStart + 1, sectionInfo.lineEnd);
+	const codeblockLines = source.split("\n");
 	if (codeblockLines)
 		return codeblockLines
 			.map((line: string) => {
@@ -53,23 +48,22 @@ export const getCodeBlockData = (
  * @returns Record of all the options saved inside codeblock
  */
 export function getAudioboxOptions(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement,
+	source: string,
 	maxDuration: number
 ): AudioBoxOptions {
 	return {
-		source: getSourceOption(ctx, container),
+		source: getSourceOption(source),
 		// Player
-		chunk: getChunkOption(ctx, container, maxDuration),
-		volume: getVolumeOption(ctx, container),
-		speed: getPlaybackSpeedOption(ctx, container),
-		loop: getLoopOption(ctx, container),
+		chunk: getChunkOption(source, maxDuration),
+		volume: getVolumeOption(source),
+		speed: getPlaybackSpeedOption(source),
+		loop: getLoopOption(source),
 		// UI
-		layout: getLayoutOption(ctx, container),
-		sticky: getStickyOption(ctx, container),
-		title: getTitleOption(ctx, container),
+		layout: getLayoutOption(source),
+		sticky: getStickyOption(source),
+		title: getTitleOption(source),
 		// Comments
-		autoplay: getAutoplayOption(ctx, container),
+		autoplay: getAutoplayOption(source),
 	} as AudioBoxOptions;
 }
 
@@ -103,14 +97,15 @@ export async function setAudioboxOptions(
 				break;
 			}
 		}
+		console.log(optionsNumber);
 		if (!optionsNumber) optionsNumber = codeblock.length - 1; // WHEN there's no comment. Fallback to the codeblock lenght wihtout extremes
 
 		const newOptionsArray = formatOptions(newOptions);
 
 		// Implement change into copy of file
 		lines.splice(
-			sectionInfo.lineStart + 1,
-			optionsNumber,
+			sectionInfo.lineStart + 2,
+			optionsNumber - 1, // Remove the id
 			...newOptionsArray
 		);
 
@@ -132,15 +127,14 @@ export async function setAudioboxOptions(
  * @returns Boundaries of the audio - default back to full audio
  */
 function getChunkOption(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement,
+	source: string,
 	maxDuration: number = 3600
 ): AudioChunk {
 	// Check IF exists the option
 	const chunkRegex = new RegExp(
 		"^chunk: *(\\d{2}:\\d{2}:\\d{2}) *- *(\\d{2}:\\d{2}:\\d{2})$"
 	);
-	const chunkData = getCodeBlockData(ctx, container, chunkRegex)[0];
+	const chunkData = getCodeBlockData(source, chunkRegex)[0];
 	if (chunkData !== undefined) {
 		// IF the option exists
 		const startTime = timeToSeconds(chunkData[0]);
@@ -165,27 +159,19 @@ function getChunkOption(
 /**
  * @returns Flag IF audio-controls are sticky
  */
-function getStickyOption(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-): boolean {
+function getStickyOption(source: string): boolean {
 	const stickyRegex = new RegExp("^sticky: *(True|False)$", "i");
-	const stickyValue = String(
-		getCodeBlockData(ctx, container, stickyRegex)[0]
-	);
+	const stickyValue = String(getCodeBlockData(source, stickyRegex)[0]);
 	if (!stickyValue) return defaultAudioBoxOptions.sticky;
 	return stickyValue.toLowerCase() === "true";
 }
 /**
  * @returns Speed @ which to play the audio
  */
-function getPlaybackSpeedOption(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-): number {
+function getPlaybackSpeedOption(source: string): number {
 	const playbackSpeedRegex = new RegExp("^speed: *([0-9.]*)$");
 	const playbackSpeedValue = Number(
-		getCodeBlockData(ctx, container, playbackSpeedRegex)[0]
+		getCodeBlockData(source, playbackSpeedRegex)[0]
 	);
 	if (!playbackSpeedValue) return defaultAudioBoxOptions.speed;
 	return Math.round(playbackSpeedValue * 10) / 10; // Truncate to 1° decimal
@@ -193,40 +179,27 @@ function getPlaybackSpeedOption(
 /**
  * @returns Flag IF audio can loop
  */
-function getLoopOption(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-): boolean {
+function getLoopOption(source: string): boolean {
 	const loopRegex = new RegExp("^loop: *(True|False)$", "i");
-	const loopValue = String(getCodeBlockData(ctx, container, loopRegex)[0]);
+	const loopValue = String(getCodeBlockData(source, loopRegex)[0]);
 	if (!loopValue) return defaultAudioBoxOptions.loop;
 	return loopValue.toLowerCase() === "true";
 }
 /**
  * @returns Volume @ which play the audio
  */
-function getVolumeOption(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-): number {
+function getVolumeOption(source: string): number {
 	const volumeRegex = new RegExp("^volume: *([0-9.]*)$"); // It does not match negative values
-	const volumeValue = Number(
-		getCodeBlockData(ctx, container, volumeRegex)[0]
-	);
+	const volumeValue = Number(getCodeBlockData(source, volumeRegex)[0]);
 	if (!volumeValue || volumeValue > 1) return defaultAudioBoxOptions.volume;
 	return Math.round(volumeValue * 10) / 10; // Truncate to 1° decimal
 }
 /**
  * @returns Flag IF audio can autoplay WHEN selecting a comment
  */
-function getAutoplayOption(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-): boolean {
+function getAutoplayOption(source: string): boolean {
 	const autoplayRegex = new RegExp("^autoplay: *(True|False)$", "i");
-	const autoplayValue = String(
-		getCodeBlockData(ctx, container, autoplayRegex)[0]
-	);
+	const autoplayValue = String(getCodeBlockData(source, autoplayRegex)[0]);
 	if (!autoplayValue) return defaultAudioBoxOptions.autoplay;
 	return autoplayValue.toLowerCase() === "true";
 }
@@ -234,40 +207,37 @@ function getAutoplayOption(
 /**
  * @returns title to display
  */
-export function getTitleOption(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-): string | undefined {
+export function getTitleOption(source: string): string | undefined {
 	const titleRegex = new RegExp("^title: *(.*)$");
-	const titleValue = getCodeBlockData(ctx, container, titleRegex)[0];
+	const titleValue = getCodeBlockData(source, titleRegex)[0];
 	if (titleValue == undefined) return defaultAudioBoxOptions.title; // Useless BUT good practice
 	return (titleValue as string).trim();
 }
 /**
  * @returns audio source
  */
-export function getSourceOption(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-): string | undefined {
+export function getSourceOption(source: string): string | undefined {
 	const sourceRegex = new RegExp("^source: *\\[\\[([^|\\]]+)\\]\\]$");
-	const sourceValue = String(
-		getCodeBlockData(ctx, container, sourceRegex)[0]
-	);
+	const sourceValue = String(getCodeBlockData(source, sourceRegex)[0]);
 	if (!sourceValue) return undefined;
 	return sourceValue;
 }
 /**
  * @returns Index of what player layout to render
  */
-export function getLayoutOption(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-): number {
+export function getLayoutOption(source: string): number {
 	const layoutRegex = new RegExp("^layout: *([0-9])$", "i");
-	const layoutValue = Number(
-		getCodeBlockData(ctx, container, layoutRegex)[0]
-	);
+	const layoutValue = Number(getCodeBlockData(source, layoutRegex)[0]);
 	if (!layoutValue) return defaultAudioBoxOptions.layout;
 	else return layoutValue;
+}
+
+/**
+ * @returns Index of what player layout to render
+ */
+export function getAudioboxId(source: string): string | null {
+	const idRegex = new RegExp("^#(\\S{16}) *$");
+	const idValue = String(getCodeBlockData(source, idRegex)[0]);
+	if (!idValue) return null;
+	else return idValue;
 }

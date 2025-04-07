@@ -27,13 +27,9 @@
 						ref="showProperties_btn"
 						:class="['commentInput_btn', 'control_btn']"
 						@click="
-							pausePlayer(
-								player,
-								audioSource,
-								options.chunk,
-								sharedRefs.currentTime
-							);
+							pausePlayer(player, sharedRefs.currentTime);
 							new PropertiesModal(
+								source,
 								ctx,
 								container,
 								obsidianApp,
@@ -61,8 +57,8 @@
 						:class="['control_btn']"
 						@click="
 							togglePlayer(
+								id,
 								player,
-								audioSource,
 								options.chunk,
 								sharedRefs.currentTime
 							)
@@ -173,6 +169,8 @@
 
 			<!-- Comment Input -->
 			<CommentInput
+				:id="id"
+				:source="source"
 				:container="container"
 				:ctx="ctx"
 				:audioSource="audioSource"
@@ -185,6 +183,8 @@
 
 		<!-- Comments List -->
 		<CommentList
+			:id="id"
+			:source="source"
 			:container="container"
 			:ctx="ctx"
 			:audioSource="audioSource"
@@ -226,6 +226,8 @@ import { logRefs } from "../sharedFunc";
 import { setAudioboxOptions } from "../Logic/codeblockFunc";
 
 const props = defineProps<{
+	id: string;
+	source: string;
 	container: HTMLElement;
 	ctx: MarkdownPostProcessorContext;
 	audioSource: string;

@@ -18,8 +18,8 @@
 						:class="['playpause_btn']"
 						@click="
 							togglePlayer(
+								id,
 								player,
-								audioSource,
 								options.chunk,
 								sharedRefs.currentTime
 							)
@@ -94,13 +94,9 @@
 						ref="showProperties_btn"
 						:class="['showProperties_btn']"
 						@click="
-							pausePlayer(
-								player,
-								audioSource,
-								options.chunk,
-								sharedRefs.currentTime
-							);
+							pausePlayer(player, sharedRefs.currentTime);
 							new PropertiesModal(
+								source,
 								ctx,
 								container,
 								obsidianApp,
@@ -122,6 +118,8 @@
 
 			<!-- Comment Input -->
 			<CommentInput
+				:id="id"
+				:source="source"
 				:container="container"
 				:ctx="ctx"
 				:audioSource="audioSource"
@@ -134,6 +132,8 @@
 
 		<!-- Comments List -->
 		<CommentList
+			:id="id"
+			:source="source"
 			:container="container"
 			:ctx="ctx"
 			:audioSource="audioSource"
@@ -165,6 +165,8 @@ import type { SharedRefs } from "../sharedRefs";
 import { AudioBoxOptions, PropertiesModal } from "src/options";
 
 const props = defineProps<{
+	id: string;
+	source: string;
 	container: HTMLElement;
 	ctx: MarkdownPostProcessorContext;
 	audioSource: string;

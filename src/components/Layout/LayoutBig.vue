@@ -56,13 +56,9 @@
 					ref="showProperties_btn"
 					:class="['commentInput_btn', 'control_btn']"
 					@click="
-						pausePlayer(
-							player,
-							audioSource,
-							options.chunk,
-							sharedRefs.currentTime
-						);
+						pausePlayer(player, sharedRefs.currentTime);
 						new PropertiesModal(
+							source,
 							ctx,
 							container,
 							obsidianApp,
@@ -90,8 +86,8 @@
 					:class="['control_btn']"
 					@click="
 						togglePlayer(
+							id,
 							player,
-							audioSource,
 							options.chunk,
 							sharedRefs.currentTime
 						)
@@ -120,6 +116,8 @@
 			</div>
 			<!-- Comment Input -->
 			<CommentInput
+				:id="id"
+				:source="source"
 				:container="container"
 				:ctx="ctx"
 				:audioSource="audioSource"
@@ -132,6 +130,8 @@
 
 		<!-- Comments List -->
 		<CommentList
+			:id="id"
+			:source="source"
 			:container="container"
 			:ctx="ctx"
 			:audioSource="audioSource"
@@ -170,6 +170,8 @@ import { getAudioboxOptions } from "../Logic/codeblockFunc";
 import { hashObj } from "src/utils";
 
 const props = defineProps<{
+	id: string;
+	source: string;
 	container: HTMLElement;
 	ctx: MarkdownPostProcessorContext;
 	audioSource: string;
@@ -206,8 +208,7 @@ onMounted(async () => {
 
 	// Initialize Wavegraph #TODO poco elegante
 	const codeblockSettings = getAudioboxOptions(
-		props.ctx,
-		props.container,
+		props.source,
 		props.sharedRefs.maxDuration.value!
 	);
 	const newHash = await hashObj(codeblockSettings);

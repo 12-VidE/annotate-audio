@@ -69,12 +69,14 @@ export function createOptions(): AudioBoxOptions {
 /* ------------- */
 
 export class PropertiesModal extends Modal {
+	private source: string;
 	private ctx: MarkdownPostProcessorContext;
 	private container: HTMLElement;
 	private options: AudioBoxOptions; // Record of all the options
 	private totalDuration: number;
 
 	constructor(
+		source: string,
 		ctx: MarkdownPostProcessorContext,
 		container: HTMLElement,
 		obsidianApp: App,
@@ -82,6 +84,7 @@ export class PropertiesModal extends Modal {
 	) {
 		super(obsidianApp);
 
+		this.source = source;
 		this.ctx = ctx;
 		this.container = container;
 		this.totalDuration = totalDuration;
@@ -90,11 +93,7 @@ export class PropertiesModal extends Modal {
 	}
 
 	private async init() {
-		this.options = getAudioboxOptions(
-			this.ctx,
-			this.container,
-			this.totalDuration
-		);
+		this.options = getAudioboxOptions(this.source, this.totalDuration);
 		if (!this.options.chunk) {
 			this.options.chunk = { startTime: 0, endTime: 0 };
 		}

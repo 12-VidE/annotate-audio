@@ -1,4 +1,4 @@
-import { getCodeBlockData } from "./Logic/codeblockFunc";
+import { getCodeBlockData, getCodeBlockData } from "./Logic/codeblockFunc";
 import { MarkdownPostProcessorContext, TFile } from "obsidian";
 // Import - Type
 import type { AudioComment } from "src/types";
@@ -11,15 +11,12 @@ import { isRef } from "vue";
 /**
  * @returns Array of all (sorted) comments
  */
-export function getCommentsArray(
-	ctx: MarkdownPostProcessorContext,
-	container: HTMLElement
-): Array<AudioComment> {
+export function getCommentsArray(source: string): Array<AudioComment> {
 	const commentRegex = new RegExp("^(.+) --- (.+)$");
 	// Get comments FROM codeblock
 	// Format comment into AudioComment
 	// Sort comment by time (just to make sure, they should already be in order)
-	const commentsArray = getCodeBlockData(ctx, container, commentRegex)
+	const commentsArray = getCodeBlockData(source, commentRegex)
 		.map((item) => {
 			if (Array.isArray(item)) {
 				return {

@@ -9,8 +9,8 @@ import { Ref } from "vue";
  * @param currentTime SharedRef
  */
 export function playPlayer(
+	id: string,
 	player: HTMLAudioElement,
-	audioSource: string,
 	chunk: Readonly<AudioChunk>,
 	currentTime: Readonly<number>
 ): void {
@@ -18,7 +18,7 @@ export function playPlayer(
 	if (currentTime <= chunk.endTime) {
 		// Pause all other players
 		const ev = new CustomEvent("pause-other-players", {
-			detail: { id: audioSource },
+			detail: { id: id },
 		});
 		document.dispatchEvent(ev);
 		// Force this player to start
@@ -33,8 +33,6 @@ export function playPlayer(
  */
 export function pausePlayer(
 	player: HTMLAudioElement,
-	audioSource: string,
-	chunk: Readonly<AudioChunk>,
 	currentTime: Ref<number>
 ): void {
 	currentTime.value = player.currentTime;
@@ -48,14 +46,13 @@ export function pausePlayer(
  * @param currentTime - SharedRef
  */
 export function togglePlayer(
+	id: string,
 	player: HTMLAudioElement,
-	audioSource: string,
 	chunk: Readonly<AudioChunk>,
 	currentTime: Ref<number>
 ): void {
-	if (player.paused)
-		playPlayer(player, audioSource, chunk, currentTime.value);
-	else pausePlayer(player, audioSource, chunk, currentTime);
+	if (player.paused) playPlayer(id, player, chunk, currentTime.value);
+	else pausePlayer(player, currentTime);
 }
 
 /**

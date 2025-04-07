@@ -2,6 +2,8 @@
 	<!-- Dynamic Layout -->
 	<component
 		:is="currentLayoutComponent"
+		:id="id"
+		:source="source"
 		:container="container"
 		:ctx="ctx"
 		:audioSource="audioSource"
@@ -34,6 +36,8 @@ import { createOptions } from "src/options";
 let options = createOptions();
 
 const props = defineProps<{
+	id: string;
+	source: string;
 	container: HTMLElement;
 	ctx: MarkdownPostProcessorContext;
 	audioSource: string;
@@ -68,10 +72,9 @@ onMounted(async () => {
 	props.player.loop = options.loop;
 
 	// Initialize Event-Listeners
-	if (props.player) {
-		props.player.addEventListener("ended", eventEndedAudio);
-	}
+	if (props.player) props.player.addEventListener("ended", eventEndedAudio);
 	document.addEventListener("pause-other-players", eventPauseOtherPlayers);
+	// Initialize Event-Listeners - Obsidian Commands
 	document.addEventListener("pause-audiobox", eventPausePlayer);
 	document.addEventListener("play-audiobox", eventPlayPlayer);
 	document.addEventListener("toggle-audiobox", eventTogglePlayer);
@@ -82,17 +85,13 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-	pausePlayer(
-		props.player,
-		props.audioSource,
-		options.chunk,
-		sharedRefs.currentTime
-	);
+	pausePlayer(props.player, sharedRefs.currentTime);
 	saveCache();
 
 	// Destroy Event-Listeners
 	props.player.removeEventListener("ended", eventEndedAudio);
 	document.removeEventListener("pause-other-players", eventPauseOtherPlayers);
+	// Destroy Event-Listeners - Obsidian Commands
 	document.removeEventListener("pause-audiobox", eventPausePlayer);
 	document.removeEventListener("play-audiobox", eventPlayPlayer);
 	document.removeEventListener("toggle-audiobox", eventTogglePlayer);
@@ -108,7 +107,7 @@ onBeforeUnmount(() => {
  * Select which player layout to display
  */
 const currentLayoutComponent = computed(() => {
-	const layoutIndex: number = getLayoutOption(props.ctx, props.container);
+	const layoutIndex: number = getLayoutOption(props.source);
 	return layoutsArray[layoutIndex].component;
 });
 
@@ -118,18 +117,15 @@ const currentLayoutComponent = computed(() => {
 
 async function loadCacheOrFallback(): Promise<void> {
 	const codeblockSettings = getAudioboxOptions(
-		props.ctx,
-		props.container,
+		props.source,
 		sharedRefs.maxDuration.value!
 	);
 	const newHash = await hashObj(codeblockSettings);
-	const oldHash = localStorage.getItem(`aa_${props.audioSource}_optionsHash`);
+	const oldHash = localStorage.getItem(`aa_${props.id}_optionsHash`);
 
 	if (newHash === oldHash) {
 		// Cached options CAN be used
-		const optionsCache = localStorage.getItem(
-			`aa_${props.audioSource}_options`
-		);
+		const optionsCache = localStorage.getItem(`aa_${props.id}_options`);
 		Object.assign(options, JSON.parse(optionsCache!));
 	} else {
 		// Cached options CANNOT be used
@@ -138,7 +134,7 @@ async function loadCacheOrFallback(): Promise<void> {
 
 	// Set time
 	const currentTimeCache = Number(
-		localStorage.getItem(`aa_${props.audioSource}_currentTime`)
+		localStorage.getItem(`aa_${props.id}_currentTime`)
 	);
 	if (
 		currentTimeCache >= options.chunk.startTime &&
@@ -151,16 +147,10 @@ async function loadCacheOrFallback(): Promise<void> {
 }
 
 async function saveCache(): Promise<void> {
+	localStorage.setItem(`aa_${props.id}_optionsHash`, await hashObj(options));
+	localStorage.setItem(`aa_${props.id}_options`, JSON.stringify(options));
 	localStorage.setItem(
-		`aa_${props.audioSource}_optionsHash`,
-		await hashObj(options)
-	);
-	localStorage.setItem(
-		`aa_${props.audioSource}_options`,
-		JSON.stringify(options)
-	);
-	localStorage.setItem(
-		`aa_${props.audioSource}_currentTime`,
+		`aa_${props.id}_currentTime`,
 		JSON.stringify(props.player.currentTime)
 	);
 }
@@ -175,48 +165,32 @@ function eventEndedAudio() {
 		sharedRefs.currentTime,
 		options.chunk?.startTime!
 	);
-	if (!options.loop)
-		pausePlayer(
-			props.player,
-			props.audioSource,
-			options.chunk,
-			sharedRefs.currentTime
-		);
+	if (!options.loop) pausePlayer(props.player, sharedRefs.currentTime);
 }
 
 const eventPauseOtherPlayers = (e: Event) => {
 	const event = e as CustomEvent;
 	// Pause every player, excluding the one that gave the initial comand
-	if (event.detail?.id !== props.audioSource) {
-		pausePlayer(
-			props.player,
-			props.audioSource,
-			options.chunk,
-			sharedRefs.currentTime
-		);
+	if (event.detail?.id !== props.id) {
+		pausePlayer(props.player, sharedRefs.currentTime);
 	}
 };
 
 const eventPausePlayer = (e: Event) => {
 	const event = e as CustomEvent;
 	// Pause this player
-	if (event.detail?.id == props.audioSource) {
-		pausePlayer(
-			props.player,
-			props.audioSource,
-			options.chunk,
-			sharedRefs.currentTime
-		);
+	if (event.detail?.id == props.id) {
+		pausePlayer(props.player, sharedRefs.currentTime);
 	}
 };
 
 const eventPlayPlayer = (e: Event) => {
 	const event = e as CustomEvent;
 	// Play this player
-	if (event.detail?.id == props.audioSource) {
+	if (event.detail?.id == props.id) {
 		playPlayer(
+			props.id,
 			props.player,
-			props.audioSource,
 			options.chunk,
 			sharedRefs.currentTime.value
 		);
@@ -226,10 +200,10 @@ const eventPlayPlayer = (e: Event) => {
 const eventTogglePlayer = (e: Event) => {
 	const event = e as CustomEvent;
 	// Toggle this player
-	if (event.detail?.id == props.audioSource) {
+	if (event.detail?.id == props.id) {
 		togglePlayer(
+			props.id,
 			props.player,
-			props.audioSource,
 			options.chunk,
 			sharedRefs.currentTime
 		);
@@ -239,7 +213,7 @@ const eventTogglePlayer = (e: Event) => {
 const eventForwardPlayer = (e: Event) => {
 	const event = e as CustomEvent;
 	// Forward this player
-	if (event.detail?.id == props.audioSource) {
+	if (event.detail?.id == props.id) {
 		setPlayerPosition(
 			props.player,
 			options.chunk,
@@ -252,7 +226,7 @@ const eventForwardPlayer = (e: Event) => {
 const eventBackwardPlayer = (e: Event) => {
 	const event = e as CustomEvent;
 	// Backward this player
-	if (event.detail?.id == props.audioSource) {
+	if (event.detail?.id == props.id) {
 		setPlayerPosition(
 			props.player,
 			options.chunk,

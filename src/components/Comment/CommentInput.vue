@@ -11,6 +11,7 @@
 			@keydown.escape="imposeDefault"
 			@keydown.enter="addComment"
 		/>
+		<!-- Buttons -->
 		<div :class="['comment-btn-container']">
 			<button
 				ref="confirm_btn"
@@ -23,7 +24,7 @@
 				ref="delete_btn"
 				@click="confirmDeleteComment"
 				:style="{
-					'background-color': sharedRefs.deleteConfirmation.value
+					'background-color': deleteConfirmation
 						? 'var(--interactive-accent)'
 						: '',
 				}"
@@ -51,6 +52,8 @@ import { pausePlayer } from "../Logic/playerFunc";
 import { AudioBoxOptions } from "src/options";
 
 const props = defineProps<{
+	id: string;
+	source: string;
 	container: HTMLElement;
 	ctx: MarkdownPostProcessorContext;
 	audioSource: string;
@@ -60,14 +63,17 @@ const props = defineProps<{
 	options: AudioBoxOptions;
 }>();
 
-/* ------------ */
-/* --- Refs --- */
-/* ------------ */
+// UI
 const confirm_btn = ref<HTMLElement | null>(null);
 const cancel_btn = ref<HTMLElement | null>(null);
 const delete_btn = ref<HTMLElement | null>(null);
 const commentInputElement = useTemplateRef<HTMLInputElement>("commentInput");
 props.sharedRefs.commentInput = computed(() => commentInputElement.value); // Expose input text
+
+let deleteConfirmation = ref<boolean>(false); // IF the user confirm he wants to delete the comment
+/* ----------------- */
+/* --- Lifecycle --- */
+/* ----------------- */
 
 onMounted(() => {
 	// Initilize Event-Listeners
@@ -79,6 +85,7 @@ onBeforeUnmount(() => {
 	document.removeEventListener("add-comment", eventInsertComment);
 });
 
+// Use flag to trigger WHEN to show this input
 watch(props.sharedRefs.isCommentInputShown, (value) => {
 	if (value) showCommentInput();
 });
@@ -112,8 +119,7 @@ async function editCodeblockComment(
 
 	try {
 		const commentsArray: Array<AudioComment> = getCommentsArray(
-			props.ctx,
-			props.container
+			props.source
 		);
 		let commentOnFocusIndex: number; // WHERE we will place the new/modified comment (to preserve cronological order). 0 = 1° comment
 
@@ -174,7 +180,7 @@ async function editCodeblockComment(
 	props.sharedRefs.isCommentInputShown.value = false;
 	props.sharedRefs.editMode.value = false;
 	props.sharedRefs.editedCommentTime.value = null;
-	props.sharedRefs.deleteConfirmation.value = false;
+	deleteConfirmation.value = false;
 	props.sharedRefs.isDuplicate.value = false;
 }
 /**
@@ -196,9 +202,9 @@ async function addComment(): Promise<void> {
 }
 
 function confirmDeleteComment() {
-	if (!props.sharedRefs.deleteConfirmation.value) {
+	if (!deleteConfirmation.value) {
 		// 1°: Set the flag to show "Sure?" on the next click
-		props.sharedRefs.deleteConfirmation.value = true;
+		deleteConfirmation.value = true;
 	} else {
 		// 2°: Trigger the actual deletion if confirmed by the user
 		deleteComment(props.sharedRefs.editedCommentTime.value!);
@@ -216,13 +222,9 @@ function showCommentInput(): void {
 	//Force state
 	props.sharedRefs.isCommentInputShown.value = true;
 
-	pausePlayer(
-		props.player,
-		props.audioSource,
-		props.options.chunk,
-		props.sharedRefs.currentTime
-	);
+	pausePlayer(props.player, props.sharedRefs.currentTime);
 
+	// Wait for it to open
 	setTimeout(() => {
 		// Initialize icons
 		if (confirm_btn.value) setIcon(confirm_btn.value, "plus");
@@ -230,10 +232,7 @@ function showCommentInput(): void {
 		if (delete_btn.value) setIcon(delete_btn.value, "trash-2");
 
 		// Check IF it's a valid time
-		const isNotUnique: boolean = getCommentsArray(
-			props.ctx,
-			props.container
-		)?.some(
+		const isNotUnique: boolean = getCommentsArray(props.source)?.some(
 			(comment: AudioComment) =>
 				comment.time === Math.floor(props.sharedRefs.currentTime.value)
 		);
@@ -262,7 +261,7 @@ function imposeDefault(): void {
 
 const eventInsertComment = (e: Event) => {
 	const event = e as CustomEvent;
-	// Show this player commentInput
-	if (event.detail?.id == props.audioSource) showCommentInput();
+	// Show THIS player commentInput
+	if (event.detail?.id == props.id) showCommentInput();
 };
 </script>

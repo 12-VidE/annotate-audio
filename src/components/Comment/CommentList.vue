@@ -12,8 +12,8 @@
 			}"
 			@play-from="(time) => playComment(time)"
 			@edit-comment="enableEditMode"
-			:comment="comment"
 			:key="comment.time"
+			:comment="comment"
 			:obsidianApp="obsidianApp"
 			:sharedRefs="sharedRefs"
 		/>
@@ -39,17 +39,17 @@ import {
 import { AudioBoxOptions } from "src/options";
 
 const props = defineProps<{
-	container: HTMLElement;
-	ctx: MarkdownPostProcessorContext;
-	audioSource: string;
+	id: string;
+	source: string;
 	player: HTMLAudioElement;
 	obsidianApp: App;
 	sharedRefs: SharedRefs;
 	options: AudioBoxOptions;
 }>();
 
-const activeComment = ref<AudioComment | null>(null); //
+const activeComment = ref<AudioComment | null>(null); // Closest comment before currentTime
 
+const commentsList = getCommentsArray(props.source);
 /* ----------------- */
 /* --- Lifecycle --- */
 /* ----------------- */
@@ -62,20 +62,16 @@ onMounted(() => {
 	/* logRefs(props.sharedRefs); */
 });
 
-/* ---------------- */
-/* --- Computed --- */
-/* ---------------- */
-
 /**
- * @returns Comments inside the chunk (CANNOT do it inside getCommentsArray otherwise it's difficult to add comment)
+ * List of comments inside chunk
+ * "computed" CAUSE it interacts w/ chunk
  */
 const filteredCommentList = computed(() => {
-	const filteredComment = getCommentsArray(props.ctx, props.container).filter(
+	return commentsList.filter(
 		(comment: AudioComment) =>
 			comment.time >= props.options.chunk.startTime &&
 			comment.time <= props.options.chunk.endTime
 	);
-	return filteredComment;
 });
 
 /* ----------------- */
@@ -92,12 +88,7 @@ function enableEditMode(time: number): void {
 	props.sharedRefs.editMode.value = true;
 	props.sharedRefs.editedCommentTime.value = time;
 
-	pausePlayer(
-		props.player,
-		props.audioSource,
-		props.options.chunk,
-		props.sharedRefs.currentTime
-	);
+	pausePlayer(props.player, props.sharedRefs.currentTime);
 
 	props.sharedRefs.contentCommentInput.value = getComment(time)!.content;
 
@@ -119,11 +110,10 @@ function enableEditMode(time: number): void {
  * @returns the comment @ that time
  */
 function getComment(time: number): AudioComment | null {
-	const commentsArray = getCommentsArray(props.ctx, props.container);
-	const commentIndex: number = commentsArray.findIndex(
+	const commentIndex: number = filteredCommentList.value.findIndex(
 		(item: AudioComment) => time == item.time
 	);
-	return commentsArray[commentIndex] || null;
+	return filteredCommentList.value.at(commentIndex) || null;
 }
 
 function playComment(time: number): void {
@@ -137,8 +127,8 @@ function playComment(time: number): void {
 	// Force play IF autoplay is enabled
 	if (props.options.autoplay) {
 		playPlayer(
+			props.id,
 			props.player,
-			props.audioSource,
 			props.options.chunk,
 			props.sharedRefs.currentTime.value
 		);
@@ -153,10 +143,7 @@ function playComment(time: number): void {
  */
 function eventActiveComment() {
 	// Find activeComment
-	const nextCommentToPlay = getCommentsArray(
-		props.ctx,
-		props.container
-	).filter(
+	const nextCommentToPlay = filteredCommentList.value.filter(
 		(comment: AudioComment) => props.player?.currentTime >= comment.time
 	);
 	activeComment.value = nextCommentToPlay[nextCommentToPlay.length - 1];

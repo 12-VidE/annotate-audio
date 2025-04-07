@@ -19,7 +19,6 @@ export interface SharedRefs {
 	/* --- States --- */
 	/* -------------- */
 	isDuplicate: Ref<boolean>; // WHEN we want to create a comment WHERE it already exists
-	deleteConfirmation: Ref<boolean>; // IF the user confirm he wants to delete the comment
 	editMode: Ref<boolean>; // IF we are editing a comment (NOT creating a new one)
 	isCommentInputShown: Ref<boolean>; // IF the input-box for a comment is displayed}
 }
@@ -38,7 +37,6 @@ export function createShareRefs(): SharedRefs {
 		contentCommentInput: ref(""),
 
 		isDuplicate: ref(false),
-		deleteConfirmation: ref(false),
 		editMode: ref(false),
 		isCommentInputShown: ref(false),
 	};

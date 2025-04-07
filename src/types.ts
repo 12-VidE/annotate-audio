@@ -13,6 +13,8 @@ export type AudioChunk = {
 };
 
 export type AudioBoxParameters = {
+	id: string;
+	source: string;
 	container: HTMLElement;
 	audioSource: string | null;
 	ctx: MarkdownPostProcessorContext;
