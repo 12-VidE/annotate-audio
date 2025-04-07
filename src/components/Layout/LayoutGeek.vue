@@ -391,19 +391,20 @@ function setupChunkBnt() {
 
 function manageChunk() {
 	if (props.options.chunk.startTime == 0) {
-		props.options.chunk.startTime = props.player.currentTime;
+		props.options.chunk.startTime = Math.floor(props.player.currentTime);
 	} else if (
 		props.options.chunk.endTime ==
 		Math.floor(props.sharedRefs.maxDuration.value!)
 	) {
 		if (props.player.currentTime > props.options.chunk.startTime)
-			props.options.chunk.endTime = props.player.currentTime;
+			props.options.chunk.endTime = Math.floor(props.player.currentTime);
 	} else {
 		props.options.chunk = {
 			startTime: 0,
 			endTime: Math.floor(props.sharedRefs.maxDuration.value!),
 		};
 	}
+	setupChunkBnt();
 }
 /* ------------------------- */
 /* --- Function ON Event --- */

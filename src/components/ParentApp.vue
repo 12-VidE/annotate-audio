@@ -85,7 +85,6 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-	console.log(sharedRefs.resume.value);
 	saveCache();
 
 	pausePlayer(props.player, sharedRefs.currentTime);

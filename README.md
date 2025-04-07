@@ -87,7 +87,7 @@ There are also some options only available in specific `layout`s
 
 ### Changelog
 
--   **1.4.0 (developing)**
+-   **1.4.0**
     -   feat[#4](https://github.com/12-VidE/annotate-audio/issues/4): Each codeblock now has its own ID to better handle them
     -   feat[#6](https://github.com/12-VidE/annotate-audio/issues/6): New option `unstoppable`
     -   feat: new "Geek" `layout`
