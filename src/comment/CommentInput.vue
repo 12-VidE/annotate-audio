@@ -5,51 +5,50 @@
 	>
 		<input
 			type="text"
-			ref="commentInput"
-			v-model="sharedRefs.contentCommentInput.value"
-			:class="[sharedRefs.isDuplicate.value && 'disabled']"
+			ref="commentInputElement"
+			v-model.trim="commentInputBox"
+			:disabled="isDuplicate"
 			@keydown.escape="imposeDefault"
 			@keydown.enter="addComment"
 		/>
 		<!-- Buttons -->
 		<div :class="['comment-btn-container']">
+			<!-- Confirm -->
 			<button
+				type="button"
 				ref="confirm_btn"
-				:class="[sharedRefs.isDuplicate.value && 'disabled']"
+				:disabled="!commentInputBox || isDuplicate"
 				@click="addComment"
 			></button>
-			<button ref="cancel_btn" @click="imposeDefault"></button>
+			<!-- Cancel -->
 			<button
-				v-if="sharedRefs.editMode.value"
+				type="button"
+				ref="cancel_btn"
+				@click="imposeDefault"
+			></button>
+			<!-- Delete -->
+			<button
+				type="button"
+				v-show="isEdit"
 				ref="delete_btn"
+				:class="{ 'delete-confirmation': deleteConfirmation }"
 				@click="confirmDeleteComment"
-				:style="{
-					'background-color': deleteConfirmation
-						? 'var(--interactive-accent)'
-						: '',
-				}"
 			></button>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { MarkdownPostProcessorContext, App, TFile, setIcon } from "obsidian";
-import {
-	computed,
-	onBeforeUnmount,
-	onMounted,
-	ref,
-	useTemplateRef,
-	watch,
-} from "vue";
+import { MarkdownPostProcessorContext, App, TFile } from "obsidian";
+import { onBeforeUnmount, onMounted, ref, watch, nextTick } from "vue";
 // Import - Type
-import type { AudioComment } from "src/types";
-import { SharedRefs } from "../sharedRefs";
+import type { AudioComment } from "./commentType";
+import type { SharedRefs } from "src/components/sharedRefs";
+import type { AudioBoxOptions } from "src/options";
 // Import - Function
-import { getCommentsArray } from "../sharedFunc";
-import { pausePlayer } from "../Logic/playerFunc";
-import { AudioBoxOptions } from "src/options";
+import { getCommentsArray } from "./commentLogic";
+import { pausePlayer } from "src/components/Logic/playerFunc";
+import { initButton } from "src/utils";
 
 const props = defineProps<{
 	id: string;
@@ -63,37 +62,100 @@ const props = defineProps<{
 	options: AudioBoxOptions;
 }>();
 
-// UI
-const confirm_btn = ref<HTMLElement | null>(null);
-const cancel_btn = ref<HTMLElement | null>(null);
-const delete_btn = ref<HTMLElement | null>(null);
-const commentInputElement = useTemplateRef<HTMLInputElement>("commentInput");
-props.sharedRefs.commentInput = computed(() => commentInputElement.value); // Expose input text
-
-let deleteConfirmation = ref<boolean>(false); // IF the user confirm he wants to delete the comment
-let workingTimestamp = ref<number | null>(null);
 /* ----------------- */
 /* --- Lifecycle --- */
 /* ----------------- */
 
+// UI
+const confirm_btn = ref<HTMLElement | null>(null);
+const cancel_btn = ref<HTMLElement | null>(null);
+const delete_btn = ref<HTMLElement | null>(null);
+const commentInputElement = ref<HTMLInputElement | null>(null);
+let commentInputBox = ref<string>(""); // Text content of "commentInputElement"
+// Flags
+let deleteConfirmation = ref<boolean>(false); // IF the user confirm he wants to delete the comment
+let isDuplicate = ref<boolean>(false); // WHEN we want to create a comment WHERE it already exists
+let isEdit = ref<boolean>(false); // IF we are editing a comment (NOT creating a new one)
+
 onMounted(() => {
 	// Initilize Event-Listeners
-	document.addEventListener("add-comment", eventInsertComment);
+	document.addEventListener("add-comment", eventAddComment);
 });
 
 onBeforeUnmount(() => {
 	// Destroy Event-Listeners
-	document.removeEventListener("add-comment", eventInsertComment);
+	document.removeEventListener("add-comment", eventAddComment);
 });
 
-// Use flag to trigger WHEN to show this input
-watch(props.sharedRefs.isCommentInputShown, (value) => {
-	if (value) showCommentInput();
-});
+// Trigger to show this input
+watch(
+	() => props.sharedRefs.isCommentInputShown.value,
+	(show) => {
+		if (show) showCommentInput();
+	}
+);
 
 /* ----------------- */
 /* --- Functions --- */
 /* ----------------- */
+
+/**
+ * Display the commnet input box
+ */
+async function showCommentInput(): Promise<void> {
+	if (!props.options.unstoppable)
+		pausePlayer(props.player, props.sharedRefs.currentTime);
+
+	// "Wait" for it to open to render
+	await nextTick(() => {
+		if (props.sharedRefs.workingComment.value?.content) {
+			// "Editing" mode = IF there's already some content
+			isEdit.value = true;
+
+			// Initialize buttons
+			initButton(confirm_btn.value, "check", "Confirm");
+			initButton(cancel_btn.value, "x", "Cancel");
+			initButton(delete_btn.value, "trash-2", "Delete");
+		} else {
+			// "Adding" mode = IF there's no content
+			props.sharedRefs.workingComment.value = {
+				time: Math.floor(props.player.currentTime), // Save it in case of "unstoppable"
+				content: "",
+			};
+
+			// Initialize buttons
+			initButton(confirm_btn.value, "plus", "Add");
+			initButton(cancel_btn.value, "x", "Cancel");
+
+			// Check IF it's a valid time = IF it's unique
+			const isNotUnique: boolean = getCommentsArray(props.source)?.some(
+				(comment: AudioComment) =>
+					comment.time === props.sharedRefs.workingComment.value?.time
+			);
+			if (isNotUnique) {
+				// IF we want to create a new comment @time WHERE already 1 exits: don't allow it
+				isDuplicate.value = true;
+
+				props.sharedRefs.workingComment.value.content =
+					"ALREADY EXISTS!";
+			} else {
+				// IF we want to create a new comment... nothing
+			}
+		}
+
+		// Populate input text
+		commentInputBox.value = props.sharedRefs.workingComment.value?.content!;
+
+		// Scroll + Focus contentCommentInput (IF sticky, it gets sluggish)
+		if (!props.options.sticky) {
+			commentInputElement.value?.scrollIntoView({
+				behavior: "smooth",
+				block: "center",
+			});
+		}
+		commentInputElement.value?.focus({ preventScroll: true });
+	});
+}
 
 /**
  * Function that actually operate on codeblock
@@ -176,97 +238,55 @@ async function editCodeblockComment(
 	} catch (error) {
 		console.error("Cannot manage comment - ", error);
 	}
-
-	// Impose default states
-	props.sharedRefs.isCommentInputShown.value = false;
-	props.sharedRefs.editMode.value = false;
-	props.sharedRefs.editedCommentTime.value = null;
-	deleteConfirmation.value = false;
-	props.sharedRefs.isDuplicate.value = false;
-	props.sharedRefs.resume.value = true;
 }
 /**
  * (Re)write comment inside commentInputBox TO codeblock
  */
 async function addComment(): Promise<void> {
-	if (props.sharedRefs.contentCommentInput.value?.length == 0) return; // Empty input-box is useless
-
-	const commentOnFocus: AudioComment = {
-		time: props.sharedRefs.editMode.value
-			? props.sharedRefs.editedCommentTime.value!
-			: workingTimestamp.value!,
-		content: props.sharedRefs.contentCommentInput.value!,
-	};
-	await editCodeblockComment(
-		commentOnFocus,
-		!props.sharedRefs.editMode.value
-	);
+	if (commentInputBox.value !== "" && props.sharedRefs.workingComment.value) {
+		props.sharedRefs.workingComment.value.content = commentInputBox.value;
+		await editCodeblockComment(
+			props.sharedRefs.workingComment.value,
+			!isEdit.value
+		);
+	}
+	imposeDefault();
 }
 
-function confirmDeleteComment() {
+async function confirmDeleteComment() {
 	if (!deleteConfirmation.value) {
-		// 1°: Set the flag to show "Sure?" on the next click
+		// 1°: Set the flag to take confirmation on the next click
 		deleteConfirmation.value = true;
 	} else {
 		// 2°: Trigger the actual deletion if confirmed by the user
-		deleteComment(props.sharedRefs.editedCommentTime.value!);
-	}
-}
-async function deleteComment(time: number) {
-	const commentOnFocus: AudioComment = {
-		time: time,
-		content: "",
-	};
-	await editCodeblockComment(commentOnFocus, false);
-}
-
-function showCommentInput(): void {
-	// Save time
-	workingTimestamp.value = Math.floor(props.player.currentTime);
-
-	//Force state
-	props.sharedRefs.isCommentInputShown.value = true;
-
-	if (!props.options.unstoppable)
-		pausePlayer(props.player, props.sharedRefs.currentTime);
-
-	// "Wait" for it to open
-	setTimeout(() => {
-		// Initialize icons
-		if (confirm_btn.value) setIcon(confirm_btn.value, "plus");
-		if (cancel_btn.value) setIcon(cancel_btn.value, "x");
-		if (delete_btn.value) setIcon(delete_btn.value, "trash-2");
-
-		// Check IF it's a valid time
-		const isNotUnique: boolean = getCommentsArray(props.source)?.some(
-			(comment: AudioComment) => comment.time === workingTimestamp.value
-		);
-		if (props.sharedRefs.editMode.value) {
-			if (confirm_btn.value) setIcon(confirm_btn.value, "check");
-		} else if (isNotUnique) {
-			// IF we want to create a new comment @time WHERE already 1 exits: don't allow it
-			props.sharedRefs.contentCommentInput.value = "ALREADY EXISTS!";
-			props.sharedRefs.isDuplicate.value = true;
-		} else {
-			props.sharedRefs.contentCommentInput.value = "";
-			props.sharedRefs.commentInput.value?.focus();
+		if (props.sharedRefs.workingComment.value) {
+			props.sharedRefs.workingComment.value.content = "";
+			await editCodeblockComment(
+				props.sharedRefs.workingComment.value,
+				false
+			);
 		}
-	}, 0);
+		imposeDefault();
+	}
 }
 
 function imposeDefault(): void {
-	props.sharedRefs.contentCommentInput.value = "";
-	props.sharedRefs.isDuplicate.value = false;
+	commentInputBox.value = "";
+
+	isDuplicate.value = false;
+	isEdit.value = false;
+
 	props.sharedRefs.isCommentInputShown.value = false;
-	props.sharedRefs.editMode.value = false;
+	props.sharedRefs.workingComment.value = null;
 }
 
 /* ------------------------- */
 /* --- Function ON Event --- */
 
-const eventInsertComment = (e: Event) => {
+const eventAddComment = (e: Event) => {
 	const event = e as CustomEvent;
 	// Show THIS player commentInput
-	if (event.detail?.id == props.id) showCommentInput();
+	if (event.detail?.id == props.id)
+		props.sharedRefs.isCommentInputShown.value = true;
 };
 </script>

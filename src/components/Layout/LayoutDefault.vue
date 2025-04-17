@@ -143,7 +143,7 @@
 		</div>
 
 		<!-- Comments List -->
-		<CommentList
+		<CommentsList
 			:id="id"
 			:source="source"
 			:container="container"
@@ -161,8 +161,8 @@
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { MarkdownPostProcessorContext, App, setIcon } from "obsidian";
 // Import - Component
-import CommentInput from "../Comment/CommentInput.vue";
-import CommentList from "../Comment/CommentList.vue";
+import CommentInput from "../../comment/CommentInput.vue";
+import CommentsList from "../../comment/CommentsList.vue";
 // Import - Func
 import { displayCurrentTime, displayDuration } from "./LayoutSharedFunc";
 import {

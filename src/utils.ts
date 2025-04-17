@@ -2,6 +2,8 @@
 /* --- Conversion --- */
 /* ------------------ */
 
+import { setIcon, setTooltip, TooltipOptions } from "obsidian";
+
 /**
  * Converts HH:mm:ss into ss
  * @param {string} str
@@ -68,4 +70,19 @@ function canonicalStringify(input: any): string {
 	const str = JSON.stringify(input, Object.keys(input).sort());
 	const normalizedStr = str.replace(/\s+/g, ""); // Remove spaces
 	return normalizedStr;
+}
+
+/* ---------- */
+/* --- UI --- */
+/* ---------- */
+export function initButton(
+	btn: HTMLElement | null,
+	icon: string = "",
+	tooltip: string = "",
+	tooltipOptions?: TooltipOptions
+) {
+	if (btn) {
+		setIcon(btn, icon);
+		setTooltip(btn, tooltip, tooltipOptions);
+	}
 }

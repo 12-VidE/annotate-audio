@@ -5,32 +5,31 @@
 		@click.right="emitEditComment"
 	>
 		<span class="comment-time">{{
-			secondsToTime(comment.time, sharedRefs.maxDuration.value)
+			secondsToTime(comment.time, maxDuration)
 		}}</span>
 		<span class="comment-content" v-html="displayCommentContent"></span>
-		<i
+		<button
+			type="button"
 			v-if="Platform.isMobile"
 			ref="edit_btn"
+			class="strip-native"
 			@click.stop="emitEditComment"
-		></i>
+		></button>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { MarkdownRenderer, Component, App, Platform, setIcon } from "obsidian";
-// Import - Function
-import { secondsToTime } from "src/utils";
+import { MarkdownRenderer, Component, App, Platform } from "obsidian";
 // Import - Type
-import type { AudioComment } from "src/types";
-import type { SharedRefs } from "../sharedRefs";
-// UI
-const edit_btn = ref<HTMLElement | null>(null);
+import type { AudioComment } from "./commentType";
+// Import - Function
+import { initButton, secondsToTime } from "src/utils";
 
 const props = defineProps<{
 	comment: AudioComment;
 	obsidianApp: App;
-	sharedRefs: SharedRefs;
+	maxDuration: number | undefined;
 }>();
 
 const emit = defineEmits<{
@@ -42,9 +41,12 @@ const emit = defineEmits<{
 /* --- Lifecycle --- */
 /* ----------------- */
 
+// UI
+const edit_btn = ref<HTMLElement | null>(null);
+
 onMounted(() => {
 	// Initialize icons
-	if (edit_btn.value) setIcon(edit_btn.value, "pencil");
+	initButton(edit_btn.value, "pencil", "Edit");
 });
 
 /* ---------------- */

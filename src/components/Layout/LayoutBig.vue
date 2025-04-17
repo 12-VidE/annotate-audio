@@ -149,7 +149,7 @@
 		</div>
 
 		<!-- Comments List -->
-		<CommentList
+		<CommentsList
 			:id="id"
 			:source="source"
 			:container="container"
@@ -167,8 +167,8 @@
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { MarkdownPostProcessorContext, App, setIcon, TFile } from "obsidian";
 // Import - Component
-import CommentInput from "../Comment/CommentInput.vue";
-import CommentList from "../Comment/CommentList.vue";
+import CommentInput from "../../comment/CommentInput.vue";
+import CommentsList from "../../comment/CommentsList.vue";
 // Import - Class
 import { AudioBoxOptions, PropertiesModal } from "src/options";
 // Import - Func

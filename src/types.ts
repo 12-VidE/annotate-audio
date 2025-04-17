@@ -1,11 +1,6 @@
 import { MarkdownPostProcessorContext, App } from "obsidian";
 import { ComponentOptions, ComponentProvideOptions } from "vue";
 
-export type AudioComment = {
-	time: number;
-	content: string;
-};
-
 export type AudioChunk = {
 	startTime: number;
 	endTime: number;

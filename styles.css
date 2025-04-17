@@ -178,14 +178,21 @@
 			color: var(--color-base-50);
 		}
 		/* Edit-Comment btn */
-		> i {
+		> button {
+			all: unset; /* Reset */
 			margin-left: auto;
-			color: var(--color-base-50);
 
 			display: flex;
 			align-items: center;
+			> svg {
+				color: var(--color-base-50);
+			}
 		}
 	}
+}
+
+button.delete-confirmation {
+	background-color: var(--interactive-accent);
 }
 
 /* ----------------- */

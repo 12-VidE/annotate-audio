@@ -1,3 +1,4 @@
+import { AudioComment } from "src/comment/commentType";
 import { ref, Ref } from "vue";
 
 export interface SharedRefs {
@@ -12,14 +13,11 @@ export interface SharedRefs {
 	/* --- Comment --- */
 	/* --------------- */
 	commentInput: Ref<HTMLInputElement | null>; // HTML text input for the comment input
-	editedCommentTime: Ref<number | null>; // Time (=index) of the comment to edit
-	contentCommentInput: Ref<string>; // Content of input-box WHEN creating/modififing comment
+	workingComment: Ref<AudioComment | null>;
 
 	/* -------------- */
 	/* --- States --- */
 	/* -------------- */
-	isDuplicate: Ref<boolean>; // WHEN we want to create a comment WHERE it already exists
-	editMode: Ref<boolean>; // IF we are editing a comment (NOT creating a new one)
 	isCommentInputShown: Ref<boolean>; // IF the input-box for a comment is displayed
 	resume: Ref<boolean>; // IF the player should resume after the re-render
 }
@@ -34,11 +32,8 @@ export function createShareRefs(): SharedRefs {
 		maxDuration: ref(undefined),
 
 		commentInput: ref(null),
-		editedCommentTime: ref(null),
-		contentCommentInput: ref(""),
+		workingComment: ref(null),
 
-		isDuplicate: ref(false),
-		editMode: ref(false),
 		isCommentInputShown: ref(false),
 		resume: ref(false),
 	};
