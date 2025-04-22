@@ -70,6 +70,8 @@ There are also some options only available in specific `layout`s
 
 ## Development
 
+For all the changes, check [CHANGELOG.md](https://github.com/12-VidE/annotate-audio/blob/master/CHANGELOG.md)
+
 ### Road-Map
 
 1. Add i18n support
@@ -83,47 +85,6 @@ There are also some options only available in specific `layout`s
 -   `title` option inside modal is not displayed correctly on mobile
 -   Cache the total duration of the file
 -   Write new options only on unload (preventing pointless re-renders)
--   Remove "defaultAudioBoxOptions" because redundant
-
-### Changelog
-
--   **1.4.0**
-    -   feat[#4](https://github.com/12-VidE/annotate-audio/issues/4): Each codeblock now has its own ID to better handle them
-    -   feat[#6](https://github.com/12-VidE/annotate-audio/issues/6): New option `unstoppable`
-    -   feat: new "Geek" `layout`
-    -   fix[#6](https://github.com/12-VidE/annotate-audio/issues/6): Audio resumes after a comment is created/deleted
-    -   fix: `chunk` is resetted correctly
--   **1.3.0**
-    -   [#4](https://github.com/12-VidE/annotate-audio/issues/4) The plugin is now supported on mobile! (Not tested on iPhone)
-    -   feat: Reset `chunk` option from the modal
-    -   feat: More Obsidian commands
-    -   fix [#5](https://github.com/12-VidE/annotate-audio/issues/5): Stop audiobox when another one start playing
-    -   fix: Obsidian commands are shown only when they can be correctly applied
--   **1.2.1**
-    -   fix: Read audio duration from metadata. It drastically decreases loading time
--   **1.2.0**
-    -   feat: Select audio source on `Add audiobox` command using a modal
-    -   feat: Add modal to manage player properties more easily
-    -   feat: Options + Wavegraph cache handling
-    -   feat: Render "404" block when `source` is invalid/absent
-    -   fix: Removed alias as possible `title` option (useless)
--   **1.1.0**
-    -   Allow each player to be independent by creating its refs in `ParentApp.vue` and passing them as `props`. To use targeted Obsidian commands, each player is called by its `id`
-    -   feat [#1](https://github.com/12-VidE/annotate-audio/issues/1): Added Obsidian command `Insert comment`
-    -   feat: [#3](https://github.com/12-VidE/annotate-audio/issues/3) Added `autoplay` option
-    -   fix: Render `LayoutDefault` even when property `title` is not present
-    -   fix: Player always strat from start of `chunk`
--   **1.0.0**
-    -   Complete redesign, moving from Vue "Options API" to "Composition API". This will allow better flexibility in the future
-    -   feat: Add ability to reproduce a `chunk` of the total audio
-    -   feat: Allow to choose beetween different `layout`s
-    -   fix [#2](https://github.com/12-VidE/annotate-audio/issues/2): Change `comment` style so it doesn't conflict with Obsidian native one
--   **0.1.1**
-    -   fix: Renamed `Add Audio-Box` command to `Add audiobox` to follow "Plugin gidelines"
-    -   feat: Show `source` alias as title if it exists and `title` option is `undefined`
--   **0.1.0 -** Initial release
-
----
 
 ## Credits
 
