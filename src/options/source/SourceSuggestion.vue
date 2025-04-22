@@ -13,19 +13,19 @@
 </template>
 
 <script setup lang="ts">
-import { App, setIcon, TFile } from "obsidian";
-import { secondsToTime } from "src/utils";
+import { App, TFile } from "obsidian";
 import { computed, onBeforeMount, onMounted, ref } from "vue";
-import { retriveDuration } from "src/utils";
+// Import - Functions
+import { secondsToTime, retriveDuration, initIcon } from "src/utils";
 
 const props = defineProps<{
 	obsidianApp: App;
 	file: TFile;
 }>();
 
-/* ------------ */
-/* --- Refs --- */
-/* ------------ */
+/* ----------------- */
+/* --- Lifecycle --- */
+/* ----------------- */
 const duration = ref<string | null>(null);
 // UI
 const durationIcon = ref<HTMLElement | null>(null);
@@ -38,8 +38,8 @@ onBeforeMount(async () => {
 
 onMounted(() => {
 	// Initialize icons
-	if (durationIcon.value) setIcon(durationIcon.value, "timer");
-	if (dateIcon.value) setIcon(dateIcon.value, "calendar-days");
+	initIcon(durationIcon.value, "timer");
+	initIcon(dateIcon.value, "calendar-days");
 });
 
 /* ---------------- */

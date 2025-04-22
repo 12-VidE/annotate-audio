@@ -57,6 +57,7 @@
 					@click="
 						pausePlayer(player, sharedRefs.currentTime);
 						new PropertiesModal(
+							options,
 							source,
 							ctx,
 							container,
@@ -170,12 +171,12 @@ import CommentsList from "../comment/CommentsList.vue";
 // Import - Type
 import type { AudioChunk } from "src/types";
 import type { SharedRefs } from "../components/sharedRefs";
+import type { AudioBoxOptions } from "src/options/optionsType";
 // Import - Class
-import { AudioBoxOptions, PropertiesModal } from "src/options";
+import { PropertiesModal } from "src/options/optionsModal";
 // Import - Functions
 import { displayTitle } from "./layoutLogic";
 import { togglePlayer, setPlayerPosition, pausePlayer } from "../playerLogic";
-import { getAudioboxOptions } from "../components/Logic/codeblockFunc";
 import { hashObj, initIcon, secondsToTime } from "src/utils";
 
 const props = defineProps<{

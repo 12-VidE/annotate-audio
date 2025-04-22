@@ -44,7 +44,7 @@ import { onBeforeUnmount, onMounted, ref, watch, nextTick } from "vue";
 // Import - Type
 import type { AudioComment } from "./commentType";
 import type { SharedRefs } from "src/components/sharedRefs";
-import type { AudioBoxOptions } from "src/options";
+import type { AudioBoxOptions } from "src/options/options";
 // Import - Function
 import { getCommentsArray } from "./commentLogic";
 import { pausePlayer } from "src/playerLogic";

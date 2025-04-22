@@ -6,71 +6,12 @@ import {
 	Setting,
 } from "obsidian";
 // Import - Type
-import type { AudioChunk } from "./types";
-// Import - Constant
-import { layoutsArray, Layout } from "./layout/layoutType";
-// Import - Function
-import {
-	getAudioboxOptions,
-	setAudioboxOptions,
-} from "./components/Logic/codeblockFunc";
-import { secondsToTime, timeToSeconds } from "./utils";
-import { reactive } from "vue";
-import { playPlayer } from "./playerLogic";
-
-// What can be changed inside audio-box
-export type AudioBoxOptions = {
-	source: string;
-	//Player
-	chunk: AudioChunk; // Portion of track to be reproduced
-	volume: number; // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/volume
-	speed: number; // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/playbackRate
-	loop: boolean;
-	// UI
-	layout: number;
-	sticky: boolean; // IF we enable the player to be sticky
-	title: string | undefined;
-	// Comments
-	autoplay: boolean; // WHEN clicking on a comment, the playes does NOT pause
-	unstoppable: boolean; // Player doesn't stop WHEN adding a comment
-};
-
-export const defaultAudioBoxOptions: AudioBoxOptions = {
-	source: "",
-	// Player
-	chunk: { startTime: 0, endTime: 0 },
-	volume: 0.5,
-	speed: 1,
-	loop: false,
-	// UI
-	layout: 0,
-	sticky: false,
-	title: undefined,
-	// Comments
-	autoplay: false,
-	unstoppable: false,
-};
-
-export function createOptions(): AudioBoxOptions {
-	return reactive<AudioBoxOptions>({
-		source: "",
-		// Player
-		chunk: reactive({ startTime: 0, endTime: 0 }),
-		volume: 0.5,
-		speed: 1,
-		loop: false,
-		// UI
-		layout: 0,
-		sticky: false,
-		title: undefined,
-		// Comments
-		autoplay: false,
-		unstoppable: false,
-	});
-}
-/* -------------- */
-/* --- Modal --- */
-/* ------------- */
+import type { AudioBoxOptions } from "./optionsType";
+import { type Layout, layoutsArray } from "src/layout/layoutType";
+// Import - Functions
+import { getAudioboxOptions } from "./optionsGetter";
+import { secondsToTime, timeToSeconds } from "src/utils";
+import { setAudioboxOptions } from "./optionsSetter";
 
 export class PropertiesModal extends Modal {
 	private source: string;
@@ -80,6 +21,7 @@ export class PropertiesModal extends Modal {
 	private totalDuration: number;
 
 	constructor(
+		options: AudioBoxOptions,
 		source: string,
 		ctx: MarkdownPostProcessorContext,
 		container: HTMLElement,
@@ -88,6 +30,7 @@ export class PropertiesModal extends Modal {
 	) {
 		super(obsidianApp);
 
+		this.options = options;
 		this.source = source;
 		this.ctx = ctx;
 		this.container = container;
@@ -108,18 +51,13 @@ export class PropertiesModal extends Modal {
 		/* --- Options - Audio --- */
 		/* ----------------------- */
 		new Setting(contentEl).setName("Audio preferences").setHeading();
+
 		// Volume
 		new Setting(contentEl).setName("Volume").then((setting) => {
-			// Create the value label first
-			const valueLabel = setting.settingEl.createEl("span", {
-				text: this.options.volume.toFixed(1),
-				cls: "slider-display",
-			});
-
-			// Add the slider
+			// Add slider
 			setting.addSlider((slider) => {
 				slider
-					.setLimits(0, 1, 0.1)
+					.setLimits(0.1, 1, 0.1)
 					.setValue(this.options.volume)
 					.setInstant(true)
 					.onChange((value: number) => {
@@ -128,19 +66,16 @@ export class PropertiesModal extends Modal {
 					});
 			});
 
-			// Add display
+			// Add label
+			const valueLabel = setting.settingEl.createEl("span", {
+				text: this.options.volume.toFixed(1),
+			});
 			setting.controlEl.appendChild(valueLabel);
 		});
 
 		// Speed
 		new Setting(contentEl).setName("Playback speed").then((setting) => {
-			// Create the value label first
-			const valueLabel = setting.settingEl.createEl("span", {
-				text: this.options.speed.toFixed(1),
-				cls: "slider-display",
-			});
-
-			// Add the slider
+			// Add slider
 			setting.addSlider((slider) => {
 				slider
 					.setLimits(0.3, 4, 0.1)
@@ -152,7 +87,10 @@ export class PropertiesModal extends Modal {
 					});
 			});
 
-			// Add display
+			// Add label
+			const valueLabel = setting.settingEl.createEl("span", {
+				text: this.options.speed.toFixed(1),
+			});
 			setting.controlEl.appendChild(valueLabel);
 		});
 
@@ -359,14 +297,15 @@ export class PropertiesModal extends Modal {
 			.setHeading() // So they dont have the above divider
 			.addButton((btn) =>
 				btn.setIcon("check").onClick(() => {
+					new Notice("Options have been updated.");
+					this.close();
+
 					setAudioboxOptions(
 						this.ctx,
 						this.container,
 						this.app,
 						this.options
 					);
-					this.close();
-					new Notice("Options have been updated.");
 				})
 			)
 			.addButton((btn) =>
@@ -387,44 +326,4 @@ export class PropertiesModal extends Modal {
 	public openPropertiesModal() {
 		this.open();
 	}
-}
-
-/* -------------- */
-/* --- Format --- */
-/* -------------- */
-
-/**
- *
- * @param options AudioBox options to process
- * @returns Lines containing the options formatted as they will in codeblock
- */
-export function formatOptions(options: AudioBoxOptions): string[] {
-	// Convert newOptions object into an array
-	// Special formatting are treated separetly
-	const newOptionsArray = Object.entries(options)
-		.map(([key, value]) => {
-			switch (key) {
-				case "source":
-					return `source: [[${value}]]`;
-				case "title":
-					if (value == undefined) return ``;
-					else if (value == "") return `title: `;
-					else return `title: ${value}`;
-				case "chunk":
-					const chunk = value as AudioChunk;
-					if (chunk.endTime > chunk.startTime)
-						return `chunk: ${secondsToTime(
-							chunk?.startTime
-						)}-${secondsToTime(chunk?.endTime)}`;
-					else return ``;
-				default:
-					return `${key}: ${value}`;
-			}
-		})
-		.filter((option) => {
-			if (option === ``) return false; // Delete empty strings
-			return true;
-		});
-	newOptionsArray.push(""); // Add spacer
-	return newOptionsArray;
 }

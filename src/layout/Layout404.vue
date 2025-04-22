@@ -13,16 +13,14 @@
 import { App, MarkdownPostProcessorContext } from "obsidian";
 import { onMounted, ref } from "vue";
 // Import - Type
-import type { AudioBoxOptions } from "src/options";
+import type { AudioBoxOptions } from "src/options/optionsType";
 import type { SharedRefs } from "src/components/sharedRefs";
 // Import - Class
-import { sourceModal } from "src/main";
+import { sourceModal } from "src/options/source/sourceModal";
 // Import - Functions
 import { initIcon } from "src/utils";
-import {
-	getAudioboxOptions,
-	setAudioboxOptions,
-} from "../components/Logic/codeblockFunc";
+import { setAudioboxOptions } from "src/options/optionsSetter";
+import { getAudioboxOptions } from "src/options/optionsGetter";
 import { retriveDuration } from "src/utils";
 
 const props = defineProps<{

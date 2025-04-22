@@ -16,11 +16,11 @@
 
 <script setup lang="ts">
 import { MarkdownPostProcessorContext, App, TFile } from "obsidian";
-import { computed, onMounted, onBeforeUnmount } from "vue";
+import { computed, onMounted, onBeforeUnmount, reactive } from "vue";
 // Import - Components
 import { layoutsArray } from "../layout/layoutType";
 // Import - Function
-import { getLayoutOption, getAudioboxOptions } from "./Logic/codeblockFunc";
+import { getLayoutOption, getAudioboxOptions } from "src/options/optionsGetter";
 import { hashObj } from "src/utils";
 import {
 	pausePlayer,
@@ -31,9 +31,13 @@ import {
 import { retriveDuration } from "src/utils";
 // Import/Create - Ref
 import { createShareRefs } from "./sharedRefs";
+import {
+	AudioBoxOptions,
+	DEFAULT_AUDIOBOX_OPTIONS,
+} from "src/options/optionsType";
 const sharedRefs = createShareRefs();
-import { createOptions } from "src/options";
-let options = createOptions();
+
+let options = reactive<AudioBoxOptions>({ ...DEFAULT_AUDIOBOX_OPTIONS });
 
 const props = defineProps<{
 	id: string;

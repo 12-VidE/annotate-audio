@@ -99,6 +99,7 @@
 						@click="
 							pausePlayer(player, sharedRefs.currentTime);
 							new PropertiesModal(
+								options,
 								source,
 								ctx,
 								container,
@@ -152,8 +153,9 @@ import CommentInput from "../comment/CommentInput.vue";
 import CommentsList from "../comment/CommentsList.vue";
 // Import - Type
 import type { SharedRefs } from "../components/sharedRefs";
+import type { AudioBoxOptions } from "src/options/optionsType";
 // Import - Class
-import { AudioBoxOptions, PropertiesModal } from "src/options";
+import { PropertiesModal } from "src/options/optionsModal";
 // Import - Functions
 import { togglePlayer, setPlayerPosition, pausePlayer } from "../playerLogic";
 import { initIcon, secondsToTime } from "src/utils";

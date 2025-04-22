@@ -32,7 +32,7 @@ import { SharedRefs } from "src/components/sharedRefs";
 // Import - Function
 import { getCommentsArray } from "./commentLogic";
 import { setPlayerPosition, pausePlayer, playPlayer } from "src/playerLogic";
-import { AudioBoxOptions } from "src/options";
+import { AudioBoxOptions } from "src/options/options";
 
 const props = defineProps<{
 	id: string;
