@@ -195,10 +195,144 @@ button.delete-confirmation {
 	background-color: var(--interactive-accent);
 }
 
+/* --------------------- */
+/* --- LayoutDefault --- */
+/* --------------------- */
+.layout--default div.main-container {
+	container-type: inline-size;
+	container-name: audiobox;
+
+	border-radius: 1rem;
+	padding: 0.5rem;
+	background-color: var(--background-secondary);
+	border-color: var(--color-base-30);
+}
+
+.layout--default div.inputs-container {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.layout--default div.controls-container {
+	margin: auto;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.1rem;
+
+	> button.playpause_btn {
+		all: unset;
+		background-color: var(--color-accent-1);
+		max-height: fit-content;
+		max-width: fit-content;
+		padding: 0.6rem;
+		border-radius: 3rem;
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
+		transition: all 0.15s;
+		cursor: pointer;
+
+		&:active {
+			background-color: var(--color-base-10);
+		}
+	}
+
+	> div.movement-container {
+		display: flex;
+		gap: 1rem;
+		line-height: 0; /* Make the div as tall as the icon */
+
+		> button.movement-btn {
+			all: unset;
+			background-color: unset;
+			border: 0;
+			flex: unset;
+			max-height: fit-content;
+			&:active {
+				svg {
+					color: var(--color-accent);
+				}
+			}
+		}
+	}
+}
+
+.layout--default div.timeline-numbers {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+
+	margin: 0.1rem 1rem 0 1rem;
+	> span:nth-of-type(1) {
+		font-size: 0.9rem;
+		color: var(--color-base-70);
+	}
+	> span:nth-of-type(2) {
+		font-size: 0.7rem;
+		color: var(--color-base-50);
+	}
+}
+
+.layout--default div.timeline-container {
+	width: 100%;
+	flex: 1;
+	margin-right: 0.5rem;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	> input[type="range"] {
+		width: 100%;
+		margin: 0;
+	}
+}
+
+@container audiobox (max-width: 320px) {
+	.layout--default div.timeline-numbers {
+		flex: 1;
+	}
+	.layout--default div.timeline-container {
+		flex: 0 0 100%;
+		width: 100%;
+		margin: 0.2rem 0 0.3rem;
+
+		order: +1;
+	}
+}
+
+.layout--default div.stacked-btns-container {
+	display: flex;
+	flex-direction: row;
+	> button.openProperties_btn {
+		all: unset;
+		align-self: self-start;
+		padding: 0;
+		margin: 0;
+		> svg {
+			color: var(--color-base-40);
+		}
+	}
+	> button.commentInput_btn {
+		all: unset;
+		align-self: center;
+		background-color: var(--color-base-50);
+		height: 3.4rem;
+		padding: 0.3rem;
+		border-radius: 2rem 0 0 2rem;
+
+		display: flex;
+		align-items: center;
+	}
+}
+
 /* ----------------- */
 /* --- LayoutBig --- */
 /* ----------------- */
-
 .layout--big .audiobox-title {
 	color: var(--text-normal);
 	> span {
@@ -299,129 +433,9 @@ button.delete-confirmation {
 	}
 }
 
-/* --------------------- */
-/* --- LayoutDefault --- */
-/* --------------------- */
-
-.layout--default div.main-container {
-	border-radius: 1rem;
-	padding: 0.5rem;
-	background-color: var(--background-secondary);
-	border-color: var(--color-base-30);
-}
-
-.layout--default div.inputs-container {
-	display: flex;
-	flex-direction: row;
-}
-
-.layout--default div.controls-container {
-	margin: auto;
-
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 0.1rem;
-
-	> button.playpause_btn {
-		all: unset;
-		background-color: var(--color-accent-1);
-		max-height: fit-content;
-		max-width: fit-content;
-		padding: 0.6rem;
-		border-radius: 3rem;
-
-		display: flex;
-		justify-content: center;
-		align-items: center;
-
-		transition: all 0.15s;
-		cursor: pointer;
-
-		&:active {
-			background-color: var(--color-base-10);
-		}
-	}
-
-	> div.movement-container {
-		display: flex;
-		gap: 1rem;
-		line-height: 0; /* Make the div as tall as the icon */
-
-		> button.movement-btn {
-			all: unset;
-			background-color: unset;
-			border: 0;
-			flex: unset;
-			max-height: fit-content;
-			&:active {
-				svg {
-					color: var(--color-accent);
-				}
-			}
-		}
-	}
-}
-
-.layout--default div.timeline-numbers {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-
-	margin: 0.1rem 1rem 0 1rem;
-	> span:nth-of-type(1) {
-		font-size: 0.9rem;
-		color: var(--color-base-70);
-	}
-	> span:nth-of-type(2) {
-		font-size: 0.7rem;
-		color: var(--color-base-50);
-	}
-}
-
-.layout--default div.timeline-container {
-	width: 100%;
-	flex: 1;
-	margin-right: 0.5rem;
-
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	> input[type="range"] {
-		width: 100%;
-		margin: 0;
-	}
-}
-
-.layout--default div.stacked-btns-container {
-	display: flex;
-	flex-direction: row;
-	> button.openProperties_btn {
-		all: unset;
-		align-self: self-start;
-		padding: 0;
-		margin: 0;
-		> svg {
-			color: var(--color-base-40);
-		}
-	}
-	> button.commentInput_btn {
-		all: unset;
-		align-self: center;
-		background-color: var(--color-base-50);
-		height: 3.4rem;
-		padding: 0.3rem;
-		border-radius: 2rem 0 0 2rem;
-
-		display: flex;
-		align-items: center;
-	}
-}
-
 /* ----------------- */
 /* --- LayoutGeek --- */
 /* ----------------- */
-
 .layout--geek .audiobox-title {
 	border-radius: 0rem 1rem 1rem 0rem;
 	border: 0.2rem solid var(--color-base-30);

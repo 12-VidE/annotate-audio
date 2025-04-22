@@ -1,5 +1,6 @@
 <template>
 	<div class="layout--default">
+		<!-- Sticky Container -->
 		<div
 			ref="stickyContainer"
 			:class="['main-container', options.sticky && 'is-sticky']"
@@ -7,7 +8,7 @@
 			<div :class="['inputs-container']">
 				<!-- Player Controls -->
 				<div :class="['controls-container']">
-					<!-- Play/Pause Control -->
+					<!-- Play/Pause -->
 					<button
 						type="button"
 						ref="playpause_btn"
@@ -35,6 +36,7 @@
 								'disabled',
 						]"
 					>
+						<!-- Backward -->
 						<button
 							type="button"
 							ref="backward_btn"
@@ -48,6 +50,7 @@
 								)
 							"
 						></button>
+						<!-- Forward -->
 						<button
 							type="button"
 							ref="forward_btn"
@@ -183,14 +186,14 @@ const backward_btn = ref<HTMLElement | null>(null);
 const forward_btn = ref<HTMLElement | null>(null);
 
 onMounted(() => {
-	// Initialize icons
+	// Initialize - Icons
 	initIcon(playpause_btn.value, "play");
 	initIcon(showCommentInput_btn.value, "bookmark-plus");
 	initIcon(openProperties_btn.value, "settings-2");
 	initIcon(backward_btn.value, "chevrons-left");
 	initIcon(forward_btn.value, "chevrons-right");
 
-	// Initialize Event-Listeners
+	// Initialize - Event-Listeners
 	if (props.player) {
 		props.player.addEventListener("timeupdate", eventTimeUpdate);
 		props.player.addEventListener("play", eventPlayerPlay);
@@ -199,7 +202,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-	// Destroy Event-Listeners
+	// Destroy - Event-Listeners
 	props.player.removeEventListener("timeupdate", eventTimeUpdate);
 	props.player.removeEventListener("play", eventPlayerPlay);
 	props.player.removeEventListener("pause", eventPlayerPause);
