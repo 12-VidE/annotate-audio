@@ -18,26 +18,22 @@
 import { MarkdownPostProcessorContext, App, TFile } from "obsidian";
 import { computed, onMounted, onBeforeUnmount, reactive } from "vue";
 // Import - Components
-import { layoutsArray } from "../layout/layoutType";
+import { layoutsArray } from "./layout/layoutType";
+// Import - Type
+import type { SharedRefs } from "./types";
+import type { AudioBoxOptions } from "src/options/optionsType";
+// Import - Constants
+import { DEFAULT_SHARED_REFS } from "./types";
+import { DEFAULT_AUDIOBOX_OPTIONS } from "src/options/optionsType";
 // Import - Function
-import { getLayoutOption, getAudioboxOptions } from "src/options/optionsGetter";
-import { hashObj } from "src/utils";
+import { getAudioboxOptions } from "src/options/optionsGetter";
 import {
 	pausePlayer,
 	playPlayer,
 	setPlayerPosition,
 	togglePlayer,
-} from "../playerLogic";
-import { retriveDuration } from "src/utils";
-// Import/Create - Ref
-import { createShareRefs } from "./sharedRefs";
-import {
-	AudioBoxOptions,
-	DEFAULT_AUDIOBOX_OPTIONS,
-} from "src/options/optionsType";
-const sharedRefs = createShareRefs();
-
-let options = reactive<AudioBoxOptions>({ ...DEFAULT_AUDIOBOX_OPTIONS });
+} from "./playerLogic";
+import { hashObj, retriveDuration } from "src/utils";
 
 const props = defineProps<{
 	id: string;
@@ -53,6 +49,9 @@ const props = defineProps<{
 /* --- Lifecycle --- */
 /* ----------------- */
 
+const sharedRefs = reactive<SharedRefs>({ ...DEFAULT_SHARED_REFS });
+const options = reactive<AudioBoxOptions>({ ...DEFAULT_AUDIOBOX_OPTIONS });
+
 onMounted(async () => {
 	await loadCacheOrFallback();
 
@@ -61,18 +60,14 @@ onMounted(async () => {
 		props.audioSource
 	);
 	if (!file || !(file instanceof TFile)) return;
-	sharedRefs.srcPath.value = props.obsidianApp.vault.getResourcePath(file);
+	sharedRefs.srcPath = props.obsidianApp.vault.getResourcePath(file);
 
 	// Get duration
-	sharedRefs.maxDuration.value = await retriveDuration(
-		sharedRefs.srcPath.value
-	);
-
-	console.log(options);
+	sharedRefs.maxDuration = await retriveDuration(sharedRefs.srcPath);
 
 	// Initialize Player
-	props.player.src = sharedRefs.srcPath.value;
-	props.player.currentTime = sharedRefs.currentTime.value;
+	props.player.src = sharedRefs.srcPath;
+	props.player.currentTime = sharedRefs.currentTime;
 	props.player.volume = options.volume;
 	props.player.playbackRate = options.speed;
 	props.player.loop = options.loop;
@@ -112,8 +107,7 @@ onBeforeUnmount(() => {
  * Select which player layout to display
  */
 const currentLayoutComponent = computed(() => {
-	const layoutIndex: number = getLayoutOption(props.source);
-	return layoutsArray[layoutIndex].component;
+	return layoutsArray[options.layout].component;
 });
 
 /* ---------------- */
@@ -123,7 +117,7 @@ const currentLayoutComponent = computed(() => {
 async function loadCacheOrFallback(): Promise<void> {
 	const codeblockSettings = getAudioboxOptions(
 		props.source,
-		sharedRefs.maxDuration.value!
+		sharedRefs.maxDuration
 	);
 	const newHash = await hashObj(codeblockSettings);
 	const oldHash = localStorage.getItem(`aa_${props.id}_optionsHash`);
@@ -146,7 +140,7 @@ async function loadCacheOrFallback(): Promise<void> {
 		currentTimeCache <= options.chunk.endTime
 	) {
 		// Inside chunk - Safe to use cache
-		sharedRefs.currentTime.value = currentTimeCache;
+		sharedRefs.currentTime = currentTimeCache;
 		// Resume audio
 		const resumeCache: boolean =
 			localStorage.getItem(`aa_${props.id}_resume`) === "true";
@@ -155,12 +149,12 @@ async function loadCacheOrFallback(): Promise<void> {
 				props.id,
 				props.player,
 				options.chunk,
-				sharedRefs.currentTime.value
+				sharedRefs.currentTime
 			);
 	}
 
 	// Out-of-bounadry - Fall back to safe place
-	else sharedRefs.currentTime.value = options.chunk?.startTime!;
+	else sharedRefs.currentTime = options.chunk?.startTime!;
 }
 
 async function saveCache(): Promise<void> {
@@ -172,7 +166,7 @@ async function saveCache(): Promise<void> {
 	);
 	localStorage.setItem(
 		`aa_${props.id}_resume`,
-		JSON.stringify(sharedRefs.resume.value)
+		JSON.stringify(sharedRefs.resume)
 	);
 }
 
@@ -213,7 +207,7 @@ const eventPlayPlayer = (e: Event) => {
 			props.id,
 			props.player,
 			options.chunk,
-			sharedRefs.currentTime.value
+			sharedRefs.currentTime
 		);
 	}
 };
@@ -239,7 +233,7 @@ const eventForwardPlayer = (e: Event) => {
 			props.player,
 			options.chunk,
 			sharedRefs.currentTime,
-			sharedRefs.currentTime.value + 5
+			sharedRefs.currentTime + 5
 		);
 	}
 };
@@ -252,7 +246,7 @@ const eventBackwardPlayer = (e: Event) => {
 			props.player,
 			options.chunk,
 			sharedRefs.currentTime,
-			sharedRefs.currentTime.value - 5
+			sharedRefs.currentTime - 5
 		);
 	}
 };

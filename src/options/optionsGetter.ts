@@ -4,7 +4,7 @@ import { DEFAULT_AUDIOBOX_OPTIONS } from "./optionsType";
 import { AudioChunk } from "src/types";
 import type { AudioBoxOptions } from "./optionsType";
 // Import - Function
-import { getCodeBlockData } from "src/components/Logic/codeblockFunc";
+import { getCodeBlockData } from "src/codeblockLogic";
 import { timeToSeconds } from "src/utils";
 
 /**
@@ -12,7 +12,7 @@ import { timeToSeconds } from "src/utils";
  */
 export function getAudioboxOptions(
 	source: string,
-	maxDuration: number
+	maxDuration: number | undefined = undefined
 ): AudioBoxOptions {
 	return {
 		source: getSourceOption(source),

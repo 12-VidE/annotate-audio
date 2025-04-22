@@ -1,9 +1,6 @@
 <template>
 	<div
-		:class="[
-			'comment-list',
-			sharedRefs.isCommentInputShown.value && 'disabled',
-		]"
+		:class="['comment-list', sharedRefs.isCommentInputShown && 'disabled']"
 	>
 		<Comment
 			v-for="comment in filteredCommentsArray"
@@ -15,7 +12,7 @@
 			:key="comment.time + '_' + comment.content"
 			:comment="comment"
 			:obsidianApp="obsidianApp"
-			:maxDuration="sharedRefs.maxDuration.value"
+			:maxDuration="sharedRefs.maxDuration"
 		/>
 	</div>
 </template>
@@ -27,12 +24,11 @@ import { ref, computed, onMounted } from "vue";
 import Comment from "./Comment.vue";
 // Import - Type
 import type { AudioComment } from "./commentType";
-import { SharedRefs } from "src/components/sharedRefs";
-
+import type { SharedRefs } from "src/types";
+import type { AudioBoxOptions } from "src/options/optionsType";
 // Import - Function
 import { getCommentsArray } from "./commentLogic";
 import { setPlayerPosition, pausePlayer, playPlayer } from "src/playerLogic";
-import { AudioBoxOptions } from "src/options/options";
 
 const props = defineProps<{
 	id: string;
@@ -83,10 +79,10 @@ function enableEditComment(time: number): void {
 	if (!props.options.unstoppable)
 		pausePlayer(props.player, props.sharedRefs.currentTime);
 
-	props.sharedRefs.workingComment.value = getComment(time);
+	props.sharedRefs.workingComment = getComment(time);
 
 	// Trigger CommentInput.vue
-	props.sharedRefs.isCommentInputShown.value = true;
+	props.sharedRefs.isCommentInputShown = true;
 }
 
 /**
@@ -114,7 +110,7 @@ function playComment(time: number): void {
 			props.id,
 			props.player,
 			props.options.chunk,
-			props.sharedRefs.currentTime.value
+			props.sharedRefs.currentTime
 		);
 	}
 }

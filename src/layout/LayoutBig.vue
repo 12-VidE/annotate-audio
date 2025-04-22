@@ -7,15 +7,12 @@
 		</div>
 		<!-- WaveGraph -->
 		<div
-			:class="[
-				'wavegraph',
-				sharedRefs.isCommentInputShown.value && 'disabled',
-			]"
+			:class="['wavegraph', sharedRefs.isCommentInputShown && 'disabled']"
 		>
 			<div
 				v-for="(s, i) in barHeights"
 				:class="{ bar: true, playedBar: i <= currentBar }"
-				:key="props.sharedRefs.srcPath.value + i"
+				:key="props.sharedRefs.srcPath + i"
 				:style="{ height: s * 6 + 'rem' }"
 			></div>
 		</div>
@@ -27,7 +24,7 @@
 			<div
 				:class="[
 					'timeline-container',
-					sharedRefs.isCommentInputShown.value && 'disabled',
+					sharedRefs.isCommentInputShown && 'disabled',
 				]"
 			>
 				<input
@@ -35,7 +32,7 @@
 					:min="options.chunk?.startTime"
 					:max="options.chunk?.endTime"
 					step="0.1"
-					v-model="sharedRefs.currentTime.value"
+					v-model="sharedRefs.currentTime"
 					@input="eventTimeBarInput"
 				/>
 				<div :class="['timeline-numbers']">
@@ -52,7 +49,7 @@
 					:class="[
 						'commentInput_btn',
 						'control_btn',
-						sharedRefs.isCommentInputShown.value && 'disabled',
+						sharedRefs.isCommentInputShown && 'disabled',
 					]"
 					@click="
 						pausePlayer(player, sharedRefs.currentTime);
@@ -62,7 +59,7 @@
 							ctx,
 							container,
 							obsidianApp,
-							sharedRefs.maxDuration.value!
+							sharedRefs.maxDuration!
 						).openPropertiesModal();
 					"
 				></button>
@@ -72,7 +69,7 @@
 					:class="[
 						'control_btn',
 						'secondary_btn',
-						sharedRefs.isCommentInputShown.value &&
+						sharedRefs.isCommentInputShown &&
 							!options.unstoppable &&
 							'disabled',
 					]"
@@ -81,7 +78,7 @@
 							player,
 							options.chunk,
 							sharedRefs.currentTime,
-							sharedRefs.currentTime.value - 5
+							sharedRefs.currentTime - 5
 						)
 					"
 				>
@@ -93,7 +90,7 @@
 					ref="playpause_btn"
 					:class="[
 						'control_btn',
-						sharedRefs.isCommentInputShown.value &&
+						sharedRefs.isCommentInputShown &&
 							!options.unstoppable &&
 							'disabled',
 					]"
@@ -111,7 +108,7 @@
 					:class="[
 						'control_btn',
 						'secondary_btn',
-						sharedRefs.isCommentInputShown.value &&
+						sharedRefs.isCommentInputShown &&
 							!options.unstoppable &&
 							'disabled',
 					]"
@@ -120,7 +117,7 @@
 							player,
 							options.chunk,
 							sharedRefs.currentTime,
-							sharedRefs.currentTime.value + 5
+							sharedRefs.currentTime + 5
 						)
 					"
 				>
@@ -132,9 +129,9 @@
 					:class="[
 						'commentInput_btn',
 						'control_btn',
-						sharedRefs.isCommentInputShown.value && 'disabled',
+						sharedRefs.isCommentInputShown && 'disabled',
 					]"
-					@click="sharedRefs.isCommentInputShown.value = true"
+					@click="sharedRefs.isCommentInputShown = true"
 				></button>
 			</div>
 			<!-- Comment Input -->
@@ -170,7 +167,7 @@ import CommentInput from "../comment/CommentInput.vue";
 import CommentsList from "../comment/CommentsList.vue";
 // Import - Type
 import type { AudioChunk } from "src/types";
-import type { SharedRefs } from "../components/sharedRefs";
+import type { SharedRefs } from "src/types";
 import type { AudioBoxOptions } from "src/options/optionsType";
 // Import - Class
 import { PropertiesModal } from "src/options/optionsModal";
@@ -253,21 +250,18 @@ onBeforeUnmount(() => {
 
 const displayCurrentTime = computed(() =>
 	secondsToTime(
-		Math.floor(props.sharedRefs.currentTime.value),
-		props.sharedRefs.maxDuration.value
+		Math.floor(props.sharedRefs.currentTime),
+		props.sharedRefs.maxDuration
 	)
 );
 
 const displayDuration = computed(() =>
-	secondsToTime(
-		props.options.chunk.endTime,
-		props.sharedRefs.maxDuration.value
-	)
+	secondsToTime(props.options.chunk.endTime, props.sharedRefs.maxDuration)
 );
 
 const currentBar = computed(() => {
 	return Math.floor(
-		((props.sharedRefs.currentTime.value - props.options.chunk.startTime) /
+		((props.sharedRefs.currentTime - props.options.chunk.startTime) /
 			props.options.chunk.duration!) *
 			nSamples
 	);
@@ -339,16 +333,16 @@ function saveCache(): void {
 
 function eventTimeBarInput() {
 	// Validate and update the audio's current time
-	if (!isNaN(props.sharedRefs.currentTime.value) && props.player)
-		props.player.currentTime = props.sharedRefs.currentTime.value;
+	if (!isNaN(props.sharedRefs.currentTime) && props.player)
+		props.player.currentTime = props.sharedRefs.currentTime;
 }
 
 function eventTimeUpdate() {
 	// Update currentTime
-	props.sharedRefs.currentTime.value = props.player.currentTime;
+	props.sharedRefs.currentTime = props.player.currentTime;
 
 	// IF outside chunk, simulate the end
-	if (props.sharedRefs.currentTime.value > props.options.chunk.endTime)
+	if (props.sharedRefs.currentTime > props.options.chunk.endTime)
 		props.player.dispatchEvent(new Event("ended", { bubbles: true }));
 }
 

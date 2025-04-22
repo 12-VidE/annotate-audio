@@ -1,7 +1,7 @@
 import { MarkdownRenderChild } from "obsidian";
 import { App, createApp } from "vue";
 // Import - Component
-import ParentApp from "./components/ParentApp.vue";
+import ParentApp from "./ParentApp.vue";
 import Layout404 from "./layout/Layout404.vue";
 // Import - Type
 import type { AudioBoxParameters } from "./types";

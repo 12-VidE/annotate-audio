@@ -13,7 +13,7 @@
 						ref="playpause_btn"
 						:class="[
 							'playpause_btn',
-							sharedRefs.isCommentInputShown.value &&
+							sharedRefs.isCommentInputShown &&
 								!options.unstoppable &&
 								'disabled',
 						]"
@@ -30,7 +30,7 @@
 					<div
 						:class="[
 							'movement-container',
-							sharedRefs.isCommentInputShown.value &&
+							sharedRefs.isCommentInputShown &&
 								!options.unstoppable &&
 								'disabled',
 						]"
@@ -44,7 +44,7 @@
 									player,
 									options.chunk,
 									sharedRefs.currentTime,
-									sharedRefs.currentTime.value - 5
+									sharedRefs.currentTime - 5
 								)
 							"
 						></button>
@@ -57,7 +57,7 @@
 									player,
 									options.chunk,
 									sharedRefs.currentTime,
-									sharedRefs.currentTime.value + 5
+									sharedRefs.currentTime + 5
 								)
 							"
 						></button>
@@ -72,7 +72,7 @@
 				<div
 					:class="[
 						'timeline-container',
-						sharedRefs.isCommentInputShown.value && 'disabled',
+						sharedRefs.isCommentInputShown && 'disabled',
 					]"
 				>
 					<input
@@ -80,7 +80,7 @@
 						:min="options.chunk?.startTime"
 						:max="options.chunk?.endTime"
 						step="0.1"
-						v-model="sharedRefs.currentTime.value"
+						v-model="sharedRefs.currentTime"
 						@input="eventTimeBarInput"
 					/>
 				</div>
@@ -88,7 +88,7 @@
 				<div
 					:class="[
 						'stacked-btns-container',
-						sharedRefs.isCommentInputShown.value && 'disabled',
+						sharedRefs.isCommentInputShown && 'disabled',
 					]"
 				>
 					<!-- "Properies" Button-->
@@ -104,7 +104,7 @@
 								ctx,
 								container,
 								obsidianApp,
-								sharedRefs.maxDuration.value!
+								sharedRefs.maxDuration!
 							).openPropertiesModal();
 						"
 					></button>
@@ -113,9 +113,9 @@
 						ref="showCommentInput_btn"
 						:class="[
 							'commentInput_btn',
-							sharedRefs.isCommentInputShown.value && 'disabled',
+							sharedRefs.isCommentInputShown && 'disabled',
 						]"
-						@click="sharedRefs.isCommentInputShown.value = true"
+						@click="sharedRefs.isCommentInputShown = true"
 					></button>
 				</div>
 			</div>
@@ -152,7 +152,7 @@ import { MarkdownPostProcessorContext, App, setIcon } from "obsidian";
 import CommentInput from "../comment/CommentInput.vue";
 import CommentsList from "../comment/CommentsList.vue";
 // Import - Type
-import type { SharedRefs } from "../components/sharedRefs";
+import type { SharedRefs } from "src/types";
 import type { AudioBoxOptions } from "src/options/optionsType";
 // Import - Class
 import { PropertiesModal } from "src/options/optionsModal";
@@ -211,16 +211,13 @@ onBeforeUnmount(() => {
 
 const displayCurrentTime = computed(() =>
 	secondsToTime(
-		Math.floor(props.sharedRefs.currentTime.value),
-		props.sharedRefs.maxDuration.value
+		Math.floor(props.sharedRefs.currentTime),
+		props.sharedRefs.maxDuration
 	)
 );
 
 const displayDuration = computed(() =>
-	secondsToTime(
-		props.options.chunk.endTime,
-		props.sharedRefs.maxDuration.value
-	)
+	secondsToTime(props.options.chunk.endTime, props.sharedRefs.maxDuration)
 );
 
 /* ---------------- */
@@ -232,16 +229,16 @@ const displayDuration = computed(() =>
 
 function eventTimeBarInput(): void {
 	// Validate and update the audio's current time
-	if (!isNaN(props.sharedRefs.currentTime.value) && props.player)
-		props.player.currentTime = props.sharedRefs.currentTime.value;
+	if (!isNaN(props.sharedRefs.currentTime) && props.player)
+		props.player.currentTime = props.sharedRefs.currentTime;
 }
 
 function eventTimeUpdate(): void {
 	// Update currentTime
-	props.sharedRefs.currentTime.value = props.player.currentTime;
+	props.sharedRefs.currentTime = props.player.currentTime;
 
 	// IF outside chunk, simulate the end
-	if (props.sharedRefs.currentTime.value > props.options.chunk.endTime)
+	if (props.sharedRefs.currentTime > props.options.chunk.endTime)
 		props.player.dispatchEvent(new Event("ended", { bubbles: true }));
 }
 

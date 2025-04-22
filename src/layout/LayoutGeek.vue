@@ -23,7 +23,7 @@
 						:class="[
 							'commentInput_btn',
 							'control_btn',
-							sharedRefs.isCommentInputShown.value && 'disabled',
+							sharedRefs.isCommentInputShown && 'disabled',
 						]"
 						@click="
 							pausePlayer(player, sharedRefs.currentTime);
@@ -33,7 +33,7 @@
 								ctx,
 								container,
 								obsidianApp,
-								sharedRefs.maxDuration.value!
+								sharedRefs.maxDuration!
 							).openPropertiesModal();
 						"
 					></button>
@@ -43,7 +43,7 @@
 						:class="[
 							'control_btn',
 							'secondary_btn',
-							sharedRefs.isCommentInputShown.value &&
+							sharedRefs.isCommentInputShown &&
 								!options.unstoppable &&
 								'disabled',
 						]"
@@ -52,7 +52,7 @@
 								player,
 								options.chunk,
 								sharedRefs.currentTime,
-								sharedRefs.currentTime.value - 5
+								sharedRefs.currentTime - 5
 							)
 						"
 					>
@@ -64,7 +64,7 @@
 						ref="playpause_btn"
 						:class="[
 							'control_btn',
-							sharedRefs.isCommentInputShown.value &&
+							sharedRefs.isCommentInputShown &&
 								!options.unstoppable &&
 								'disabled',
 						]"
@@ -83,7 +83,7 @@
 						:class="[
 							'control_btn',
 							'secondary_btn',
-							sharedRefs.isCommentInputShown.value &&
+							sharedRefs.isCommentInputShown &&
 								!options.unstoppable &&
 								'disabled',
 						]"
@@ -92,7 +92,7 @@
 								player,
 								options.chunk,
 								sharedRefs.currentTime,
-								sharedRefs.currentTime.value + 5
+								sharedRefs.currentTime + 5
 							)
 						"
 					>
@@ -105,9 +105,9 @@
 						:class="[
 							'commentInput_btn',
 							'control_btn',
-							sharedRefs.isCommentInputShown.value && 'disabled',
+							sharedRefs.isCommentInputShown && 'disabled',
 						]"
-						@click="sharedRefs.isCommentInputShown.value = true"
+						@click="sharedRefs.isCommentInputShown = true"
 					></button>
 				</div>
 
@@ -118,7 +118,7 @@
 			<div
 				:class="[
 					'timeline-container',
-					sharedRefs.isCommentInputShown.value && 'disabled',
+					sharedRefs.isCommentInputShown && 'disabled',
 				]"
 			>
 				<input
@@ -126,7 +126,7 @@
 					:min="options.chunk?.startTime"
 					:max="options.chunk?.endTime"
 					step="0.1"
-					v-model="sharedRefs.currentTime.value"
+					v-model="sharedRefs.currentTime"
 					@input="eventTimeBarInput"
 				/>
 			</div>
@@ -135,7 +135,7 @@
 			<div
 				:class="[
 					'secondary-controls-container',
-					sharedRefs.isCommentInputShown.value && 'disabled',
+					sharedRefs.isCommentInputShown && 'disabled',
 				]"
 			>
 				<!-- 1° Row -->
@@ -238,7 +238,7 @@ import { MarkdownPostProcessorContext, App } from "obsidian";
 import CommentInput from "../comment/CommentInput.vue";
 import CommentsList from "../comment/CommentsList.vue";
 // Import - Type
-import type { SharedRefs } from "../components/sharedRefs";
+import type { SharedRefs } from "src/types";
 import type { AudioBoxOptions } from "src/options/optionsType";
 // Import - Class
 import { PropertiesModal } from "src/options/optionsModal";
@@ -327,16 +327,13 @@ onBeforeUnmount(() => {
 
 const displayCurrentTime = computed(() =>
 	secondsToTime(
-		Math.floor(props.sharedRefs.currentTime.value),
-		props.sharedRefs.maxDuration.value
+		Math.floor(props.sharedRefs.currentTime),
+		props.sharedRefs.maxDuration
 	)
 );
 
 const displayDuration = computed(() =>
-	secondsToTime(
-		props.options.chunk.endTime,
-		props.sharedRefs.maxDuration.value
-	)
+	secondsToTime(props.options.chunk.endTime, props.sharedRefs.maxDuration)
 );
 
 const title = computed(() => displayTitle(props.source, props.options.title));
@@ -354,8 +351,7 @@ function styleChunkBnt() {
 		// Set chunk startTime
 		initIcon(chunk_btn.value, "arrow-left-to-line", "Chunk: Select start");
 	} else if (
-		props.options.chunk.endTime ==
-		Math.floor(props.sharedRefs.maxDuration.value!)
+		props.options.chunk.endTime == Math.floor(props.sharedRefs.maxDuration!)
 	) {
 		// Set chunk endTime
 		initIcon(chunk_btn.value, "arrow-right-to-line", "Chunk: Select end");
@@ -369,15 +365,14 @@ function manageChunk() {
 	if (props.options.chunk.startTime == 0) {
 		props.options.chunk.startTime = Math.floor(props.player.currentTime);
 	} else if (
-		props.options.chunk.endTime ==
-		Math.floor(props.sharedRefs.maxDuration.value!)
+		props.options.chunk.endTime == Math.floor(props.sharedRefs.maxDuration!)
 	) {
 		if (props.player.currentTime > props.options.chunk.startTime)
 			props.options.chunk.endTime = Math.floor(props.player.currentTime);
 	} else {
 		props.options.chunk = {
 			startTime: 0,
-			endTime: Math.floor(props.sharedRefs.maxDuration.value!),
+			endTime: Math.floor(props.sharedRefs.maxDuration!),
 		};
 	}
 	styleChunkBnt();
@@ -388,16 +383,16 @@ function manageChunk() {
 
 function eventTimeBarInput() {
 	// Validate and update the audio's current time
-	if (!isNaN(props.sharedRefs.currentTime.value) && props.player)
-		props.player.currentTime = props.sharedRefs.currentTime.value;
+	if (!isNaN(props.sharedRefs.currentTime) && props.player)
+		props.player.currentTime = props.sharedRefs.currentTime;
 }
 
 function eventTimeUpdate() {
 	// Update currentTime
-	props.sharedRefs.currentTime.value = props.player.currentTime;
+	props.sharedRefs.currentTime = props.player.currentTime;
 
 	// IF outside chunk, simulate the end
-	if (props.sharedRefs.currentTime.value > props.options.chunk.endTime)
+	if (props.sharedRefs.currentTime > props.options.chunk.endTime)
 		props.player.dispatchEvent(new Event("ended", { bubbles: true }));
 }
 

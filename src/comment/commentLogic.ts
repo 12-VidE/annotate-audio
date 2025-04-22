@@ -1,4 +1,4 @@
-import { getCodeBlockData } from "src/components/Logic/codeblockFunc";
+import { getCodeBlockData } from "src/codeblockLogic";
 import { AudioComment } from "./commentType";
 
 /**

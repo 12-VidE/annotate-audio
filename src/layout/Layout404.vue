@@ -14,7 +14,7 @@ import { App, MarkdownPostProcessorContext } from "obsidian";
 import { onMounted, ref } from "vue";
 // Import - Type
 import type { AudioBoxOptions } from "src/options/optionsType";
-import type { SharedRefs } from "src/components/sharedRefs";
+import type { SharedRefs } from "src/types";
 // Import - Class
 import { sourceModal } from "src/options/source/sourceModal";
 // Import - Functions

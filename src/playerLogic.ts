@@ -33,9 +33,9 @@ export async function playPlayer(
  */
 export function pausePlayer(
 	player: HTMLAudioElement,
-	currentTime: Ref<number>
+	currentTime: number
 ): void {
-	currentTime.value = player.currentTime;
+	currentTime = player.currentTime;
 
 	player.pause();
 }
@@ -49,9 +49,9 @@ export async function togglePlayer(
 	id: string,
 	player: HTMLAudioElement,
 	chunk: Readonly<AudioChunk>,
-	currentTime: Ref<number>
+	currentTime: number
 ): Promise<void> {
-	if (player.paused) await playPlayer(id, player, chunk, currentTime.value);
+	if (player.paused) await playPlayer(id, player, chunk, currentTime);
 	else pausePlayer(player, currentTime);
 }
 
@@ -64,20 +64,20 @@ export async function togglePlayer(
 export function setPlayerPosition(
 	player: HTMLAudioElement,
 	chunk: Readonly<AudioChunk | undefined>,
-	currentTime: Ref<number>,
+	currentTime: number,
 	time: number
 ) {
 	if (time <= chunk?.startTime!) {
 		// IF moving BEFORE chunk, move @ start
 		player.currentTime = chunk?.startTime!;
-		currentTime.value = chunk?.startTime!;
+		currentTime = chunk?.startTime!;
 	} else if (time >= chunk?.endTime!) {
 		// IF moving AFTER chunk, move @end
 		player.currentTime = chunk?.endTime!;
-		currentTime.value = chunk?.endTime!;
+		currentTime = chunk?.endTime!;
 	} else {
 		// IF moving WITHIN chunk
 		player.currentTime = time;
-		currentTime.value = time;
+		currentTime = time;
 	}
 }
