@@ -1,7 +1,7 @@
 {
 	"id": "annotate-audio",
 	"name": "Annotate Audio",
-	"version": "1.4.0",
+	"version": "1.4.1",
 	"minAppVersion": "1.8.7",
 	"description": "Listen to an audio and add comments to it.",
 	"author": "VidE",
