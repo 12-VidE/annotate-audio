@@ -6,6 +6,13 @@
 -   _fix ([#6](https://github.com/12-VidE/annotate-audio/issues/6))_ - Audio resumes after a comment is created/deleted
 -   _fix_ - `chunk` is resetted correctly
 
+#### 1.4.1
+
+Substantial tidy up of my spaghetti code
+
+-   _fix_ - "Default" layout works better on small screens
+-   _fix_ - Less padding on time-stamps
+
 ## 1.3.0 - Mobile Support
 
 ([#4](https://github.com/12-VidE/annotate-audio/issues/4)) The plugin is now supported on mobile! (Not tested on iPhone)
