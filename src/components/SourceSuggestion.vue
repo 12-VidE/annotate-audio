@@ -16,7 +16,7 @@
 import { App, setIcon, TFile } from "obsidian";
 import { secondsToTime } from "src/utils";
 import { computed, onBeforeMount, onMounted, ref } from "vue";
-import { retriveDuration } from "./sharedFunc";
+import { retriveDuration } from "src/utils";
 
 const props = defineProps<{
 	obsidianApp: App;

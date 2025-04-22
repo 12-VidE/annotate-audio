@@ -24,7 +24,7 @@ import { MarkdownRenderer, Component, App, Platform } from "obsidian";
 // Import - Type
 import type { AudioComment } from "./commentType";
 // Import - Function
-import { initButton, secondsToTime } from "src/utils";
+import { initIcon, secondsToTime } from "src/utils";
 
 const props = defineProps<{
 	comment: AudioComment;
@@ -46,7 +46,7 @@ const edit_btn = ref<HTMLElement | null>(null);
 
 onMounted(() => {
 	// Initialize icons
-	initButton(edit_btn.value, "pencil", "Edit");
+	initIcon(edit_btn.value, "pencil", "Edit");
 });
 
 /* ---------------- */

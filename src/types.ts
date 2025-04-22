@@ -1,5 +1,4 @@
 import { MarkdownPostProcessorContext, App } from "obsidian";
-import { ComponentOptions, ComponentProvideOptions } from "vue";
 
 export type AudioChunk = {
 	startTime: number;
@@ -15,27 +14,4 @@ export type AudioBoxParameters = {
 	ctx: MarkdownPostProcessorContext;
 	player: HTMLAudioElement;
 	obsidianApp: App;
-};
-
-export type Layout = {
-	name: string;
-	component: ComponentOptions<
-		{},
-		any,
-		any,
-		any,
-		any,
-		any,
-		any,
-		any,
-		string,
-		{},
-		{},
-		string,
-		{},
-		{},
-		{},
-		string,
-		ComponentProvideOptions
-	>;
 };

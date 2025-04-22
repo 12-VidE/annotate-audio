@@ -20,7 +20,7 @@ import { AudioBox } from "./audioBox";
 // Import - Constant
 import { defaultAudioBoxOptions, formatOptions } from "./options";
 import { allowedAudioExtension } from "./const";
-import { retriveDuration } from "./components/sharedFunc";
+import { retriveDuration } from "./utils";
 
 /* -------------- */
 /* --- Plugin --- */

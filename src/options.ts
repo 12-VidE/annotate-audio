@@ -6,9 +6,9 @@ import {
 	Setting,
 } from "obsidian";
 // Import - Type
-import type { AudioChunk, Layout } from "./types";
+import type { AudioChunk } from "./types";
 // Import - Constant
-import { layoutsArray } from "./const";
+import { layoutsArray, Layout } from "./layout/layoutType";
 // Import - Function
 import {
 	getAudioboxOptions,
@@ -16,7 +16,7 @@ import {
 } from "./components/Logic/codeblockFunc";
 import { secondsToTime, timeToSeconds } from "./utils";
 import { reactive } from "vue";
-import { playPlayer } from "./components/Logic/playerFunc";
+import { playPlayer } from "./playerLogic";
 
 // What can be changed inside audio-box
 export type AudioBoxOptions = {

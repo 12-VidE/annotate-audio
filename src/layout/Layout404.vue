@@ -10,27 +10,39 @@
 </template>
 
 <script setup lang="ts">
-import { App, MarkdownPostProcessorContext, setIcon } from "obsidian";
+import { App, MarkdownPostProcessorContext } from "obsidian";
 import { onMounted, ref } from "vue";
-import { getAudioboxOptions, setAudioboxOptions } from "./Logic/codeblockFunc";
-import { AudioBoxOptions } from "src/options";
+// Import - Type
+import type { AudioBoxOptions } from "src/options";
+import type { SharedRefs } from "src/components/sharedRefs";
+// Import - Class
 import { sourceModal } from "src/main";
-const disk_icon = ref<HTMLElement | null>(null);
+// Import - Functions
+import { initIcon } from "src/utils";
+import {
+	getAudioboxOptions,
+	setAudioboxOptions,
+} from "../components/Logic/codeblockFunc";
+import { retriveDuration } from "src/utils";
 
 const props = defineProps<{
 	source: string;
 	container: HTMLElement;
 	ctx: MarkdownPostProcessorContext;
 	obsidianApp: App;
+	sharedRefs: SharedRefs;
 }>();
 
 /* ----------------- */
 /* --- Lifecycle --- */
 /* ----------------- */
 
+// UI
+const disk_icon = ref<HTMLElement | null>(null);
+
 onMounted(() => {
 	// Initialize icons
-	if (disk_icon.value) setIcon(disk_icon.value, "disc-3");
+	initIcon(disk_icon.value, "disc-3");
 });
 
 /* ---------------- */
@@ -43,10 +55,8 @@ onMounted(() => {
 async function eventAddSource(): Promise<void> {
 	// Get the saved options and update the source
 	let options: AudioBoxOptions = getAudioboxOptions(
-		props.ctx,
-		props.container,
-		0,
-		props.source
+		props.source,
+		await retriveDuration(props.ctx.sourcePath)
 	);
 	options.source = await new sourceModal(props.obsidianApp).openWithPromise();
 	setAudioboxOptions(props.ctx, props.container, props.obsidianApp, options);

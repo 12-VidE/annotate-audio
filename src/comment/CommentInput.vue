@@ -47,15 +47,14 @@ import type { SharedRefs } from "src/components/sharedRefs";
 import type { AudioBoxOptions } from "src/options";
 // Import - Function
 import { getCommentsArray } from "./commentLogic";
-import { pausePlayer } from "src/components/Logic/playerFunc";
-import { initButton } from "src/utils";
+import { pausePlayer } from "src/playerLogic";
+import { initIcon } from "src/utils";
 
 const props = defineProps<{
 	id: string;
 	source: string;
 	container: HTMLElement;
 	ctx: MarkdownPostProcessorContext;
-	audioSource: string;
 	player: HTMLAudioElement;
 	obsidianApp: App;
 	sharedRefs: SharedRefs;
@@ -113,9 +112,9 @@ async function showCommentInput(): Promise<void> {
 			isEdit.value = true;
 
 			// Initialize buttons
-			initButton(confirm_btn.value, "check", "Confirm");
-			initButton(cancel_btn.value, "x", "Cancel");
-			initButton(delete_btn.value, "trash-2", "Delete");
+			initIcon(confirm_btn.value, "check", "Confirm");
+			initIcon(cancel_btn.value, "x", "Cancel");
+			initIcon(delete_btn.value, "trash-2", "Delete");
 		} else {
 			// "Adding" mode = IF there's no content
 			props.sharedRefs.workingComment.value = {
@@ -124,8 +123,8 @@ async function showCommentInput(): Promise<void> {
 			};
 
 			// Initialize buttons
-			initButton(confirm_btn.value, "plus", "Add");
-			initButton(cancel_btn.value, "x", "Cancel");
+			initIcon(confirm_btn.value, "plus", "Add");
+			initIcon(cancel_btn.value, "x", "Cancel");
 
 			// Check IF it's a valid time = IF it's unique
 			const isNotUnique: boolean = getCommentsArray(props.source)?.some(

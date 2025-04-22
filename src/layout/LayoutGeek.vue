@@ -2,7 +2,8 @@
 	<div class="layout--geek">
 		<!-- Title -->
 		<div v-show="title" :class="['audiobox-title']">
-			<i ref="titleIcon"></i>{{ title }}
+			<span ref="titleIcon"></span>
+			{{ title }}
 		</div>
 		<div
 			ref="stickyContainer"
@@ -11,15 +12,13 @@
 			<!-- Main Controls -->
 			<div :class="['main-controls-container']">
 				<span :class="['timeline-number']">{{
-					displayCurrentTime(
-						sharedRefs.currentTime.value,
-						sharedRefs.maxDuration.value
-					)
+					displayCurrentTime
 				}}</span>
 
 				<div :class="['controls-container']">
 					<!-- Properties -->
-					<div
+					<button
+						type="button"
 						ref="showProperties_btn"
 						:class="[
 							'commentInput_btn',
@@ -36,9 +35,10 @@
 								sharedRefs.maxDuration.value!
 							).openPropertiesModal();
 						"
-					></div>
+					></button>
 					<!-- Backward -->
-					<div
+					<button
+						type="button"
 						:class="[
 							'control_btn',
 							'secondary_btn',
@@ -56,9 +56,10 @@
 						"
 					>
 						-5s
-					</div>
+					</button>
 					<!-- Play/Pause -->
-					<div
+					<button
+						type="button"
 						ref="playpause_btn"
 						:class="[
 							'control_btn',
@@ -74,9 +75,10 @@
 								sharedRefs.currentTime
 							)
 						"
-					></div>
+					></button>
 					<!-- Forward -->
-					<div
+					<button
+						type="button"
 						:class="[
 							'control_btn',
 							'secondary_btn',
@@ -94,9 +96,10 @@
 						"
 					>
 						+5s
-					</div>
+					</button>
 					<!-- Add Comment -->
-					<div
+					<button
+						type="button"
 						ref="showCommentInput_btn"
 						:class="[
 							'commentInput_btn',
@@ -104,12 +107,10 @@
 							sharedRefs.isCommentInputShown.value && 'disabled',
 						]"
 						@click="sharedRefs.isCommentInputShown.value = true"
-					></div>
+					></button>
 				</div>
 
-				<span :class="['timeline-number']">{{
-					displayDuration(options.chunk, sharedRefs.maxDuration.value)
-				}}</span>
+				<span :class="['timeline-number']">{{ displayDuration }}</span>
 			</div>
 
 			<!-- Timeline -->
@@ -139,35 +140,39 @@
 				<!-- 1° Row -->
 				<div class="row">
 					<!-- Loop -->
-					<i
+					<button
+						type="button"
 						ref="loop_toggle"
 						:class="{ active: options.loop }"
 						@click="options.loop = !options.loop"
-					>
-					</i>
+					></button>
 					<!-- Autoplay -->
-					<i
+					<button
+						type="button"
 						ref="autoplay_toggle"
 						:class="{ active: options.autoplay }"
 						@click="options.autoplay = !options.autoplay"
-					>
-					</i>
+					></button>
 					<!-- Unstoppable -->
-					<i
+					<button
+						type="button"
 						ref="unstoppable_toggle"
 						:class="{ active: options.unstoppable }"
 						@click="options.unstoppable = !options.unstoppable"
-					>
-					</i>
+					></button>
 					<!-- Sticky -->
-					<i
+					<button
+						type="button"
 						ref="sticky_toggle"
 						:class="{ active: options.sticky }"
 						@click="options.sticky = !options.sticky"
-					>
-					</i>
+					></button>
 					<!-- Chunk -->
-					<i ref="chunk_btn" @click="manageChunk"> </i>
+					<button
+						type="button"
+						ref="chunk_btn"
+						@click="manageChunk"
+					></button>
 				</div>
 				<!-- 2° Row -->
 				<div class="row">
@@ -206,7 +211,6 @@
 				:source="source"
 				:container="container"
 				:ctx="ctx"
-				:audioSource="audioSource"
 				:player="player"
 				:obsidianApp="obsidianApp"
 				:sharedRefs="sharedRefs"
@@ -218,9 +222,6 @@
 		<CommentsList
 			:id="id"
 			:source="source"
-			:container="container"
-			:ctx="ctx"
-			:audioSource="audioSource"
 			:player="player"
 			:obsidianApp="obsidianApp"
 			:sharedRefs="sharedRefs"
@@ -231,39 +232,25 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import {
-	MarkdownPostProcessorContext,
-	App,
-	setIcon,
-	setTooltip,
-} from "obsidian";
+import { MarkdownPostProcessorContext, App } from "obsidian";
 // Import - Component
-import CommentInput from "../../comment/CommentInput.vue";
-import CommentsList from "../../comment/CommentsList.vue";
+import CommentInput from "../comment/CommentInput.vue";
+import CommentsList from "../comment/CommentsList.vue";
+// Import - Type
+import type { SharedRefs } from "../components/sharedRefs";
 // Import - Class
 import { AudioBoxOptions, PropertiesModal } from "src/options";
-// Import - Func
-import {
-	displayCurrentTime,
-	displayTitle,
-	displayDuration,
-} from "./LayoutSharedFunc";
-import {
-	togglePlayer,
-	setPlayerPosition,
-	pausePlayer,
-} from "../Logic/playerFunc";
-// Import - Type
-import type { SharedRefs } from "../sharedRefs";
-import { logRefs } from "../sharedFunc";
-import { setAudioboxOptions } from "../Logic/codeblockFunc";
+// Import - Functions
+import { displayTitle } from "./layoutLogic";
+import { togglePlayer, setPlayerPosition, pausePlayer } from "../playerLogic";
+import { setAudioboxOptions } from "../components/Logic/codeblockFunc";
+import { initIcon, secondsToTime } from "src/utils";
 
 const props = defineProps<{
 	id: string;
 	source: string;
 	container: HTMLElement;
 	ctx: MarkdownPostProcessorContext;
-	audioSource: string;
 	player: HTMLAudioElement;
 	obsidianApp: App;
 	sharedRefs: SharedRefs;
@@ -293,40 +280,20 @@ const speed_icon = ref<HTMLElement | null>(null);
 
 onMounted(async () => {
 	// Initialize icons - Primary
-	if (titleIcon.value) setIcon(titleIcon.value, "audio-lines");
-	if (playpause_btn.value) setIcon(playpause_btn.value, "play");
-	if (showCommentInput_btn.value)
-		setIcon(showCommentInput_btn.value, "bookmark-plus");
-	if (showProperties_btn.value)
-		setIcon(showProperties_btn.value, "settings-2");
+	initIcon(titleIcon.value, "audio-lines");
+	initIcon(playpause_btn.value, "play");
+	initIcon(showCommentInput_btn.value, "bookmark-plus");
+	initIcon(showProperties_btn.value, "settings-2");
 	// Initialize icons + Tooltip - Secondary
-	if (loop_toggle.value) {
-		setIcon(loop_toggle.value, "repeat");
-		setTooltip(loop_toggle.value, "Loop");
-	}
-	if (autoplay_toggle.value) {
-		setIcon(autoplay_toggle.value, "square-play");
-		setTooltip(autoplay_toggle.value, "Autoplay");
-	}
-	if (unstoppable_toggle.value) {
-		setIcon(unstoppable_toggle.value, "shield");
-		setTooltip(unstoppable_toggle.value, "Unstoppable");
-	}
-	if (sticky_toggle.value) {
-		setIcon(sticky_toggle.value, "pin");
-		setTooltip(sticky_toggle.value, "Sticky");
-	}
-	if (volume_icon.value) {
-		setIcon(volume_icon.value, "volume-2");
-		setTooltip(volume_icon.value, "Volume");
-	}
-	if (speed_icon.value) {
-		setIcon(speed_icon.value, "gauge");
-		setTooltip(speed_icon.value, "Playback speed");
-	}
+	initIcon(loop_toggle.value, "repeat", "Loop");
+	initIcon(autoplay_toggle.value, "square-play", "Autoplay");
+	initIcon(unstoppable_toggle.value, "shield", "Unstoppable");
+	initIcon(sticky_toggle.value, "pin", "Sticky");
+	initIcon(volume_icon.value, "volume-2", "Volume");
+	initIcon(speed_icon.value, "gauge", "Playback speed");
 
 	setTimeout(() => {
-		setupChunkBnt();
+		styleChunkBnt();
 		// Need time to get maxDuration
 	}, 50);
 
@@ -336,10 +303,13 @@ onMounted(async () => {
 		props.player.addEventListener("play", eventPlayerPlay);
 		props.player.addEventListener("pause", eventPlayerPause);
 	}
-	/* logRefs(props.sharedRefs); */
 });
 
 onBeforeUnmount(() => {
+	// Destroy Event-Listeners
+	props.player.removeEventListener("timeupdate", eventTimeUpdate);
+	props.player.removeEventListener("play", eventPlayerPlay);
+	props.player.removeEventListener("pause", eventPlayerPause);
 	// Save options
 	setAudioboxOptions(
 		props.ctx,
@@ -347,16 +317,25 @@ onBeforeUnmount(() => {
 		props.obsidianApp,
 		props.options
 	);
-
-	// Destroy Event-Listeners
-	props.player.removeEventListener("timeupdate", eventTimeUpdate);
-	props.player.removeEventListener("play", eventPlayerPlay);
-	props.player.removeEventListener("pause", eventPlayerPause);
 });
 
 /* ---------------- */
 /* --- Computed --- */
 /* ---------------- */
+
+const displayCurrentTime = computed(() =>
+	secondsToTime(
+		Math.floor(props.sharedRefs.currentTime.value),
+		props.sharedRefs.maxDuration.value
+	)
+);
+
+const displayDuration = computed(() =>
+	secondsToTime(
+		props.options.chunk.endTime,
+		props.sharedRefs.maxDuration.value
+	)
+);
 
 const title = computed(() => displayTitle(props.source, props.options.title));
 
@@ -368,22 +347,19 @@ const speed = computed(() => Number(props.options.speed).toFixed(1));
 /* --- Function --- */
 /* ---------------- */
 
-function setupChunkBnt() {
+function styleChunkBnt() {
 	if (props.options.chunk.startTime == 0) {
 		// Set chunk startTime
-		setIcon(chunk_btn.value!, "arrow-left-to-line");
-		setTooltip(chunk_btn.value!, "Chunk: Select start");
+		initIcon(chunk_btn.value, "arrow-left-to-line", "Chunk: Select start");
 	} else if (
 		props.options.chunk.endTime ==
 		Math.floor(props.sharedRefs.maxDuration.value!)
 	) {
 		// Set chunk endTime
-		setIcon(chunk_btn.value!, "arrow-right-to-line");
-		setTooltip(chunk_btn.value!, "Chunk: Select end");
+		initIcon(chunk_btn.value, "arrow-right-to-line", "Chunk: Select end");
 	} else {
 		// Reset chunk
-		setIcon(chunk_btn.value!, "fold-horizontal");
-		setTooltip(chunk_btn.value!, "Chunk: Delete");
+		initIcon(chunk_btn.value, "fold-horizontal", "Chunk: Delete");
 	}
 }
 
@@ -402,8 +378,9 @@ function manageChunk() {
 			endTime: Math.floor(props.sharedRefs.maxDuration.value!),
 		};
 	}
-	setupChunkBnt();
+	styleChunkBnt();
 }
+
 /* ------------------------- */
 /* --- Function ON Event --- */
 
@@ -414,21 +391,21 @@ function eventTimeBarInput() {
 }
 
 function eventTimeUpdate() {
-	// Update currentTime #TODO rendi > generico
+	// Update currentTime
 	props.sharedRefs.currentTime.value = props.player.currentTime;
 
 	// IF outside chunk, simulate the end
-	if (props.sharedRefs.currentTime.value > props.options.chunk?.endTime!)
+	if (props.sharedRefs.currentTime.value > props.options.chunk.endTime)
 		props.player.dispatchEvent(new Event("ended", { bubbles: true }));
 }
 
 function eventPlayerPlay() {
 	// Update icon
-	setIcon(playpause_btn.value!, "pause");
+	initIcon(playpause_btn.value, "pause");
 }
 
 function eventPlayerPause() {
 	// Update icon
-	setIcon(playpause_btn.value!, "play");
+	initIcon(playpause_btn.value, "play");
 }
 </script>

@@ -18,7 +18,7 @@
 import { MarkdownPostProcessorContext, App, TFile } from "obsidian";
 import { computed, onMounted, onBeforeUnmount } from "vue";
 // Import - Components
-import { layoutsArray } from "src/const";
+import { layoutsArray } from "../layout/layoutType";
 // Import - Function
 import { getLayoutOption, getAudioboxOptions } from "./Logic/codeblockFunc";
 import { hashObj } from "src/utils";
@@ -27,8 +27,8 @@ import {
 	playPlayer,
 	setPlayerPosition,
 	togglePlayer,
-} from "./Logic/playerFunc";
-import { retriveDuration, logRefs } from "./sharedFunc";
+} from "../playerLogic";
+import { retriveDuration } from "src/utils";
 // Import/Create - Ref
 import { createShareRefs } from "./sharedRefs";
 const sharedRefs = createShareRefs();
@@ -80,8 +80,6 @@ onMounted(async () => {
 	document.addEventListener("toggle-audiobox", eventTogglePlayer);
 	document.addEventListener("audiobox-forward", eventForwardPlayer);
 	document.addEventListener("audiobox-backward", eventBackwardPlayer);
-
-	/* logRefs(sharedRefs); */
 });
 
 onBeforeUnmount(() => {
