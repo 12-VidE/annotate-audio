@@ -68,6 +68,8 @@ onMounted(async () => {
 		sharedRefs.srcPath.value
 	);
 
+	console.log(options);
+
 	// Initialize Player
 	props.player.src = sharedRefs.srcPath.value;
 	props.player.currentTime = sharedRefs.currentTime.value;

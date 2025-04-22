@@ -16,20 +16,33 @@ export function timeToSeconds(str: string): number {
 }
 
 /**
- * Converts ss into HH:mm:ss OR mm:ss
+ * Converts ss into HH:mm:ss OR as short as possible
  * @param num - Input to convert
- * @param max - WHEN present, num is removed of the extra hour padding
+ * @param max - WHEN present, num is strip down to fit "max" format
  * @returns {string}
  */
 export function secondsToTime(num: number, max?: number): string {
 	num = Math.floor(num);
-	const HH = String(Math.floor(num / 3600)).padStart(2, "0");
-	const mm = String(Math.floor((num % 3600) / 60)).padStart(2, "0");
-	const ss = String(num % 60).padStart(2, "0");
 
-	// Output depends on the presence of max
-	if (max !== undefined && max < 3600) return `${mm}:${ss}`;
-	else return `${HH}:${mm}:${ss}`;
+	if (max && max > 0 && max < 60) {
+		// ss OR s
+		let ss = String(num % 60);
+		if (max >= 10) ss = ss.padStart(2, "0");
+		return `${ss}`;
+	} else if (max && max < 360) {
+		// mm:ss OR m:ss
+		const ss = String(num % 60).padStart(2, "0");
+		let mm = String(Math.floor((num % 3600) / 60));
+		if (max >= 600) mm = mm.padStart(2, "0");
+		return `${mm}:${ss}`;
+	} else {
+		// HH:mm:ss OR H:mm:ss
+		const ss = String(num % 60).padStart(2, "0");
+		const mm = String(Math.floor((num % 3600) / 60)).padStart(2, "0");
+		let HH = String(Math.floor(num / 3600));
+		if (!max || max >= 36000) HH = HH.padStart(2, "0");
+		return `${HH}:${mm}:${ss}`;
+	}
 }
 
 /* ------------ */
