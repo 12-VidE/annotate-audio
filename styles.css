@@ -26,9 +26,14 @@
 /* ------------- */
 /* --- Button --- */
 /* ------------- */
-.annotate-audio-container button,
-.annotate-audio-container .commentInput_btn {
-	cursor: pointer;
+.annotate-audio-container {
+	button,
+	.commentInput_btn,
+	.playpause_btn,
+	.showProperties_btn,
+	.movement-btn {
+		cursor: pointer;
+	}
 }
 
 /* ----------------------- */
