@@ -39,27 +39,25 @@
 </template>
 
 <script setup lang="ts">
-import { MarkdownPostProcessorContext, App, TFile } from "obsidian";
 import { onBeforeUnmount, onMounted, ref, watch, nextTick } from "vue";
 // Import - Type
 import type { AudioComment } from "./commentType";
 import type { SharedRefs } from "src/types";
 import type { AudioBoxOptions } from "src/options/optionsType";
 // Import - Function
-import { getCommentsArray } from "./commentLogic";
 import { pausePlayer } from "src/playerLogic";
 import { initIcon } from "src/utils";
 
 const props = defineProps<{
 	id: string;
-	source: string;
-	container: HTMLElement;
-	ctx: MarkdownPostProcessorContext;
 	player: HTMLAudioElement;
-	obsidianApp: App;
-	sharedRefs: SharedRefs;
-	options: AudioBoxOptions;
 }>();
+
+const sharedRefs = defineModel<SharedRefs>("sharedRefs", { required: true });
+const options = defineModel<AudioBoxOptions>("options", { required: true });
+const comments = defineModel<AudioComment[]>("comments", {
+	required: true,
+});
 
 /* ----------------- */
 /* --- Lifecycle --- */
@@ -88,7 +86,7 @@ onBeforeUnmount(() => {
 
 // Trigger to show this input
 watch(
-	() => props.sharedRefs.isCommentInputShown,
+	() => sharedRefs.value.isCommentInputShown,
 	(show) => {
 		if (show) showCommentInput();
 	}
@@ -102,12 +100,12 @@ watch(
  * Display the commnet input box
  */
 async function showCommentInput(): Promise<void> {
-	if (!props.options.unstoppable)
-		pausePlayer(props.player, props.sharedRefs.currentTime);
+	if (!options.value.unstoppable)
+		pausePlayer(props.player, sharedRefs.value.currentTime);
 
 	// "Wait" for it to open to render
 	await nextTick(() => {
-		if (props.sharedRefs.workingComment?.content) {
+		if (sharedRefs.value.workingComment?.content) {
 			// "Editing" mode = IF there's already some content
 			isEdit.value = true;
 
@@ -117,7 +115,7 @@ async function showCommentInput(): Promise<void> {
 			initIcon(delete_btn.value, "trash-2", "Delete");
 		} else {
 			// "Adding" mode = IF there's no content
-			props.sharedRefs.workingComment = {
+			sharedRefs.value.workingComment = {
 				time: Math.floor(props.player.currentTime), // Save it in case of "unstoppable"
 				content: "",
 			};
@@ -127,25 +125,25 @@ async function showCommentInput(): Promise<void> {
 			initIcon(cancel_btn.value, "x", "Cancel");
 
 			// Check IF it's a valid time = IF it's unique
-			const isNotUnique: boolean = getCommentsArray(props.source)?.some(
+			const isNotUnique: boolean = comments.value.some(
 				(comment: AudioComment) =>
-					comment.time === props.sharedRefs.workingComment?.time
+					comment.time === sharedRefs.value.workingComment?.time
 			);
 			if (isNotUnique) {
 				// IF we want to create a new comment @time WHERE already 1 exits: don't allow it
 				isDuplicate.value = true;
 
-				props.sharedRefs.workingComment.content = "ALREADY EXISTS!";
+				sharedRefs.value.workingComment.content = "ALREADY EXISTS!";
 			} else {
 				// IF we want to create a new comment... nothing
 			}
 		}
 
 		// Populate input text
-		commentInputBox.value = props.sharedRefs.workingComment?.content!;
+		commentInputBox.value = sharedRefs.value.workingComment?.content!;
 
 		// Scroll + Focus contentCommentInput (IF sticky, it gets sluggish)
-		if (!props.options.sticky) {
+		if (!options.value.sticky) {
 			commentInputElement.value?.scrollIntoView({
 				behavior: "smooth",
 				block: "center",
@@ -156,97 +154,28 @@ async function showCommentInput(): Promise<void> {
 }
 
 /**
- * Function that actually operate on codeblock
- * (Re)Writing/Cancelling 1 comment
- * @param commentOnFocus Comment to work with. If .content = empty → It deletes the comment
- * @param isNew True: dealing w/ a new comment | False: dealing w/ an already existsing comment
- */
-async function editCodeblockComment(
-	commentOnFocus: AudioComment,
-	isNew: boolean
-) {
-	if (commentOnFocus.content == "" && isNew) {
-		// Impossible state: are we deleting OR creating a comment?
-		console.error("Impossible state reached WHEN dealing with comment");
-		return;
-	}
-
-	// Get file full content
-	const sectionInfo = props.ctx.getSectionInfo(props.container);
-	if (!sectionInfo) {
-		return;
-	}
-	const lines = sectionInfo.text.split("\n");
-
-	try {
-		const commentsArray: Array<AudioComment> = getCommentsArray(
-			props.source
-		);
-		let commentOnFocusIndex: number; // WHERE we will place the new/modified comment (to preserve cronological order). 0 = 1° comment
-
-		if (isNew) {
-			// WHEN we need to add a new comment
-			if (!commentsArray)
-				commentOnFocusIndex = 0; // IF we are adding the 1° comment
-			else {
-				commentOnFocusIndex = commentsArray.findIndex(
-					(item: AudioComment) => commentOnFocus.time < item.time
-				);
-				if (commentOnFocusIndex === -1)
-					commentOnFocusIndex = commentsArray.length; // IF it doesn't find a place: it's the last
-			}
-		} else {
-			// WHEN we need to modify/cancel an existing comment
-			commentOnFocusIndex = commentsArray.findIndex(
-				(item: AudioComment) => commentOnFocus.time === item.time
-			);
-			if (commentOnFocusIndex == -1) {
-				// IF it doesn't find the comment, there must be an error: the comment must exists!
-				console.error("Trying to edit a non-existing comment");
-				return;
-			}
-		}
-
-		const commentOnFocusAbsoluteLine =
-			sectionInfo.lineEnd - commentsArray.length + commentOnFocusIndex; // Line WHERE the comment is place inside the entire file
-
-		// Check IF it's within bounds
-		if (
-			commentOnFocusAbsoluteLine <
-				sectionInfo.lineEnd - commentsArray.length ||
-			commentOnFocusAbsoluteLine > sectionInfo.lineEnd
-		)
-			return;
-
-		// Implement change into file
-		lines.splice(
-			commentOnFocusAbsoluteLine,
-			isNew ? 0 : 1,
-			...(commentOnFocus.content == ""
-				? [] // IF deleting
-				: [`${commentOnFocus.time} --- ${commentOnFocus.content}`]) // IF adding/modifying
-		);
-
-		// Get file & write the changes to it
-		const file = props.obsidianApp.vault.getAbstractFileByPath(
-			props.ctx.sourcePath
-		);
-		if (!file || !(file instanceof TFile)) return;
-		await props.obsidianApp.vault.modify(file, lines.join("\n"));
-	} catch (error) {
-		console.error("Cannot manage comment - ", error);
-	}
-}
-/**
  * (Re)write comment inside commentInputBox TO codeblock
  */
 async function addComment(): Promise<void> {
-	if (commentInputBox.value !== "" && props.sharedRefs.workingComment) {
-		props.sharedRefs.workingComment.content = commentInputBox.value;
-		await editCodeblockComment(
-			props.sharedRefs.workingComment,
-			!isEdit.value
-		);
+	if (commentInputBox.value !== "" && sharedRefs.value.workingComment) {
+		sharedRefs.value.workingComment.content = commentInputBox.value;
+		if (isEdit.value) {
+			// WHEN modifing an existing comment
+			const indexCommentToEdit = comments.value.findIndex(
+				(comment) =>
+					comment.time === sharedRefs.value.workingComment?.time
+			);
+			// IF exists, update the content
+			if (indexCommentToEdit !== -1)
+				comments.value[indexCommentToEdit].content =
+					sharedRefs.value.workingComment.content;
+		} else {
+			// WHEN adding a new comment
+			comments.value.push(sharedRefs.value.workingComment);
+			comments.value.sort(
+				(x: AudioComment, y: AudioComment) => x.time - y.time
+			);
+		}
 	}
 	imposeDefault();
 }
@@ -257,9 +186,14 @@ async function confirmDeleteComment() {
 		deleteConfirmation.value = true;
 	} else {
 		// 2°: Trigger the actual deletion if confirmed by the user
-		if (props.sharedRefs.workingComment) {
-			props.sharedRefs.workingComment.content = "";
-			await editCodeblockComment(props.sharedRefs.workingComment, false);
+		if (sharedRefs.value.workingComment) {
+			sharedRefs.value.workingComment.content = "";
+			const indexCommentToDelete = comments.value.findIndex(
+				(comment) =>
+					comment.time === sharedRefs.value.workingComment?.time
+			);
+			if (indexCommentToDelete !== -1)
+				comments.value.splice(indexCommentToDelete, 1);
 		}
 		imposeDefault();
 	}
@@ -271,8 +205,8 @@ function imposeDefault(): void {
 	isDuplicate.value = false;
 	isEdit.value = false;
 
-	props.sharedRefs.isCommentInputShown = false;
-	props.sharedRefs.workingComment = null;
+	sharedRefs.value.isCommentInputShown = false;
+	sharedRefs.value.workingComment = null;
 }
 
 /* ------------------------- */
@@ -282,6 +216,6 @@ const eventAddComment = (e: Event) => {
 	const event = e as CustomEvent;
 	// Show THIS player commentInput
 	if (event.detail?.id == props.id)
-		props.sharedRefs.isCommentInputShown = true;
+		sharedRefs.value.isCommentInputShown = true;
 };
 </script>

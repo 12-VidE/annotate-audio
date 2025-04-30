@@ -9,22 +9,20 @@
 		:audioSource="audioSource"
 		:player="player"
 		:obsidianApp="obsidianApp"
-		:sharedRefs="sharedRefs"
-		:options="options"
+		v-model:sharedRefs="sharedRefs"
+		v-model:options="options"
+		v-model:comments="comments"
 	/>
 </template>
 
 <script setup lang="ts">
 import { MarkdownPostProcessorContext, App, TFile } from "obsidian";
-import { computed, onMounted, onBeforeUnmount, reactive } from "vue";
+import { computed, onMounted, onBeforeUnmount } from "vue";
 // Import - Components
 import { layoutsArray } from "./layout/layoutType";
 // Import - Type
 import type { SharedRefs } from "./types";
 import type { AudioBoxOptions } from "src/options/optionsType";
-// Import - Constants
-import { DEFAULT_SHARED_REFS } from "./types";
-import { DEFAULT_AUDIOBOX_OPTIONS } from "src/options/optionsType";
 // Import - Function
 import { getAudioboxOptions } from "src/options/optionsGetter";
 import {
@@ -34,6 +32,7 @@ import {
 	togglePlayer,
 } from "./playerLogic";
 import { hashObj, retriveDuration } from "src/utils";
+import { AudioComment } from "./comment/commentType";
 
 const props = defineProps<{
 	id: string;
@@ -49,8 +48,11 @@ const props = defineProps<{
 /* --- Lifecycle --- */
 /* ----------------- */
 
-const sharedRefs = reactive<SharedRefs>({ ...DEFAULT_SHARED_REFS });
-const options = reactive<AudioBoxOptions>({ ...DEFAULT_AUDIOBOX_OPTIONS });
+const sharedRefs = defineModel<SharedRefs>("sharedRefs", { required: true });
+const options = defineModel<AudioBoxOptions>("options", { required: true });
+const comments = defineModel<AudioComment[]>("comments", {
+	required: true,
+});
 
 onMounted(async () => {
 	await loadCacheOrFallback();
@@ -60,17 +62,19 @@ onMounted(async () => {
 		props.audioSource
 	);
 	if (!file || !(file instanceof TFile)) return;
-	sharedRefs.srcPath = props.obsidianApp.vault.getResourcePath(file);
+	sharedRefs.value.srcPath = props.obsidianApp.vault.getResourcePath(file);
 
 	// Get duration
-	sharedRefs.maxDuration = await retriveDuration(sharedRefs.srcPath);
+	sharedRefs.value.maxDuration = await retriveDuration(
+		sharedRefs.value.srcPath
+	);
 
 	// Initialize Player
-	props.player.src = sharedRefs.srcPath;
-	props.player.currentTime = sharedRefs.currentTime;
-	props.player.volume = options.volume;
-	props.player.playbackRate = options.speed;
-	props.player.loop = options.loop;
+	props.player.src = sharedRefs.value.srcPath;
+	props.player.currentTime = sharedRefs.value.currentTime;
+	props.player.volume = options.value.volume;
+	props.player.playbackRate = options.value.speed;
+	props.player.loop = options.value.loop;
 
 	// Initialize Event-Listeners
 	if (props.player) props.player.addEventListener("ended", eventEndedAudio);
@@ -84,9 +88,9 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-	saveCache();
+	/* saveCache(); */
 
-	pausePlayer(props.player, sharedRefs.currentTime);
+	pausePlayer(props.player, sharedRefs.value.currentTime);
 
 	// Destroy Event-Listeners
 	props.player.removeEventListener("ended", eventEndedAudio);
@@ -107,7 +111,7 @@ onBeforeUnmount(() => {
  * Select which player layout to display
  */
 const currentLayoutComponent = computed(() => {
-	return layoutsArray[options.layout].component;
+	return layoutsArray[options.value.layout].component;
 });
 
 /* ---------------- */
@@ -117,7 +121,7 @@ const currentLayoutComponent = computed(() => {
 async function loadCacheOrFallback(): Promise<void> {
 	const codeblockSettings = getAudioboxOptions(
 		props.source,
-		sharedRefs.maxDuration
+		sharedRefs.value.maxDuration
 	);
 	const newHash = await hashObj(codeblockSettings);
 	const oldHash = localStorage.getItem(`aa_${props.id}_optionsHash`);
@@ -136,11 +140,11 @@ async function loadCacheOrFallback(): Promise<void> {
 		localStorage.getItem(`aa_${props.id}_currentTime`)
 	);
 	if (
-		currentTimeCache >= options.chunk.startTime &&
-		currentTimeCache <= options.chunk.endTime
+		currentTimeCache >= options.value.chunk.startTime &&
+		currentTimeCache <= options.value.chunk.endTime
 	) {
 		// Inside chunk - Safe to use cache
-		sharedRefs.currentTime = currentTimeCache;
+		sharedRefs.value.currentTime = currentTimeCache;
 		// Resume audio
 		const resumeCache: boolean =
 			localStorage.getItem(`aa_${props.id}_resume`) === "true";
@@ -148,13 +152,13 @@ async function loadCacheOrFallback(): Promise<void> {
 			playPlayer(
 				props.id,
 				props.player,
-				options.chunk,
-				sharedRefs.currentTime
+				options.value.chunk,
+				sharedRefs.value.currentTime
 			);
 	}
 
 	// Out-of-bounadry - Fall back to safe place
-	else sharedRefs.currentTime = options.chunk?.startTime!;
+	else sharedRefs.value.currentTime = options.value.chunk?.startTime!;
 }
 
 async function saveCache(): Promise<void> {
@@ -166,7 +170,7 @@ async function saveCache(): Promise<void> {
 	);
 	localStorage.setItem(
 		`aa_${props.id}_resume`,
-		JSON.stringify(sharedRefs.resume)
+		JSON.stringify(sharedRefs.value.resume)
 	);
 }
 
@@ -176,18 +180,19 @@ async function saveCache(): Promise<void> {
 function eventEndedAudio() {
 	setPlayerPosition(
 		props.player,
-		options.chunk,
-		sharedRefs.currentTime,
-		options.chunk?.startTime!
+		options.value.chunk,
+		sharedRefs.value.currentTime,
+		options.value.chunk?.startTime!
 	);
-	if (!options.loop) pausePlayer(props.player, sharedRefs.currentTime);
+	if (!options.value.loop)
+		pausePlayer(props.player, sharedRefs.value.currentTime);
 }
 
 const eventPauseOtherPlayers = (e: Event) => {
 	const event = e as CustomEvent;
 	// Pause every player, excluding the one that gave the initial comand
 	if (event.detail?.id !== props.id) {
-		pausePlayer(props.player, sharedRefs.currentTime);
+		pausePlayer(props.player, sharedRefs.value.currentTime);
 	}
 };
 
@@ -195,7 +200,7 @@ const eventPausePlayer = (e: Event) => {
 	const event = e as CustomEvent;
 	// Pause this player
 	if (event.detail?.id == props.id) {
-		pausePlayer(props.player, sharedRefs.currentTime);
+		pausePlayer(props.player, sharedRefs.value.currentTime);
 	}
 };
 
@@ -206,8 +211,8 @@ const eventPlayPlayer = (e: Event) => {
 		playPlayer(
 			props.id,
 			props.player,
-			options.chunk,
-			sharedRefs.currentTime
+			options.value.chunk,
+			sharedRefs.value.currentTime
 		);
 	}
 };
@@ -219,8 +224,8 @@ const eventTogglePlayer = (e: Event) => {
 		togglePlayer(
 			props.id,
 			props.player,
-			options.chunk,
-			sharedRefs.currentTime
+			options.value.chunk,
+			sharedRefs.value.currentTime
 		);
 	}
 };
@@ -231,9 +236,9 @@ const eventForwardPlayer = (e: Event) => {
 	if (event.detail?.id == props.id) {
 		setPlayerPosition(
 			props.player,
-			options.chunk,
-			sharedRefs.currentTime,
-			sharedRefs.currentTime + 5
+			options.value.chunk,
+			sharedRefs.value.currentTime,
+			sharedRefs.value.currentTime + 5
 		);
 	}
 };
@@ -244,9 +249,9 @@ const eventBackwardPlayer = (e: Event) => {
 	if (event.detail?.id == props.id) {
 		setPlayerPosition(
 			props.player,
-			options.chunk,
-			sharedRefs.currentTime,
-			sharedRefs.currentTime - 5
+			options.value.chunk,
+			sharedRefs.value.currentTime,
+			sharedRefs.value.currentTime - 5
 		);
 	}
 };

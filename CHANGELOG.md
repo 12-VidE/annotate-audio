@@ -13,6 +13,10 @@ Substantial tidy up of my spaghetti code
 -   _fix_ - "Default" layout works better on small screens
 -   _fix_ - Less padding on time-stamps
 
+#### 1.4.2
+
+-   _fix ([#8](https://github.com/12-VidE/annotate-audio/issues/8))_ - Codeblock is re-written only on unload
+
 ## 1.3.0 - Mobile Support
 
 ([#4](https://github.com/12-VidE/annotate-audio/issues/4)) The plugin is now supported on mobile! (Not tested on iPhone)

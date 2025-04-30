@@ -27,14 +27,7 @@
 						]"
 						@click="
 							pausePlayer(player, sharedRefs.currentTime);
-							new PropertiesModal(
-								options,
-								source,
-								ctx,
-								container,
-								obsidianApp,
-								sharedRefs.maxDuration!
-							).openPropertiesModal();
+							openOptionsModal();
 						"
 					></button>
 					<!-- Backward -->
@@ -209,55 +202,53 @@
 			<!-- Comment Input -->
 			<CommentInput
 				:id="id"
-				:source="source"
-				:container="container"
-				:ctx="ctx"
 				:player="player"
-				:obsidianApp="obsidianApp"
-				:sharedRefs="sharedRefs"
-				:options="options"
+				v-model:sharedRefs="sharedRefs"
+				v-model:options="options"
+				v-model:comments="comments"
 			/>
 		</div>
 
 		<!-- Comments List -->
 		<CommentsList
 			:id="id"
-			:source="source"
 			:player="player"
 			:obsidianApp="obsidianApp"
-			:sharedRefs="sharedRefs"
-			:options="options"
+			v-model:sharedRefs="sharedRefs"
+			v-model:options="options"
+			v-model:comments="comments"
 		/>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import { MarkdownPostProcessorContext, App } from "obsidian";
+import { App } from "obsidian";
 // Import - Component
 import CommentInput from "../comment/CommentInput.vue";
 import CommentsList from "../comment/CommentsList.vue";
 // Import - Type
 import type { SharedRefs } from "src/types";
 import type { AudioBoxOptions } from "src/options/optionsType";
+import type { AudioComment } from "src/comment/commentType";
 // Import - Class
-import { PropertiesModal } from "src/options/optionsModal";
+import { optionsModal } from "src/options/optionsModal";
 // Import - Functions
 import { displayTitle } from "./layoutLogic";
-import { togglePlayer, setPlayerPosition, pausePlayer } from "../playerLogic";
-import { setAudioboxOptions } from "src/options/optionsSetter";
 import { initIcon, secondsToTime } from "src/utils";
+import { togglePlayer, pausePlayer, setPlayerPosition } from "src/playerLogic";
 
 const props = defineProps<{
 	id: string;
-	source: string;
-	container: HTMLElement;
-	ctx: MarkdownPostProcessorContext;
 	player: HTMLAudioElement;
 	obsidianApp: App;
-	sharedRefs: SharedRefs;
-	options: AudioBoxOptions;
 }>();
+
+const sharedRefs = defineModel<SharedRefs>("sharedRefs", { required: true });
+const options = defineModel<AudioBoxOptions>("options", { required: true });
+const comments = defineModel<AudioComment[]>("comments", {
+	required: true,
+});
 
 /* ------------ */
 /* --- Refs --- */
@@ -296,8 +287,7 @@ onMounted(async () => {
 
 	setTimeout(() => {
 		styleChunkBnt();
-		// Need time to get maxDuration
-	}, 50);
+	}, 50); // Need time to get maxDuration
 
 	// Initialize Event-Listeners
 	if (props.player) {
@@ -312,13 +302,6 @@ onBeforeUnmount(() => {
 	props.player.removeEventListener("timeupdate", eventTimeUpdate);
 	props.player.removeEventListener("play", eventPlayerPlay);
 	props.player.removeEventListener("pause", eventPlayerPause);
-	// Save options
-	setAudioboxOptions(
-		props.ctx,
-		props.container,
-		props.obsidianApp,
-		props.options
-	);
 });
 
 /* ---------------- */
@@ -327,31 +310,33 @@ onBeforeUnmount(() => {
 
 const displayCurrentTime = computed(() =>
 	secondsToTime(
-		Math.floor(props.sharedRefs.currentTime),
-		props.sharedRefs.maxDuration
+		Math.floor(sharedRefs.value.currentTime),
+		sharedRefs.value.maxDuration
 	)
 );
 
 const displayDuration = computed(() =>
-	secondsToTime(props.options.chunk.endTime, props.sharedRefs.maxDuration)
+	secondsToTime(options.value.chunk.endTime, sharedRefs.value.maxDuration)
 );
 
-const title = computed(() => displayTitle(props.source, props.options.title));
+const title = computed(() =>
+	displayTitle(options.value.source, options.value.title)
+);
 
-const volume = computed(() => Number(props.options.volume).toFixed(1));
+const volume = computed(() => Number(options.value.volume).toFixed(1));
 
-const speed = computed(() => Number(props.options.speed).toFixed(1));
+const speed = computed(() => Number(options.value.speed).toFixed(1));
 
 /* ---------------- */
 /* --- Function --- */
 /* ---------------- */
 
 function styleChunkBnt() {
-	if (props.options.chunk.startTime == 0) {
+	if (options.value.chunk.startTime == 0) {
 		// Set chunk startTime
 		initIcon(chunk_btn.value, "arrow-left-to-line", "Chunk: Select start");
 	} else if (
-		props.options.chunk.endTime == Math.floor(props.sharedRefs.maxDuration!)
+		options.value.chunk.endTime == Math.floor(sharedRefs.value.maxDuration!)
 	) {
 		// Set chunk endTime
 		initIcon(chunk_btn.value, "arrow-right-to-line", "Chunk: Select end");
@@ -362,20 +347,33 @@ function styleChunkBnt() {
 }
 
 function manageChunk() {
-	if (props.options.chunk.startTime == 0) {
-		props.options.chunk.startTime = Math.floor(props.player.currentTime);
+	if (options.value.chunk.startTime == 0) {
+		options.value.chunk.startTime = Math.floor(props.player.currentTime);
 	} else if (
-		props.options.chunk.endTime == Math.floor(props.sharedRefs.maxDuration!)
+		options.value.chunk.endTime == Math.floor(sharedRefs.value.maxDuration!)
 	) {
-		if (props.player.currentTime > props.options.chunk.startTime)
-			props.options.chunk.endTime = Math.floor(props.player.currentTime);
+		if (props.player.currentTime > options.value.chunk.startTime)
+			options.value.chunk.endTime = Math.floor(props.player.currentTime);
 	} else {
-		props.options.chunk = {
+		options.value.chunk = {
 			startTime: 0,
-			endTime: Math.floor(props.sharedRefs.maxDuration!),
+			endTime: Math.floor(sharedRefs.value.maxDuration!),
 		};
 	}
 	styleChunkBnt();
+}
+
+async function openOptionsModal(): Promise<void> {
+	try {
+		const modal = new optionsModal(
+			options.value,
+			props.obsidianApp,
+			sharedRefs.value.maxDuration!
+		);
+		const newOptions = await modal.openPropertiesModal();
+
+		Object.assign(options.value, newOptions);
+	} catch {}
 }
 
 /* ------------------------- */
@@ -383,16 +381,16 @@ function manageChunk() {
 
 function eventTimeBarInput() {
 	// Validate and update the audio's current time
-	if (!isNaN(props.sharedRefs.currentTime) && props.player)
-		props.player.currentTime = props.sharedRefs.currentTime;
+	if (!isNaN(sharedRefs.value.currentTime) && props.player)
+		props.player.currentTime = sharedRefs.value.currentTime;
 }
 
 function eventTimeUpdate() {
 	// Update currentTime
-	props.sharedRefs.currentTime = props.player.currentTime;
+	sharedRefs.value.currentTime = props.player.currentTime;
 
 	// IF outside chunk, simulate the end
-	if (props.sharedRefs.currentTime > props.options.chunk.endTime)
+	if (sharedRefs.value.currentTime > options.value.chunk.endTime)
 		props.player.dispatchEvent(new Event("ended", { bubbles: true }));
 }
 

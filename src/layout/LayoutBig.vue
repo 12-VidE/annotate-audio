@@ -12,7 +12,7 @@
 			<div
 				v-for="(s, i) in barHeights"
 				:class="{ bar: true, playedBar: i <= currentBar }"
-				:key="props.sharedRefs.srcPath + i"
+				:key="sharedRefs.srcPath + i"
 				:style="{ height: s * 6 + 'rem' }"
 			></div>
 		</div>
@@ -53,14 +53,7 @@
 					]"
 					@click="
 						pausePlayer(player, sharedRefs.currentTime);
-						new PropertiesModal(
-							options,
-							source,
-							ctx,
-							container,
-							obsidianApp,
-							sharedRefs.maxDuration!
-						).openPropertiesModal();
+						openOptionsModal();
 					"
 				></button>
 				<!-- Backward -->
@@ -137,31 +130,28 @@
 			<!-- Comment Input -->
 			<CommentInput
 				:id="id"
-				:source="source"
-				:container="container"
-				:ctx="ctx"
 				:player="player"
-				:obsidianApp="obsidianApp"
-				:sharedRefs="sharedRefs"
-				:options="options"
+				v-model:sharedRefs="sharedRefs"
+				v-model:options="options"
+				v-model:comments="comments"
 			/>
 		</div>
 
 		<!-- Comments List -->
 		<CommentsList
 			:id="id"
-			:source="source"
 			:player="player"
 			:obsidianApp="obsidianApp"
-			:sharedRefs="sharedRefs"
-			:options="options"
+			v-model:sharedRefs="sharedRefs"
+			v-model:options="options"
+			v-model:comments="comments"
 		/>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import { MarkdownPostProcessorContext, App, TFile } from "obsidian";
+import { App, TFile } from "obsidian";
 // Import - Component
 import CommentInput from "../comment/CommentInput.vue";
 import CommentsList from "../comment/CommentsList.vue";
@@ -169,8 +159,9 @@ import CommentsList from "../comment/CommentsList.vue";
 import type { AudioChunk } from "src/types";
 import type { SharedRefs } from "src/types";
 import type { AudioBoxOptions } from "src/options/optionsType";
+import type { AudioComment } from "src/comment/commentType";
 // Import - Class
-import { PropertiesModal } from "src/options/optionsModal";
+import { optionsModal } from "src/options/optionsModal";
 // Import - Functions
 import { displayTitle } from "./layoutLogic";
 import { togglePlayer, setPlayerPosition, pausePlayer } from "../playerLogic";
@@ -178,15 +169,16 @@ import { hashObj, initIcon, secondsToTime } from "src/utils";
 
 const props = defineProps<{
 	id: string;
-	source: string;
-	container: HTMLElement;
-	ctx: MarkdownPostProcessorContext;
 	audioSource: string;
 	player: HTMLAudioElement;
 	obsidianApp: App;
-	sharedRefs: SharedRefs;
-	options: AudioBoxOptions;
 }>();
+
+const sharedRefs = defineModel<SharedRefs>("sharedRefs", { required: true });
+const options = defineModel<AudioBoxOptions>("options", { required: true });
+const comments = defineModel<AudioComment[]>("comments", {
+	required: true,
+});
 
 /* ----------------- */
 /* --- Lifecycle --- */
@@ -209,7 +201,7 @@ onMounted(async () => {
 	initIcon(showProperties_btn.value, "settings-2");
 
 	// Initialize Wavegraph
-	const newHash = await hashObj(props.options);
+	const newHash = await hashObj(options.value);
 	const oldHash = localStorage.getItem(`aa_${props.id}_optionsHash`);
 	if (newHash === oldHash) {
 		const cachedBarHeights = localStorage.getItem(
@@ -250,24 +242,26 @@ onBeforeUnmount(() => {
 
 const displayCurrentTime = computed(() =>
 	secondsToTime(
-		Math.floor(props.sharedRefs.currentTime),
-		props.sharedRefs.maxDuration
+		Math.floor(sharedRefs.value.currentTime),
+		sharedRefs.value.maxDuration
 	)
 );
 
 const displayDuration = computed(() =>
-	secondsToTime(props.options.chunk.endTime, props.sharedRefs.maxDuration)
+	secondsToTime(options.value.chunk.endTime, sharedRefs.value.maxDuration)
 );
 
 const currentBar = computed(() => {
 	return Math.floor(
-		((props.sharedRefs.currentTime - props.options.chunk.startTime) /
-			props.options.chunk.duration!) *
+		((sharedRefs.value.currentTime - options.value.chunk.startTime) /
+			options.value.chunk.duration!) *
 			nSamples
 	);
 });
 
-const title = computed(() => displayTitle(props.source, props.options.title));
+const title = computed(() =>
+	displayTitle(options.value.source, options.value.title)
+);
 
 /* ---------------- */
 /* --- Function --- */
@@ -291,10 +285,10 @@ async function calculateWaveGraph(): Promise<number[]> {
 			const audioSampleRate = buf.sampleRate;
 			const playedChunk: AudioChunk = {
 				startTime: Math.floor(
-					props.options.chunk?.startTime! * audioSampleRate
+					options.value.chunk.startTime! * audioSampleRate
 				),
 				endTime: Math.floor(
-					props.options.chunk?.endTime! * audioSampleRate
+					options.value.chunk?.endTime! * audioSampleRate
 				),
 			}; // Portion of audio to play (can be entire file)
 			const barWidth = Math.floor(
@@ -302,7 +296,7 @@ async function calculateWaveGraph(): Promise<number[]> {
 			);
 			let highestBar = 0;
 			for (let i = 0; i < nSamples; i++) {
-				let blockStart = props.options.chunk?.startTime! + barWidth * i;
+				let blockStart = options.value.chunk?.startTime! + barWidth * i;
 				let sum = 0;
 				for (let j = 0; j < barWidth; j++) {
 					sum += Math.abs(rawData[blockStart + j]);
@@ -328,21 +322,34 @@ function saveCache(): void {
 	);
 }
 
+async function openOptionsModal(): Promise<void> {
+	try {
+		const modal = new optionsModal(
+			options.value,
+			props.obsidianApp,
+			sharedRefs.value.maxDuration!
+		);
+		const newOptions = await modal.openPropertiesModal();
+
+		Object.assign(options.value, newOptions);
+	} catch {}
+}
+
 /* ------------------------- */
 /* --- Function ON Event --- */
 
 function eventTimeBarInput() {
 	// Validate and update the audio's current time
-	if (!isNaN(props.sharedRefs.currentTime) && props.player)
-		props.player.currentTime = props.sharedRefs.currentTime;
+	if (!isNaN(sharedRefs.value.currentTime) && props.player)
+		props.player.currentTime = sharedRefs.value.currentTime;
 }
 
 function eventTimeUpdate() {
 	// Update currentTime
-	props.sharedRefs.currentTime = props.player.currentTime;
+	sharedRefs.value.currentTime = props.player.currentTime;
 
 	// IF outside chunk, simulate the end
-	if (props.sharedRefs.currentTime > props.options.chunk.endTime)
+	if (sharedRefs.value.currentTime > options.value.chunk.endTime)
 		props.player.dispatchEvent(new Event("ended", { bubbles: true }));
 }
 

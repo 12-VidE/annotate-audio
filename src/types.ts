@@ -1,6 +1,7 @@
 import { MarkdownPostProcessorContext, App } from "obsidian";
 // Import - Type
 import type { AudioComment } from "./comment/commentType";
+import { AudioBoxOptions } from "./options/optionsType";
 
 export type AudioChunk = {
 	startTime: number;
@@ -16,6 +17,9 @@ export type AudioBoxParameters = {
 	ctx: MarkdownPostProcessorContext;
 	player: HTMLAudioElement;
 	obsidianApp: App;
+	sharedRefs: SharedRefs;
+	options: AudioBoxOptions;
+	comments: AudioComment[];
 };
 
 /* ------------------ */

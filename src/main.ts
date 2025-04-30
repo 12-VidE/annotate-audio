@@ -9,19 +9,31 @@ import {
 // Import - Component
 import { AudioBox } from "./audioBox";
 // Import - Constant
-import { DEFAULT_AUDIOBOX_OPTIONS } from "./options/optionsType";
+import {
+	AudioBoxOptions,
+	DEFAULT_AUDIOBOX_OPTIONS,
+} from "./options/optionsType";
 import { allowedAudioExtension } from "./const";
 import { retriveDuration } from "./utils";
 // Import - Function
-import { getAudioboxId, getSourceOption } from "./options/optionsGetter";
+import {
+	getAudioboxId,
+	getAudioboxOptions,
+	getSourceOption,
+} from "./options/optionsGetter";
 import { formatOptions } from "./options/optionsLogic";
 import { sourceModal } from "./options/source/sourceModal";
+import { DEFAULT_SHARED_REFS, SharedRefs } from "./types";
+import { AudioComment } from "./comment/commentType";
+import { getComments } from "./comment/commentLogic";
+import { formatCodeblock, writeCodeblock } from "./codeblockLogic";
 
 /* -------------- */
 /* --- Plugin --- */
 /* -------------- */
 
 export default class AnnotateAudioPlugin extends Plugin {
+	private audioboxMap: Map<string, AudioBox> = new Map();
 	private audioboxList: Map<string, HTMLAudioElement> = new Map();
 	private lastInteractedAudioboxId: string | null = null;
 
@@ -177,17 +189,6 @@ export default class AnnotateAudioPlugin extends Plugin {
 			},
 		});
 
-		/* this.registerObsidianProtocolHandler("audioplayer", (e) => {
-                const parameters = e as {
-                    action: string;
-                    playerId?: string;
-                    chapter?: string;
-                };
-                if (e.das) {
-                    e.das;
-                }
-            }); */
-
 		/* -------------- */
 		/* --- Render --- */
 		/* -------------- */
@@ -220,65 +221,100 @@ export default class AnnotateAudioPlugin extends Plugin {
 				}
 
 				// Check if an existing player already exists for this audio source
-				let player: HTMLAudioElement;
+				let audiobox: AudioBox;
 
-				if (this.audioboxList.has(audioboxId))
-					player = this.audioboxList.get(audioboxId)!;
-				else {
-					player = document.createElement("audio");
-					this.audioboxList.set(audioboxId, player);
-				}
+				if (this.audioboxList.has(audioboxId)) {
+					// IF the audiobox already exists
+					audiobox = this.audioboxMap.get(audioboxId)!;
+				} else {
+					// IF the audiobox is new
+					// ####
+					// #### ▼▼ This is the only place WHERE we read the codeblock
+					// ####
+					const player: HTMLAudioElement =
+						document.createElement("audio");
+					const sharedRefs: SharedRefs = { ...DEFAULT_SHARED_REFS };
+					const options: AudioBoxOptions = getAudioboxOptions(source);
+					const comments: AudioComment[] = getComments(source);
 
-				// Set up the container
-				let container = el.createDiv({
-					cls: "annotate-audio-container",
-					attr: { "data-audio-id": audioboxId, tabindex: 0 },
-				});
-				container.appendChild(player);
+					// Set up the container
+					let container = el.createDiv({
+						cls: "annotate-audio-container",
+						attr: { "data-audio-id": audioboxId, tabindex: 0 },
+					});
+					container.appendChild(player!);
 
-				// Set the currently active audio on click
-				container.addEventListener("click", () => {
-					this.lastInteractedAudioboxId = audioboxId;
-				});
+					// Set the currently active audio on click
+					container.addEventListener("click", () => {
+						this.lastInteractedAudioboxId = audioboxId;
+					});
 
-				// Render
-				ctx.addChild(
-					new AudioBox(
+					audiobox = new AudioBox(
 						{
 							id: audioboxId,
 							source,
 							container,
 							audioSource,
 							ctx,
-							player,
+							player: player!,
 							obsidianApp: this.app,
+
+							sharedRefs,
+							options,
+							comments,
 						},
 						// Function to perfome WHEN 1 audiobox is unloaded
-						(id: string) => {
+						(
+							id: string,
+							player: HTMLAudioElement,
+							options: AudioBoxOptions,
+							comments: AudioComment[]
+						) => {
 							// Clean it an remove it
-							const unloadedAudiobox = this.audioboxList.get(id);
+							const unloadedAudiobox = this.audioboxMap.get(id);
 							if (unloadedAudiobox) {
-								unloadedAudiobox.pause();
-								unloadedAudiobox.remove();
-								this.audioboxList.delete(id);
+								this.audioboxMap.delete(id);
+
+								player.pause();
+								player.remove();
+
+								// ####
+								// #### ▼▼ This is the only place WHERE we write to the codeblock
+								// ####
+								const formattedCodeblock = formatCodeblock(
+									id,
+									options,
+									comments
+								);
+								writeCodeblock(
+									ctx,
+									container,
+									this.app,
+									formattedCodeblock
+								);
 							}
 							// Check IF it's the last interacted one and remove it
 							if (this.lastInteractedAudioboxId === id)
 								this.lastInteractedAudioboxId = null;
 						}
-					)
-				);
+					);
+
+					this.audioboxMap.set(audioboxId, audiobox);
+				}
+
+				// Render
+				ctx.addChild(audiobox);
 			}
 		);
 	}
 
 	onunload() {
-		Object.values(this.audioboxList).forEach((player) => {
-			player.pause();
-			player.remove();
-			player.source = "";
+		Object.values(this.audioboxMap).forEach((audiobox) => {
+			audiobox.player.pause();
+			audiobox.player.remove();
+			audiobox.player.source = "";
 		});
-		this.audioboxList.clear();
+		this.audioboxMap.clear();
 		this.lastInteractedAudioboxId = null;
 	}
 }

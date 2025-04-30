@@ -1,50 +1,38 @@
-import {
-	App,
-	MarkdownPostProcessorContext,
-	Modal,
-	Notice,
-	Setting,
-} from "obsidian";
+import { App, Modal, Notice, Setting } from "obsidian";
 // Import - Type
 import type { AudioBoxOptions } from "./optionsType";
 import { type Layout, layoutsArray } from "src/layout/layoutType";
 // Import - Functions
-import { getAudioboxOptions } from "./optionsGetter";
 import { secondsToTime, timeToSeconds } from "src/utils";
-import { setAudioboxOptions } from "./optionsSetter";
+import { toRaw } from "vue";
 
-export class PropertiesModal extends Modal {
-	private source: string;
-	private ctx: MarkdownPostProcessorContext;
-	private container: HTMLElement;
-	private options: AudioBoxOptions; // Record of all the options
+export class optionsModal extends Modal {
+	private options: AudioBoxOptions;
 	private totalDuration: number;
 
+	private resolve!: (newOptions: AudioBoxOptions) => void;
+	private reject!: () => void;
+	public result: Promise<AudioBoxOptions>;
+
 	constructor(
-		options: AudioBoxOptions,
-		source: string,
-		ctx: MarkdownPostProcessorContext,
-		container: HTMLElement,
-		obsidianApp: App,
-		totalDuration: number
+		options: Readonly<AudioBoxOptions>,
+		obsidianApp: Readonly<App>,
+		totalDuration: Readonly<number>
 	) {
 		super(obsidianApp);
 
-		this.options = options;
-		this.source = source;
-		this.ctx = ctx;
-		this.container = container;
+		this.options = JSON.parse(JSON.stringify(options));
 		this.totalDuration = totalDuration;
+
+		this.result = new Promise((res, rej) => {
+			this.resolve = res;
+			this.reject = rej;
+		});
 
 		this.init(); // Call an async method instead
 	}
 
 	private async init() {
-		this.options = getAudioboxOptions(this.source, this.totalDuration);
-		if (!this.options.chunk) {
-			this.options.chunk = { startTime: 0, endTime: 0 };
-		}
-
 		const { contentEl } = this;
 
 		/* ----------------------- */
@@ -297,19 +285,14 @@ export class PropertiesModal extends Modal {
 			.setHeading() // So they dont have the above divider
 			.addButton((btn) =>
 				btn.setIcon("check").onClick(() => {
+					this.resolve(this.options);
 					new Notice("Options have been updated.");
 					this.close();
-
-					setAudioboxOptions(
-						this.ctx,
-						this.container,
-						this.app,
-						this.options
-					);
 				})
 			)
 			.addButton((btn) =>
 				btn.setIcon("x").onClick(() => {
+					this.reject();
 					this.close();
 				})
 			);
@@ -325,5 +308,6 @@ export class PropertiesModal extends Modal {
 	 */
 	public openPropertiesModal() {
 		this.open();
+		return this.result;
 	}
 }

@@ -27,24 +27,25 @@ import type { AudioComment } from "./commentType";
 import type { SharedRefs } from "src/types";
 import type { AudioBoxOptions } from "src/options/optionsType";
 // Import - Function
-import { getCommentsArray } from "./commentLogic";
 import { setPlayerPosition, pausePlayer, playPlayer } from "src/playerLogic";
 
 const props = defineProps<{
 	id: string;
-	source: string;
 	player: HTMLAudioElement;
 	obsidianApp: App;
-	sharedRefs: SharedRefs;
-	options: AudioBoxOptions;
 }>();
+
+const sharedRefs = defineModel<SharedRefs>("sharedRefs", { required: true });
+const options = defineModel<AudioBoxOptions>("options", { required: true });
+const comments = defineModel<AudioComment[]>("comments", {
+	required: true,
+});
 
 /* ----------------- */
 /* --- Lifecycle --- */
 /* ----------------- */
 
 const activeComment = ref<AudioComment | null>(null); // Closest comment before currentTime
-const commentsArray: AudioComment[] = getCommentsArray(props.source);
 
 onMounted(() => {
 	// Initialize Event-Listeners
@@ -60,10 +61,10 @@ onMounted(() => {
  * List of comments inside chunk
  */
 const filteredCommentsArray = computed(() => {
-	return commentsArray.filter(
+	return comments.value.filter(
 		(comment: AudioComment) =>
-			comment.time >= props.options.chunk.startTime &&
-			comment.time <= props.options.chunk.endTime
+			comment.time >= options.value.chunk.startTime &&
+			comment.time <= options.value.chunk.endTime
 	);
 });
 
@@ -76,13 +77,13 @@ const filteredCommentsArray = computed(() => {
  * @param time - Index of comment to edit
  */
 function enableEditComment(time: number): void {
-	if (!props.options.unstoppable)
-		pausePlayer(props.player, props.sharedRefs.currentTime);
+	if (!options.value.unstoppable)
+		pausePlayer(props.player, sharedRefs.value.currentTime);
 
-	props.sharedRefs.workingComment = getComment(time);
+	sharedRefs.value.workingComment = getComment(time);
 
 	// Trigger CommentInput.vue
-	props.sharedRefs.isCommentInputShown = true;
+	sharedRefs.value.isCommentInputShown = true;
 }
 
 /**
@@ -99,18 +100,18 @@ function getComment(time: number): AudioComment | null {
 function playComment(time: number): void {
 	setPlayerPosition(
 		props.player,
-		props.options.chunk,
-		props.sharedRefs.currentTime,
+		options.value.chunk,
+		sharedRefs.value.currentTime,
 		time
 	);
 
 	// Force play IF autoplay is enabled
-	if (props.options.autoplay) {
+	if (options.value.autoplay) {
 		playPlayer(
 			props.id,
 			props.player,
-			props.options.chunk,
-			props.sharedRefs.currentTime
+			options.value.chunk,
+			sharedRefs.value.currentTime
 		);
 	}
 }
@@ -124,7 +125,7 @@ function playComment(time: number): void {
 function eventActiveComment() {
 	// Find activeComment
 	const nextCommentToPlay = filteredCommentsArray.value.filter(
-		(comment: AudioComment) => props.player?.currentTime >= comment.time
+		(comment: AudioComment) => comment.time <= props.player.currentTime
 	);
 	activeComment.value = nextCommentToPlay[nextCommentToPlay.length - 1];
 }

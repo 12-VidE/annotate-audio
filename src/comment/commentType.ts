@@ -1,4 +1,4 @@
 export type AudioComment = {
-	time: number; // ~= id
+	time: number; // Its id
 	content: string;
 };
