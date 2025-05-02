@@ -1,5 +1,6 @@
 import { setIcon, setTooltip, TooltipOptions } from "obsidian";
 import { isRef } from "vue";
+import { hash } from "spark-md5";
 
 /* ------------------ */
 /* --- Conversion --- */
@@ -53,26 +54,10 @@ export function secondsToTime(num: number, max?: number): string {
  * @param obj - Input to convert
  * @returns SHA-256 hash of obj
  */
-export async function hashObj(obj: object): Promise<string> {
-	const str = JSON.stringify(obj); // Force it into a string
-	return await hashStr(str);
-}
-
-/**
- * @param str - Input to convert
- * @returns SHA-256 hash of str
- */
-export async function hashStr(str: string): Promise<string> {
-	// Normalize
-	const normStr = canonicalStringify(str);
-	// Endoce
-	const encoder = new TextEncoder();
-	const data = encoder.encode(normStr);
-	const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-	const hash = Array.from(new Uint8Array(hashBuffer))
-		.map((b) => b.toString(16).padStart(2, "0"))
-		.join("");
-	return hash;
+export function hashObj(obj: unknown): string {
+	const canonicalString = canonicalStringify(obj);
+	const json = JSON.stringify(canonicalString);
+	return hash(json);
 }
 
 /**

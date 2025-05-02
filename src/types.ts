@@ -28,7 +28,6 @@ export type AudioBoxParameters = {
 
 export interface SharedRefs {
 	/* --- Player --- */
-	srcPath: string; // Path to the audio source
 	currentTime: number; // Time playing on the track
 	maxDuration: number | undefined; // Total maximum duration of the track
 	/* --- Comment --- */
@@ -40,7 +39,6 @@ export interface SharedRefs {
 }
 
 export const DEFAULT_SHARED_REFS: SharedRefs = {
-	srcPath: "",
 	currentTime: 0,
 	maxDuration: undefined,
 

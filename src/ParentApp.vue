@@ -44,33 +44,32 @@ const props = defineProps<{
 	obsidianApp: App;
 }>();
 
-/* ----------------- */
-/* --- Lifecycle --- */
-/* ----------------- */
-
 const sharedRefs = defineModel<SharedRefs>("sharedRefs", { required: true });
 const options = defineModel<AudioBoxOptions>("options", { required: true });
 const comments = defineModel<AudioComment[]>("comments", {
 	required: true,
 });
 
+/* ----------------- */
+/* --- Lifecycle --- */
+/* ----------------- */
+
 onMounted(async () => {
-	await loadCacheOrFallback();
+	console.log("mounted");
+	loadCacheOrFallback();
 
 	// Read file from vault
 	const file = props.obsidianApp.vault.getAbstractFileByPath(
 		props.audioSource
 	);
 	if (!file || !(file instanceof TFile)) return;
-	sharedRefs.value.srcPath = props.obsidianApp.vault.getResourcePath(file);
+	const srcPath: string = props.obsidianApp.vault.getResourcePath(file);
 
 	// Get duration
-	sharedRefs.value.maxDuration = await retriveDuration(
-		sharedRefs.value.srcPath
-	);
+	sharedRefs.value.maxDuration = await retriveDuration(srcPath);
 
 	// Initialize Player
-	props.player.src = sharedRefs.value.srcPath;
+	props.player.src = srcPath;
 	props.player.currentTime = sharedRefs.value.currentTime;
 	props.player.volume = options.value.volume;
 	props.player.playbackRate = options.value.speed;
@@ -88,10 +87,6 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-	/* saveCache(); */
-
-	pausePlayer(props.player, sharedRefs.value.currentTime);
-
 	// Destroy Event-Listeners
 	props.player.removeEventListener("ended", eventEndedAudio);
 	document.removeEventListener("pause-other-players", eventPauseOtherPlayers);
@@ -118,12 +113,12 @@ const currentLayoutComponent = computed(() => {
 /* --- Function --- */
 /* ---------------- */
 
-async function loadCacheOrFallback(): Promise<void> {
+function loadCacheOrFallback(): void {
 	const codeblockSettings = getAudioboxOptions(
 		props.source,
 		sharedRefs.value.maxDuration
 	);
-	const newHash = await hashObj(codeblockSettings);
+	const newHash = hashObj(codeblockSettings);
 	const oldHash = localStorage.getItem(`aa_${props.id}_optionsHash`);
 
 	if (newHash === oldHash) {
@@ -145,33 +140,12 @@ async function loadCacheOrFallback(): Promise<void> {
 	) {
 		// Inside chunk - Safe to use cache
 		sharedRefs.value.currentTime = currentTimeCache;
-		// Resume audio
-		const resumeCache: boolean =
-			localStorage.getItem(`aa_${props.id}_resume`) === "true";
-		if (resumeCache)
-			playPlayer(
-				props.id,
-				props.player,
-				options.value.chunk,
-				sharedRefs.value.currentTime
-			);
+	} else {
+		// Out-of-bounadry - Fall back to safe place
+		sharedRefs.value.currentTime = options.value.chunk?.startTime!;
 	}
 
-	// Out-of-bounadry - Fall back to safe place
-	else sharedRefs.value.currentTime = options.value.chunk?.startTime!;
-}
-
-async function saveCache(): Promise<void> {
-	localStorage.setItem(`aa_${props.id}_optionsHash`, await hashObj(options));
-	localStorage.setItem(`aa_${props.id}_options`, JSON.stringify(options));
-	localStorage.setItem(
-		`aa_${props.id}_currentTime`,
-		JSON.stringify(props.player.currentTime)
-	);
-	localStorage.setItem(
-		`aa_${props.id}_resume`,
-		JSON.stringify(sharedRefs.value.resume)
-	);
+	// Set maxDuration
 }
 
 /* ------------------------- */
@@ -182,7 +156,7 @@ function eventEndedAudio() {
 		props.player,
 		options.value.chunk,
 		sharedRefs.value.currentTime,
-		options.value.chunk?.startTime!
+		options.value.chunk.startTime
 	);
 	if (!options.value.loop)
 		pausePlayer(props.player, sharedRefs.value.currentTime);

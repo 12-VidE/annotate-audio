@@ -15,7 +15,8 @@ Substantial tidy up of my spaghetti code
 
 #### 1.4.2
 
--   _fix ([#8](https://github.com/12-VidE/annotate-audio/issues/8))_ - Codeblock is re-written only on unload
+-   _fix ([#8](https://github.com/12-VidE/annotate-audio/issues/8)) ([#9](https://github.com/12-VidE/annotate-audio/issues/9))_ - Codeblock is re-written only on unload
+-   _fix ([#9](https://github.com/12-VidE/annotate-audio/issues/9))_ - Cache only on audiobox unmounting
 
 ## 1.3.0 - Mobile Support
 

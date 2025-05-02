@@ -12,7 +12,7 @@
 			<div
 				v-for="(s, i) in barHeights"
 				:class="{ bar: true, playedBar: i <= currentBar }"
-				:key="sharedRefs.srcPath + i"
+				:key="id + i"
 				:style="{ height: s * 6 + 'rem' }"
 			></div>
 		</div>

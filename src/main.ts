@@ -14,7 +14,7 @@ import {
 	DEFAULT_AUDIOBOX_OPTIONS,
 } from "./options/optionsType";
 import { allowedAudioExtension } from "./const";
-import { retriveDuration } from "./utils";
+import { hashObj, retriveDuration } from "./utils";
 // Import - Function
 import {
 	getAudioboxId,
@@ -273,6 +273,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 							// Clean it an remove it
 							const unloadedAudiobox = this.audioboxMap.get(id);
 							if (unloadedAudiobox) {
+								console.log("UnMounted");
 								this.audioboxMap.delete(id);
 
 								player.pause();
@@ -291,6 +292,19 @@ export default class AnnotateAudioPlugin extends Plugin {
 									container,
 									this.app,
 									formattedCodeblock
+								);
+								// Save cache
+								localStorage.setItem(
+									`aa_${id}_optionsHash`,
+									hashObj(options)
+								);
+								localStorage.setItem(
+									`aa_${id}_options`,
+									JSON.stringify(options)
+								);
+								localStorage.setItem(
+									`aa_${id}_currentTime`,
+									JSON.stringify(player.currentTime)
 								);
 							}
 							// Check IF it's the last interacted one and remove it
