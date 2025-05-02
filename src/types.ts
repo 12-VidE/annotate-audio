@@ -35,7 +35,6 @@ export interface SharedRefs {
 	workingComment: AudioComment | null;
 	/* --- States --- */
 	isCommentInputShown: boolean; // IF the input-box for a comment is displayed
-	resume: boolean; // IF the player should resume after the re-render
 }
 
 export const DEFAULT_SHARED_REFS: SharedRefs = {
@@ -46,5 +45,4 @@ export const DEFAULT_SHARED_REFS: SharedRefs = {
 	workingComment: null,
 
 	isCommentInputShown: false,
-	resume: false,
 };

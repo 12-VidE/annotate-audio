@@ -77,11 +77,7 @@ const filteredCommentsArray = computed(() => {
  * @param time - Index of comment to edit
  */
 function enableEditComment(time: number): void {
-	if (!options.value.unstoppable)
-		pausePlayer(props.player, sharedRefs.value.currentTime);
-
 	sharedRefs.value.workingComment = getComment(time);
-
 	// Trigger CommentInput.vue
 	sharedRefs.value.isCommentInputShown = true;
 }

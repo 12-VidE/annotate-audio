@@ -130,7 +130,7 @@ function loadCacheOrFallback(): void {
 		Object.assign(options, codeblockSettings);
 	}
 
-	// Set time + Resume
+	// Set time
 	const currentTimeCache = Number(
 		localStorage.getItem(`aa_${props.id}_currentTime`)
 	);
@@ -142,10 +142,8 @@ function loadCacheOrFallback(): void {
 		sharedRefs.value.currentTime = currentTimeCache;
 	} else {
 		// Out-of-bounadry - Fall back to safe place
-		sharedRefs.value.currentTime = options.value.chunk?.startTime!;
+		sharedRefs.value.currentTime = options.value.chunk.startTime;
 	}
-
-	// Set maxDuration
 }
 
 /* ------------------------- */

@@ -45,7 +45,7 @@ import type { AudioComment } from "./commentType";
 import type { SharedRefs } from "src/types";
 import type { AudioBoxOptions } from "src/options/optionsType";
 // Import - Function
-import { pausePlayer } from "src/playerLogic";
+import { pausePlayer, playPlayer } from "src/playerLogic";
 import { initIcon } from "src/utils";
 
 const props = defineProps<{
@@ -73,6 +73,7 @@ let commentInputBox = ref<string>(""); // Text content of "commentInputElement"
 let deleteConfirmation = ref<boolean>(false); // IF the user confirm he wants to delete the comment
 let isDuplicate = ref<boolean>(false); // WHEN we want to create a comment WHERE it already exists
 let isEdit = ref<boolean>(false); // IF we are editing a comment (NOT creating a new one)
+let resume = ref<boolean>(false); // IF the player should resume after the re-render
 
 onMounted(() => {
 	// Initilize Event-Listeners
@@ -100,6 +101,8 @@ watch(
  * Display the commnet input box
  */
 async function showCommentInput(): Promise<void> {
+	if (!props.player.paused) resume.value = true;
+
 	if (!options.value.unstoppable)
 		pausePlayer(props.player, sharedRefs.value.currentTime);
 
@@ -200,10 +203,21 @@ async function confirmDeleteComment() {
 }
 
 function imposeDefault(): void {
+	// Resume player IF it was playing before interacting w/ a comment
+	if (resume.value && !options.value.unstoppable)
+		playPlayer(
+			props.id,
+			props.player,
+			options.value.chunk,
+			sharedRefs.value.currentTime
+		);
+
+	// Reset states
 	commentInputBox.value = "";
 
 	isDuplicate.value = false;
 	isEdit.value = false;
+	resume.value = false;
 
 	sharedRefs.value.isCommentInputShown = false;
 	sharedRefs.value.workingComment = null;

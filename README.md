@@ -83,6 +83,7 @@ For all the changes, check [CHANGELOG.md](https://github.com/12-VidE/annotate-au
 
 -   `title` option inside modal is not displayed correctly on mobile
 -   Audiobox in "reading" and "editing" mode are not in sync
+-   Checking when to use cache - by looking at the options hashing - is not efficiently done
 
 ## Credits
 
