@@ -55,7 +55,6 @@ const comments = defineModel<AudioComment[]>("comments", {
 /* ----------------- */
 
 onMounted(async () => {
-	console.log("mounted");
 	loadCacheOrFallback();
 
 	// Read file from vault

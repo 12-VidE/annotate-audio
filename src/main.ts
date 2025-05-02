@@ -273,7 +273,6 @@ export default class AnnotateAudioPlugin extends Plugin {
 							// Clean it an remove it
 							const unloadedAudiobox = this.audioboxMap.get(id);
 							if (unloadedAudiobox) {
-								console.log("UnMounted");
 								this.audioboxMap.delete(id);
 
 								player.pause();
