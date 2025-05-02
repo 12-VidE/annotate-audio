@@ -12,15 +12,28 @@
 /* ------------- */
 /* --- State --- */
 /* ------------- */
-.is-sticky {
+.annotate-audio-container .is-sticky {
 	position: sticky;
 	top: 0; /* Stick to the top */
 	z-index: 10; /* Above other content */
 }
 
-.disabled {
+.annotate-audio-container .disabled {
 	pointer-events: none;
 	opacity: 0.6;
+}
+
+/* ------------- */
+/* --- Button --- */
+/* ------------- */
+.annotate-audio-container {
+	button,
+	.commentInput_btn,
+	.playpause_btn,
+	.showProperties_btn,
+	.movement-btn {
+		cursor: pointer;
+	}
 }
 
 /* ----------------------- */
