@@ -1,10 +1,11 @@
 import { App, Modal, Notice, Setting } from "obsidian";
+import { toRaw } from "vue";
 // Import - Type
 import type { AudioBoxOptions } from "./optionsType";
 import { type Layout, layoutsArray } from "src/layout/layoutType";
 // Import - Functions
 import { secondsToTime, timeToSeconds } from "src/utils";
-import { toRaw } from "vue";
+import { t } from "src/lang/helpers";
 
 export class optionsModal extends Modal {
 	private options: AudioBoxOptions;
@@ -38,10 +39,12 @@ export class optionsModal extends Modal {
 		/* ----------------------- */
 		/* --- Options - Audio --- */
 		/* ----------------------- */
-		new Setting(contentEl).setName("Audio preferences").setHeading();
+		new Setting(contentEl)
+			.setName(t("AUDIO_PREFERERENCES_TITLE"))
+			.setHeading();
 
 		// Volume
-		new Setting(contentEl).setName("Volume").then((setting) => {
+		new Setting(contentEl).setName(t("VOLUME_OPTION")).then((setting) => {
 			// Add slider
 			setting.addSlider((slider) => {
 				slider
@@ -62,7 +65,7 @@ export class optionsModal extends Modal {
 		});
 
 		// Speed
-		new Setting(contentEl).setName("Playback speed").then((setting) => {
+		new Setting(contentEl).setName(t("SPEED_OPTION")).then((setting) => {
 			// Add slider
 			setting.addSlider((slider) => {
 				slider
@@ -84,8 +87,8 @@ export class optionsModal extends Modal {
 
 		// Loop
 		new Setting(contentEl)
-			.setName("Loop")
-			.setDesc("When the track ends, it plays back from the beginning")
+			.setName(t("LOOP_OPTION"))
+			.setDesc(t("LOOP_OPTION_DESC"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.options.loop)
@@ -96,8 +99,8 @@ export class optionsModal extends Modal {
 
 		// Autoplay
 		new Setting(contentEl)
-			.setName("Autoplay")
-			.setDesc("When clicking on a comment, the player is forced to play")
+			.setName(t("AUTOPLAY_OPTION"))
+			.setDesc(t("AUTOPLAY_OPTION_DESC"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.options.autoplay)
@@ -117,8 +120,8 @@ export class optionsModal extends Modal {
 		} | null = null;
 
 		new Setting(contentEl)
-			.setName("Chunk")
-			.setDesc("What part of the audio track to reproduce")
+			.setName(t("CHUNK_OPTION"))
+			.setDesc(t("CHUNK_OPTION_DESC"))
 			.addExtraButton((btn) =>
 				btn.setIcon("trash-2").onClick(() => {
 					chunkStartTime?.setValue("00:00:00");
@@ -193,7 +196,9 @@ export class optionsModal extends Modal {
 		/* ------------------------ */
 		/* --- Options - Player --- */
 		/* ------------------------ */
-		new Setting(contentEl).setName("Player preferences").setHeading();
+		new Setting(contentEl)
+			.setName(t("PLAYER_PREFERENCES_TITLE"))
+			.setHeading();
 
 		// Layout
 		new Setting(contentEl).setName("Layout").addDropdown((dropdown) => {
@@ -214,8 +219,8 @@ export class optionsModal extends Modal {
 
 		// Sticky
 		new Setting(contentEl)
-			.setName("Sticky commands")
-			.setDesc("The mains controls follow you as you scroll")
+			.setName(t("STICKY_OPTION"))
+			.setDesc(t("STICKY_OPTION_DESC"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.options.sticky)
@@ -226,10 +231,8 @@ export class optionsModal extends Modal {
 
 		// Unstoppable
 		new Setting(contentEl)
-			.setName("Unstoppable")
-			.setDesc(
-				"The audio will continue playing even when adding/modifing a comment"
-			)
+			.setName(t("UNSTOPPABLE_OPTION"))
+			.setDesc(t("UNSTOPPABLE_OPTION_DESC"))
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.options.unstoppable)
@@ -240,10 +243,8 @@ export class optionsModal extends Modal {
 
 		// Title
 		new Setting(contentEl)
-			.setName("Title")
-			.setDesc(
-				"Want to show a title? Leave empty to use the audio filename"
-			)
+			.setName(t("TITLE_OPTION"))
+			.setDesc(t("TITLE_OPTION_DESC"))
 			.then((setting) => {
 				// TODO Junky ma sembra funzionare
 				const container = setting.settingEl.createDiv();
@@ -286,7 +287,7 @@ export class optionsModal extends Modal {
 			.addButton((btn) =>
 				btn.setIcon("check").onClick(() => {
 					this.resolve(this.options);
-					new Notice("Options have been updated.");
+					new Notice(t("OPTIONS_UPDATE_NOTICE"));
 					this.close();
 				})
 			)

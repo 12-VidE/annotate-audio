@@ -237,6 +237,7 @@ import { optionsModal } from "src/options/optionsModal";
 import { displayTitle } from "./layoutLogic";
 import { initIcon, secondsToTime } from "src/utils";
 import { togglePlayer, pausePlayer, setPlayerPosition } from "src/playerLogic";
+import { t } from "src/lang/helpers";
 
 const props = defineProps<{
 	id: string;
@@ -278,12 +279,12 @@ onMounted(async () => {
 	initIcon(showCommentInput_btn.value, "bookmark-plus");
 	initIcon(showProperties_btn.value, "settings-2");
 	// Initialize icons + Tooltip - Secondary
-	initIcon(loop_toggle.value, "repeat", "Loop");
-	initIcon(autoplay_toggle.value, "square-play", "Autoplay");
-	initIcon(unstoppable_toggle.value, "shield", "Unstoppable");
-	initIcon(sticky_toggle.value, "pin", "Sticky");
-	initIcon(volume_icon.value, "volume-2", "Volume");
-	initIcon(speed_icon.value, "gauge", "Playback speed");
+	initIcon(loop_toggle.value, "repeat", t("LOOP_OPTION"));
+	initIcon(autoplay_toggle.value, "square-play", t("AUTOPLAY_OPTION"));
+	initIcon(unstoppable_toggle.value, "shield", t("UNSTOPPABLE_OPTION"));
+	initIcon(sticky_toggle.value, "pin", t("STICKY_OPTION"));
+	initIcon(volume_icon.value, "volume-2", t("VOLUME_OPTION"));
+	initIcon(speed_icon.value, "gauge", t("SPEED_OPTION"));
 
 	setTimeout(() => {
 		styleChunkBnt();
@@ -334,15 +335,23 @@ const speed = computed(() => Number(options.value.speed).toFixed(1));
 function styleChunkBnt() {
 	if (options.value.chunk.startTime == 0) {
 		// Set chunk startTime
-		initIcon(chunk_btn.value, "arrow-left-to-line", "Chunk: Select start");
+		initIcon(
+			chunk_btn.value,
+			"arrow-left-to-line",
+			t("CHUNK_START_TOOLTIP")
+		);
 	} else if (
 		options.value.chunk.endTime == Math.floor(sharedRefs.value.maxDuration!)
 	) {
 		// Set chunk endTime
-		initIcon(chunk_btn.value, "arrow-right-to-line", "Chunk: Select end");
+		initIcon(
+			chunk_btn.value,
+			"arrow-right-to-line",
+			t("CHUNK_END_TOOLTIP")
+		);
 	} else {
 		// Reset chunk
-		initIcon(chunk_btn.value, "fold-horizontal", "Chunk: Delete");
+		initIcon(chunk_btn.value, "fold-horizontal", t("CHUNK_DELETE_TOOLTIP"));
 	}
 }
 

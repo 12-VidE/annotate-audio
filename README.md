@@ -10,6 +10,7 @@
 -   Inuitive keyboard shortcuts
 -   Mobile compatible
 -   Controllabe with obsdian commands
+-   Localized interface ([Want to add a language?](https://github.com/12-VidE/annotate-audio/tree/master/src/lang/README.md))
 
 ````
 ``` annotate-audio
@@ -74,16 +75,16 @@ For all the changes, check [CHANGELOG.md](https://github.com/12-VidE/annotate-au
 
 ### Road-Map
 
-1. Add i18n support
+1. Allow hotkeys inside input text box
 2. Follow native folder exclusion in the audio file search
-3. Allow hotkeys inside input text box
-4. Render markdown even when modifying a comment (https://github.com/nothingislost/obsidian-cm6-attributes)
+3. Render markdown even when modifying a comment. "Live-Preview" (https://github.com/nothingislost/obsidian-cm6-attributes)
 
 ### Known Issues
 
 -   `title` option inside modal is not displayed correctly on mobile
 -   Audiobox in "reading" and "editing" mode are not in sync
 -   Checking when to use cache - by looking at the options hashing - is not efficiently done
+-   `Big` layout's wavegraph cannot handle file bigger than 2GiB
 
 ## Credits
 

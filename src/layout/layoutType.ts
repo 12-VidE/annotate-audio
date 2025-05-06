@@ -3,6 +3,8 @@ import { ComponentOptions, ComponentProvideOptions } from "vue";
 import LayoutDefault from "./LayoutDefault.vue";
 import LayoutBig from "./LayoutBig.vue";
 import LayoutGeek from "./LayoutGeek.vue";
+// Import - Function
+import { t } from "src/lang/helpers";
 
 export type Layout = {
 	name: string;
@@ -32,7 +34,7 @@ export type Layout = {
  * WARNING - Ignore IDE error
  */
 export const layoutsArray: Array<Layout> = [
-	{ name: "Default", component: LayoutDefault },
-	{ name: "Big", component: LayoutBig },
-	{ name: "Geek", component: LayoutGeek },
+	{ name: t("DEFAUTL_LAYOUT_NAME"), component: LayoutDefault },
+	{ name: t("BIG_LAYOUT_NAME"), component: LayoutBig },
+	{ name: t("GEEK_LAYOUT_NAME"), component: LayoutGeek },
 ];

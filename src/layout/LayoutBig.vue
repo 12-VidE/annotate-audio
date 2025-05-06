@@ -166,6 +166,7 @@ import { optionsModal } from "src/options/optionsModal";
 import { displayTitle } from "./layoutLogic";
 import { togglePlayer, setPlayerPosition, pausePlayer } from "../playerLogic";
 import { hashObj, initIcon, secondsToTime } from "src/utils";
+import { t } from "src/lang/helpers";
 
 const props = defineProps<{
 	id: string;

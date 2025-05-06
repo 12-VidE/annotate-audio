@@ -1,3 +1,7 @@
+## 1.5.0 - Localization
+
+The plugin now supports localization. It currently includes "English" and "Italian" translations.
+
 ## 1.4.0
 
 -   _feat ([#4](https://github.com/12-VidE/annotate-audio/issues/4))_ - Each codeblock now has its own ID to better handle them

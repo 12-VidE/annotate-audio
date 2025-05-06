@@ -27,6 +27,7 @@ import { DEFAULT_SHARED_REFS, SharedRefs } from "./types";
 import { AudioComment } from "./comment/commentType";
 import { getComments } from "./comment/commentLogic";
 import { formatCodeblock, writeCodeblock } from "./codeblockLogic";
+import { t } from "./lang/helpers";
 
 /* -------------- */
 /* --- Plugin --- */
@@ -44,7 +45,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 		// Add audiobox
 		this.addCommand({
 			id: "add-audio-box",
-			name: "Add audiobox",
+			name: t("ADD_AUDIOBOX_NAME"),
 			editorCallback: async (editor: Editor) => {
 				let defaultOptions = DEFAULT_AUDIOBOX_OPTIONS;
 				// Create ID
@@ -87,7 +88,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 		// Add comment
 		this.addCommand({
 			id: "add-comment",
-			name: "Insert comment",
+			name: t("ADD_COMMENT_NAME"),
 			checkCallback: (checking: boolean) => {
 				if (!this.lastInteractedAudioboxId) return false;
 				if (!checking) {
@@ -102,7 +103,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 		// Pause audiobox
 		this.addCommand({
 			id: "pause-audiobox",
-			name: "Pause audiobox",
+			name: t("PAUSE_AUDIOBOX_NAME"),
 			checkCallback: (checking: boolean) => {
 				if (
 					!this.lastInteractedAudioboxId ||
@@ -122,7 +123,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 		// Play audiobox
 		this.addCommand({
 			id: "play-audiobox",
-			name: "Play audiobox",
+			name: t("PLAY_AUDIOBOX_NAME"),
 			checkCallback: (checking: boolean) => {
 				if (
 					!this.lastInteractedAudioboxId ||
@@ -143,7 +144,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 		// Toggle audiobox
 		this.addCommand({
 			id: "toggle-audiobox",
-			name: "Toggle audiobox",
+			name: t("TOGGLE_AUDIOBOX_NAME"),
 			checkCallback: (checking: boolean) => {
 				if (!this.lastInteractedAudioboxId) return false;
 				if (!checking) {
@@ -159,7 +160,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 		// Forward
 		this.addCommand({
 			id: "audiobox-forward",
-			name: "Move forward",
+			name: t("MOVE_FORWARD_NAME"),
 			checkCallback: (checking: boolean) => {
 				if (!this.lastInteractedAudioboxId) return false;
 				if (!checking) {
@@ -175,7 +176,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 		// Backward
 		this.addCommand({
 			id: "audiobox-backward",
-			name: "Move backward",
+			name: t("MOVE_BACKWARD_NAME"),
 			checkCallback: (checking: boolean) => {
 				if (!this.lastInteractedAudioboxId) return false;
 				if (!checking) {

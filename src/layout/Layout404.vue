@@ -2,9 +2,9 @@
 	<div class="layout--404">
 		<div @click="eventAddSource">
 			<div class="main_content">
-				<span ref="disk_icon"></span>Invalid/Absent audio source
+				<span ref="disk_icon"></span>{{ t("ERROR_TAG") }}
 			</div>
-			<div class="minor">Click to select</div>
+			<div class="minor">{{ t("CLICK_TAG") }}</div>
 		</div>
 	</div>
 </template>
@@ -22,6 +22,7 @@ import { initIcon } from "src/utils";
 import { setAudioboxOptions } from "src/options/optionsSetter";
 import { getAudioboxOptions } from "src/options/optionsGetter";
 import { retriveDuration } from "src/utils";
+import { t } from "src/lang/helpers";
 
 const props = defineProps<{
 	source: string;

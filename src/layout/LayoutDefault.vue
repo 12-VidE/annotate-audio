@@ -153,6 +153,7 @@ import { optionsModal } from "src/options/optionsModal";
 // Import - Functions
 import { togglePlayer, setPlayerPosition, pausePlayer } from "../playerLogic";
 import { initIcon, secondsToTime } from "src/utils";
+import { t } from "src/lang/helpers";
 
 const props = defineProps<{
 	id: string;
