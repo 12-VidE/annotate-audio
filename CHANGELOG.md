@@ -5,7 +5,7 @@ The plugin now supports localization. It currently includes "English" and "Itali
 ## 1.4.0
 
 -   _feat ([#4](https://github.com/12-VidE/annotate-audio/issues/4))_ - Each codeblock now has its own ID to better handle them
--   _feat ([#6](https://github.com/12-VidE/annotate-audio/issues/6))_ New option `unstoppable`
+-   _feat ([#6](https://github.com/12-VidE/annotate-audio/issues/6))_ - New option `unstoppable`
 -   _feat_ - new "Geek" `layout`
 -   _fix ([#6](https://github.com/12-VidE/annotate-audio/issues/6))_ - Audio resumes after a comment is created/deleted
 -   _fix_ - `chunk` is resetted correctly
