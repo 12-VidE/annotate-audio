@@ -69,8 +69,9 @@ export function formatCodeblock(
 					const chunk = value as AudioChunk;
 					if (chunk.endTime > chunk.startTime)
 						return `chunk: ${secondsToTime(
-							chunk?.startTime
-						)}-${secondsToTime(chunk.endTime)}`;
+							chunk?.startTime,
+							3
+						)}-${secondsToTime(chunk.endTime, 3)}`;
 					else return ``;
 				default:
 					return `${key}: ${value}`;

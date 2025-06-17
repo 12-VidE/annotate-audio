@@ -118,7 +118,7 @@
 					type="range"
 					:min="options.chunk?.startTime"
 					:max="options.chunk?.endTime"
-					step="0.1"
+					step="0.001"
 					v-model="sharedRefs.currentTime"
 					@input="eventTimeBarInput"
 				/>
@@ -197,6 +197,21 @@
 						<span class="label">{{ speed }}</span>
 					</div>
 				</div>
+				<!-- 3° Row -->
+				<div class="row">
+					<!-- Decimals -->
+					<div class="inrow">
+						<i ref="decimals_icon"></i>
+						<input
+							type="range"
+							min="0"
+							max="3"
+							step="1"
+							v-model.number="options.decimals"
+						/>
+						<span class="label">{{ decimals }}</span>
+					</div>
+				</div>
 			</div>
 
 			<!-- Comment Input -->
@@ -267,6 +282,7 @@ const sticky_toggle = ref<HTMLElement | null>(null);
 const chunk_btn = ref<HTMLElement | null>(null);
 const volume_icon = ref<HTMLElement | null>(null);
 const speed_icon = ref<HTMLElement | null>(null);
+const decimals_icon = ref<HTMLElement | null>(null);
 
 /* ----------------- */
 /* --- Lifecycle --- */
@@ -285,6 +301,7 @@ onMounted(async () => {
 	initIcon(sticky_toggle.value, "pin", t("STICKY_OPTION"));
 	initIcon(volume_icon.value, "volume-2", t("VOLUME_OPTION"));
 	initIcon(speed_icon.value, "gauge", t("SPEED_OPTION"));
+	initIcon(decimals_icon.value, "ellipsis", t("DECIMALS_OPTION"));
 
 	setTimeout(() => {
 		styleChunkBnt();
@@ -311,13 +328,18 @@ onBeforeUnmount(() => {
 
 const displayCurrentTime = computed(() =>
 	secondsToTime(
-		Math.floor(sharedRefs.value.currentTime),
+		sharedRefs.value.currentTime,
+		options.value.decimals,
 		sharedRefs.value.maxDuration
 	)
 );
 
 const displayDuration = computed(() =>
-	secondsToTime(options.value.chunk.endTime, sharedRefs.value.maxDuration)
+	secondsToTime(
+		options.value.chunk.endTime,
+		options.value.decimals,
+		sharedRefs.value.maxDuration
+	)
 );
 
 const title = computed(() =>
@@ -327,6 +349,8 @@ const title = computed(() =>
 const volume = computed(() => Number(options.value.volume).toFixed(1));
 
 const speed = computed(() => Number(options.value.speed).toFixed(1));
+
+const decimals = computed(() => Number(options.value.decimals).toFixed(0));
 
 /* ---------------- */
 /* --- Function --- */
@@ -340,9 +364,7 @@ function styleChunkBnt() {
 			"arrow-left-to-line",
 			t("CHUNK_START_TOOLTIP")
 		);
-	} else if (
-		options.value.chunk.endTime == Math.floor(sharedRefs.value.maxDuration!)
-	) {
+	} else if (options.value.chunk.endTime == sharedRefs.value.maxDuration!) {
 		// Set chunk endTime
 		initIcon(
 			chunk_btn.value,
@@ -357,16 +379,14 @@ function styleChunkBnt() {
 
 function manageChunk() {
 	if (options.value.chunk.startTime == 0) {
-		options.value.chunk.startTime = Math.floor(props.player.currentTime);
-	} else if (
-		options.value.chunk.endTime == Math.floor(sharedRefs.value.maxDuration!)
-	) {
+		options.value.chunk.startTime = props.player.currentTime;
+	} else if (options.value.chunk.endTime == sharedRefs.value.maxDuration!) {
 		if (props.player.currentTime > options.value.chunk.startTime)
-			options.value.chunk.endTime = Math.floor(props.player.currentTime);
+			options.value.chunk.endTime = props.player.currentTime;
 	} else {
 		options.value.chunk = {
 			startTime: 0,
-			endTime: Math.floor(sharedRefs.value.maxDuration!),
+			endTime: sharedRefs.value.maxDuration!,
 		};
 	}
 	styleChunkBnt();

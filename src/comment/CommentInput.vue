@@ -119,7 +119,7 @@ async function showCommentInput(): Promise<void> {
 		} else {
 			// "Adding" mode = IF there's no content
 			sharedRefs.value.workingComment = {
-				time: Math.floor(props.player.currentTime), // Save it in case of "unstoppable"
+				time: Math.round(props.player.currentTime * 1000) / 1000, // Save time (in ms) in case of "unstoppable"
 				content: "",
 			};
 
@@ -159,7 +159,7 @@ async function showCommentInput(): Promise<void> {
 /**
  * (Re)write comment inside commentInputBox TO codeblock
  */
-async function addComment(): Promise<void> {
+function addComment(): void {
 	if (commentInputBox.value !== "" && sharedRefs.value.workingComment) {
 		sharedRefs.value.workingComment.content = commentInputBox.value;
 		if (isEdit.value) {

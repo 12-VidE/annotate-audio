@@ -5,7 +5,7 @@
 		@click.right="emitEditComment"
 	>
 		<span class="comment-time">{{
-			secondsToTime(comment.time, maxDuration)
+			secondsToTime(comment.time, decimalsOption, maxDuration)
 		}}</span>
 		<span class="comment-content" v-html="displayCommentContent"></span>
 		<button
@@ -30,6 +30,7 @@ const props = defineProps<{
 	comment: AudioComment;
 	obsidianApp: App;
 	maxDuration: number | undefined;
+	decimalsOption: number;
 }>();
 
 const emit = defineEmits<{

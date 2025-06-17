@@ -34,7 +34,7 @@ export async function setAudioboxOptions(
 				break;
 			}
 		}
-		if (!optionsNumber) optionsNumber = codeblock.length - 1; // WHEN there's no comment. Fallback to the codeblock lenght wihtout extremes
+		if (!optionsNumber) optionsNumber = codeblock.length - 1; // WHEN there's no comments. Fallback to the codeblock length w/o extremes
 
 		const newOptionsArray = formatOptions(newOptions);
 

@@ -13,23 +13,26 @@ export default {
 	/* --- OPTIONS --- */
 
 	// options/optionsType.ts
+	VOLUME_OPTION: "Volume",
+	SPEED_OPTION: "Velocità riproduzione",
 	LOOP_OPTION: "Ripeti",
 	LOOP_OPTION_DESC:
 		"Quando la traccia termina, la riproduzione ricomincia da capo",
 	AUTOPLAY_OPTION: "Riproduzione automatica",
 	AUTOPLAY_OPTION_DESC:
 		"Cliccando su un commento, la riproduzione partirà automaticamente",
-	UNSTOPPABLE_OPTION: "Inarrestabilie",
-	UNSTOPPABLE_OPTION_DESC:
-		"La traccia non verrà fermata durale all'aggiunta/modifica di un commento",
-	STICKY_OPTION: "Appiccicoso",
-	STICKY_OPTION_DESC:
-		"I controlli principali rimangono visibili quando si scorre la pagina",
-	VOLUME_OPTION: "Volume",
-	SPEED_OPTION: "Velocità riproduzione",
 	CHUNK_OPTION: "Porzione",
 	CHUNK_OPTION_DESC:
 		"Seleziona quale parte della traccia si vuole riprodurre",
+	STICKY_OPTION: "Appiccicoso",
+	STICKY_OPTION_DESC:
+		"I controlli principali rimangono visibili quando si scorre la pagina",
+	UNSTOPPABLE_OPTION: "Inarrestabilie",
+	UNSTOPPABLE_OPTION_DESC:
+		"La traccia non verrà fermata durale all'aggiunta/modifica di un commento",
+	DECIMALS_OPTION: "Decimali",
+	DECIMALS_OPTION_DESC:
+		"Quanti decimali sono visibili quando viene mostrato il tempo",
 	TITLE_OPTION: "Titolo",
 	TITLE_OPTION_DESC:
 		"Vuoi mostare un titolo? Lascia vuoto per usare il nome del file audio",

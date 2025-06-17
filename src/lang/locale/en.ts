@@ -13,20 +13,22 @@ export default {
 	/* --- OPTIONS --- */
 
 	// options/optionsType.ts
+	VOLUME_OPTION: "Volume",
+	SPEED_OPTION: "Playback speed",
 	LOOP_OPTION: "Loop",
 	LOOP_OPTION_DESC: "When the track ends, it plays back from the beginning",
 	AUTOPLAY_OPTION: "Autoplay",
 	AUTOPLAY_OPTION_DESC:
 		"When clicking on a comment, the player is forced to play",
+	CHUNK_OPTION: "Chunk",
+	CHUNK_OPTION_DESC: "What part of the audio track to reproduce",
+	STICKY_OPTION: "Sticky",
+	STICKY_OPTION_DESC: "The mains controls follow you as you scroll",
 	UNSTOPPABLE_OPTION: "Unstoppable",
 	UNSTOPPABLE_OPTION_DESC:
 		"The audio will continue playing even when adding/modifing a comment",
-	STICKY_OPTION: "Sticky",
-	STICKY_OPTION_DESC: "The mains controls follow you as you scroll",
-	VOLUME_OPTION: "Volume",
-	SPEED_OPTION: "Playback speed",
-	CHUNK_OPTION: "Chunk",
-	CHUNK_OPTION_DESC: "What part of the audio track to reproduce",
+	DECIMALS_OPTION: "Decimals",
+	DECIMALS_OPTION_DESC: "How many decimals to show when displaying time",
 	TITLE_OPTION: "Title",
 	TITLE_OPTION_DESC:
 		"Want to show a title? Leave empty to use the audio filename",

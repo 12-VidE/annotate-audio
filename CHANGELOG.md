@@ -2,6 +2,9 @@
 
 The plugin now supports localization. It currently includes "English" and "Italian" translations.
 
+-   _feat ([#11](https://github.com/12-VidE/annotate-audio/issues/11))_ - Everything is now precise to the millisecond
+-   _feat ([#11](https://github.com/12-VidE/annotate-audio/issues/11))_ - New option `decimals`
+
 ## 1.4.0
 
 -   _feat ([#4](https://github.com/12-VidE/annotate-audio/issues/4))_ - Each codeblock now has its own ID to better handle them

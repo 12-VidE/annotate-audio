@@ -11,12 +11,13 @@
 -   Mobile compatible
 -   Controllabe with obsdian commands
 -   Localized interface ([Want to add a language?](https://github.com/12-VidE/annotate-audio/tree/master/src/lang/README.md))
+-   Precision down to the millisecond
 
 ````
 ``` annotate-audio
 #32a9143a94c3700d
 source: [[My Audio.mp3]]
-chunk: 00:00:00-00:02:52
+chunk: 00:00:00.000-00:02:52.100
 volume: 0.5
 speed: 1
 loop: false
@@ -24,9 +25,9 @@ layout: 0
 sticky: false
 autoplay: false
 
-37 --- Section 1
-162 --- Section 2
-174 --- Section 3
+37.075 --- Section 1
+162.349 --- Section 2
+174.902 --- Section 3
 ```
 ````
 
@@ -48,6 +49,7 @@ Each audio-box has its owns. They can be tweaked manually or, more easily, **usi
 | `chunk`       | `undefined` | `HH:MM:SS-HH:MM:SS` | Section of audio to play                                                                        |
 | `autoplay`    | `false`     | `true`/`false`      | When clicking on a comment, the player starts playing from there instead of simply moving there |
 | `unstoppable` | `false`     | `true`/`false`      | When creating/modifing a comment, the player doesn't stop                                       |
+| `decimals`    | `0`         | `0`,`1`,`2`,`3`     | How many time decimals are displayed                                                            |
 
 There are also some options only available in specific `layout`s
 
@@ -82,6 +84,7 @@ For all the changes, check [CHANGELOG.md](https://github.com/12-VidE/annotate-au
 ### Known Issues
 
 -   `title` option inside modal is not displayed correctly on mobile
+-   Layout-unique options are visible inside other layouts
 -   Audiobox in "reading" and "editing" mode are not in sync
 -   Checking when to use cache - by looking at the options hashing - is not efficiently done
 -   `Big` layout's wavegraph cannot handle file bigger than 2GiB

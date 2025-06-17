@@ -13,6 +13,7 @@
 			:comment="comment"
 			:obsidianApp="obsidianApp"
 			:maxDuration="sharedRefs.maxDuration"
+			:decimalsOption="options.decimals"
 		/>
 	</div>
 </template>

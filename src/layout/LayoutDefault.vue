@@ -207,13 +207,18 @@ onBeforeUnmount(() => {
 
 const displayCurrentTime = computed(() =>
 	secondsToTime(
-		Math.floor(sharedRefs.value.currentTime),
+		sharedRefs.value.currentTime,
+		options.value.decimals,
 		sharedRefs.value.maxDuration
 	)
 );
 
 const displayDuration = computed(() =>
-	secondsToTime(options.value.chunk.endTime, sharedRefs.value.maxDuration)
+	secondsToTime(
+		options.value.chunk.endTime,
+		options.value.decimals,
+		sharedRefs.value.maxDuration
+	)
 );
 
 /* ---------------- */

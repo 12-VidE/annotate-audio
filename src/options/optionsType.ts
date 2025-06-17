@@ -13,6 +13,7 @@ export type AudioBoxOptions = {
 	layout: number;
 	sticky: boolean; // IF we enable the player to be sticky
 	title: string | undefined;
+	decimals: number; // How many decimals of time (btw 0-3) to show
 	// Comments
 	autoplay: boolean; // WHEN clicking on a comment, the playes does NOT pause
 	unstoppable: boolean; // Player doesn't stop WHEN adding a comment
@@ -29,6 +30,7 @@ export const DEFAULT_AUDIOBOX_OPTIONS: AudioBoxOptions = {
 	layout: 0,
 	sticky: false,
 	title: undefined,
+	decimals: 0,
 	// Comments
 	autoplay: false,
 	unstoppable: false,

@@ -25,6 +25,7 @@ export function getAudioboxOptions(
 		layout: getLayoutOption(source),
 		sticky: getStickyOption(source),
 		title: getTitleOption(source),
+		decimals: getDecimalsOption(source),
 		// Comments
 		autoplay: getAutoplayOption(source),
 		unstoppable: getUnstoppableOption(source),
@@ -34,8 +35,17 @@ export function getAudioboxOptions(
 /* ----------------- */
 /* --- Secondary --- */
 /* ----------------- */
-
 /**
+ * @returns audio source
+ */
+export function getSourceOption(source: string): string | undefined {
+	const sourceRegex = new RegExp("^source: *\\[\\[([^|\\]]+)\\]\\]$");
+	const sourceValue = String(getCodeBlockData(source, sourceRegex)[0]);
+	if (!sourceValue) return undefined;
+	return sourceValue;
+}
+
+/** (Player)
  * @returns Boundaries of the audio - default back to full audio
  */
 function getChunkOption(
@@ -44,7 +54,7 @@ function getChunkOption(
 ): AudioChunk {
 	// Check IF exists the option
 	const chunkRegex = new RegExp(
-		"^chunk: *(\\d{2}:\\d{2}:\\d{2}) *- *(\\d{2}:\\d{2}:\\d{2})$"
+		"^chunk: *(\\d{2}:\\d{2}:\\d{2}.\\d{3}) *- *(\\d{2}:\\d{2}:\\d{2}.\\d{3})$"
 	);
 	const chunkData = getCodeBlockData(source, chunkRegex)[0];
 	if (chunkData !== undefined) {
@@ -58,28 +68,26 @@ function getChunkOption(
 			return {
 				startTime,
 				endTime,
-				duration: endTime - startTime,
 			} as AudioChunk;
 	}
 	// Fallback - It's the entire audiofile
 	return {
 		startTime: 0,
 		endTime: maxDuration,
-		duration: maxDuration,
 	};
 }
 
-/**
- * @returns Flag IF audio-controls are sticky
+/** (Player)
+ * @returns Volume @ which play the audio
  */
-function getStickyOption(source: string): boolean {
-	const stickyRegex = new RegExp("^sticky: *(True|False)$", "i");
-	const stickyValue = String(getCodeBlockData(source, stickyRegex)[0]);
-	if (!stickyValue) return DEFAULT_AUDIOBOX_OPTIONS.sticky;
-	return stickyValue.toLowerCase() === "true";
+function getVolumeOption(source: string): number {
+	const volumeRegex = new RegExp("^volume: *([0-9.]*)$"); // It does not match negative values
+	const volumeValue = Number(getCodeBlockData(source, volumeRegex)[0]);
+	if (!volumeValue || volumeValue > 1) return DEFAULT_AUDIOBOX_OPTIONS.volume;
+	return Math.round(volumeValue * 10) / 10; // Round to 1° decimal
 }
 
-/**
+/** (Player)
  * @returns Speed @ which to play the audio
  */
 function getPlaybackSpeedOption(source: string): number {
@@ -91,7 +99,7 @@ function getPlaybackSpeedOption(source: string): number {
 	return Math.round(playbackSpeedValue * 10) / 10; // Truncate to 1° decimal
 }
 
-/**
+/** (Player)
  * @returns Flag IF audio can loop
  */
 function getLoopOption(source: string): boolean {
@@ -101,33 +109,27 @@ function getLoopOption(source: string): boolean {
 	return loopValue.toLowerCase() === "true";
 }
 
-/**
- * @returns Volume @ which play the audio
+/** (UI)
+ * @returns Index of what player layout to render
  */
-function getVolumeOption(source: string): number {
-	const volumeRegex = new RegExp("^volume: *([0-9.]*)$"); // It does not match negative values
-	const volumeValue = Number(getCodeBlockData(source, volumeRegex)[0]);
-	if (!volumeValue || volumeValue > 1) return DEFAULT_AUDIOBOX_OPTIONS.volume;
-	return Math.round(volumeValue * 10) / 10; // Truncate to 1° decimal
+export function getLayoutOption(source: string): number {
+	const layoutRegex = new RegExp("^layout: *([0-9])$", "i");
+	const layoutValue = Number(getCodeBlockData(source, layoutRegex)[0]);
+	if (!layoutValue) return DEFAULT_AUDIOBOX_OPTIONS.layout;
+	else return layoutValue;
 }
 
-function getAutoplayOption(source: string): boolean {
-	const autoplayRegex = new RegExp("^autoplay: *(True|False)$", "i");
-	const autoplayValue = String(getCodeBlockData(source, autoplayRegex)[0]);
-	if (!autoplayValue) return DEFAULT_AUDIOBOX_OPTIONS.autoplay;
-	return autoplayValue.toLowerCase() === "true";
+/** (UI)
+ * @returns Flag IF audio-controls are sticky
+ */
+function getStickyOption(source: string): boolean {
+	const stickyRegex = new RegExp("^sticky: *(True|False)$", "i");
+	const stickyValue = String(getCodeBlockData(source, stickyRegex)[0]);
+	if (!stickyValue) return DEFAULT_AUDIOBOX_OPTIONS.sticky;
+	return stickyValue.toLowerCase() === "true";
 }
 
-function getUnstoppableOption(source: string): boolean {
-	const unstoppableRegex = new RegExp("^unstoppable: *(True|False)$", "i");
-	const unstoppableValue = String(
-		getCodeBlockData(source, unstoppableRegex)[0]
-	);
-	if (!unstoppableValue) return DEFAULT_AUDIOBOX_OPTIONS.unstoppable;
-	return unstoppableValue.toLowerCase() === "true";
-}
-
-/**
+/** (UI)
  * @returns title to display
  */
 export function getTitleOption(source: string): string | undefined {
@@ -137,24 +139,36 @@ export function getTitleOption(source: string): string | undefined {
 	return (titleValue as string).trim();
 }
 
-/**
- * @returns audio source
+/** (UI)
+ * @returns How many decimals to show in time (btw 0-3)
  */
-export function getSourceOption(source: string): string | undefined {
-	const sourceRegex = new RegExp("^source: *\\[\\[([^|\\]]+)\\]\\]$");
-	const sourceValue = String(getCodeBlockData(source, sourceRegex)[0]);
-	if (!sourceValue) return undefined;
-	return sourceValue;
+function getDecimalsOption(source: string): number {
+	const decimalsRegex = new RegExp("^decimals: *([0-3])$", "i");
+	const decimalsValue = Number(getCodeBlockData(source, decimalsRegex)[0]);
+	if (!decimalsValue) return DEFAULT_AUDIOBOX_OPTIONS.decimals;
+	return decimalsValue;
 }
-/**
- * @returns Index of what player layout to render
- */
 
-export function getLayoutOption(source: string): number {
-	const layoutRegex = new RegExp("^layout: *([0-9])$", "i");
-	const layoutValue = Number(getCodeBlockData(source, layoutRegex)[0]);
-	if (!layoutValue) return DEFAULT_AUDIOBOX_OPTIONS.layout;
-	else return layoutValue;
+/** (Comments)
+ * @returns Flag IF resume player WHEN selecting a comment
+ */
+function getAutoplayOption(source: string): boolean {
+	const autoplayRegex = new RegExp("^autoplay: *(True|False)$", "i");
+	const autoplayValue = String(getCodeBlockData(source, autoplayRegex)[0]);
+	if (!autoplayValue) return DEFAULT_AUDIOBOX_OPTIONS.autoplay;
+	return autoplayValue.toLowerCase() === "true";
+}
+
+/** (Comments)
+ * @returns Flag IF the player can continue WHEN editing a comment
+ */
+function getUnstoppableOption(source: string): boolean {
+	const unstoppableRegex = new RegExp("^unstoppable: *(True|False)$", "i");
+	const unstoppableValue = String(
+		getCodeBlockData(source, unstoppableRegex)[0]
+	);
+	if (!unstoppableValue) return DEFAULT_AUDIOBOX_OPTIONS.unstoppable;
+	return unstoppableValue.toLowerCase() === "true";
 }
 
 /**

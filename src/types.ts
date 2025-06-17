@@ -6,7 +6,6 @@ import { AudioBoxOptions } from "./options/optionsType";
 export type AudioChunk = {
 	startTime: number;
 	endTime: number;
-	duration?: number;
 };
 
 export type AudioBoxParameters = {

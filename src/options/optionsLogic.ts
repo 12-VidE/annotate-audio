@@ -5,7 +5,6 @@ import type { AudioBoxOptions } from "./optionsType";
 import { secondsToTime } from "src/utils";
 
 /**
- *
  * @param options AudioBox options to process
  * @returns Lines containing the options formatted as they will in codeblock
  */
@@ -25,8 +24,9 @@ export function formatOptions(options: AudioBoxOptions): string[] {
 					const chunk = value as AudioChunk;
 					if (chunk.endTime > chunk.startTime)
 						return `chunk: ${secondsToTime(
-							chunk?.startTime
-						)}-${secondsToTime(chunk?.endTime)}`;
+							chunk?.startTime,
+							3
+						)}-${secondsToTime(chunk?.endTime, 3)}`;
 					else return ``;
 				default:
 					return `${key}: ${value}`;

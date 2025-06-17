@@ -1,10 +1,9 @@
 import { App, Modal, Notice, Setting } from "obsidian";
-import { toRaw } from "vue";
 // Import - Type
 import type { AudioBoxOptions } from "./optionsType";
 import { type Layout, layoutsArray } from "src/layout/layoutType";
 // Import - Functions
-import { secondsToTime, timeToSeconds } from "src/utils";
+import { secondsToTime, timeToSeconds, watchProperty } from "src/utils";
 import { t } from "src/lang/helpers";
 
 export class optionsModal extends Modal {
@@ -109,8 +108,7 @@ export class optionsModal extends Modal {
 					})
 			);
 
-		// Chuck (Junky but it works)
-		let chunkStartTime: {
+		/* let chunkStartTime: {
 			inputEl: HTMLInputElement;
 			setValue: (val: string) => void;
 		} | null = null;
@@ -119,13 +117,26 @@ export class optionsModal extends Modal {
 			setValue: (val: string) => void;
 		} | null = null;
 
+		const min: string = "00:00:00.000";
+		const max: string = secondsToTime(
+			this.totalDuration,
+			this.options.decimals
+		);
+		const step =
+			this.options.decimals > 0
+				? `0.${"0".repeat(this.options.decimals - 1)}1`
+				: "1"; // Step reflext the selected n° of decimals (even IF 3 decimals are always shown even WHEN we want 1 CAUSE <input> design)
+
 		new Setting(contentEl)
 			.setName(t("CHUNK_OPTION"))
 			.setDesc(t("CHUNK_OPTION_DESC"))
 			.addExtraButton((btn) =>
+				// Delete chunck btn
 				btn.setIcon("trash-2").onClick(() => {
-					chunkStartTime?.setValue("00:00:00");
-					chunkEndTime?.setValue(secondsToTime(this.totalDuration));
+					// Reset inputs
+					chunkStartTime?.setValue(min);
+					chunkEndTime?.setValue(max);
+					// Update chunk option
 					this.options.chunk = {
 						startTime: 0,
 						endTime: this.totalDuration,
@@ -136,17 +147,22 @@ export class optionsModal extends Modal {
 				// Chunk start
 				chunkStartTime = text;
 				text.inputEl.type = "time";
-				text.inputEl.step = "1";
-				text.inputEl.min = "00:00:00";
-				text.inputEl.max = secondsToTime(this.totalDuration);
+				text.inputEl.step = step;
+				text.inputEl.min = min;
+				text.inputEl.max = max;
 
 				let savedStart = this.options.chunk?.startTime
-					? secondsToTime(this.options.chunk.startTime)
-					: "00:00:00";
+					? secondsToTime(
+							this.options.chunk.startTime,
+							this.options.decimals
+					  )
+					: min;
 				text.setValue(savedStart);
 
+				// Update values WHEN interacting w/ input
 				text.inputEl.addEventListener("change", (event: Event) => {
 					const newStart = (event.target as HTMLInputElement).value;
+					// Check IF valid value
 					if (chunkEndTime && newStart > chunkEndTime.inputEl.value) {
 						// Revert change
 						text.setValue(savedStart);
@@ -160,24 +176,38 @@ export class optionsModal extends Modal {
 						}
 					}
 				});
+
+				// Update step WHEN digits option get change
+				let dec = this.options.decimals;
+				Object.defineProperty(this.options, "decimals", {
+					get: () => dec,
+					set: (newVal: number) => {
+						text.inputEl.step = (1 / Math.pow(10, newVal)).toFixed(
+							newVal
+						);
+					},
+					configurable: true,
+				});
 			})
 			.addText((text) => {
 				// Chunk end
 				chunkEndTime = text;
 				text.inputEl.type = "time";
-				text.inputEl.step = "1";
+				text.inputEl.step = step;
 				text.inputEl.min = chunkStartTime
 					? chunkStartTime.inputEl.value
-					: "00:00:00";
-				text.inputEl.max = secondsToTime(this.totalDuration);
+					: min;
+				text.inputEl.max = max;
 
 				let savedEnd = this.options.chunk?.endTime
 					? secondsToTime(this.options.chunk.endTime)
-					: secondsToTime(this.totalDuration);
+					: max;
 				text.setValue(savedEnd);
 
+				// Update values WHEN interacting w/ input
 				text.inputEl.addEventListener("change", (event: Event) => {
 					const newEnd = (event.target as HTMLInputElement).value;
+					// Check IF valid end
 					if (
 						(chunkStartTime &&
 							newEnd < chunkStartTime.inputEl.value) ||
@@ -191,7 +221,134 @@ export class optionsModal extends Modal {
 						this.options.chunk!.endTime = timeToSeconds(newEnd);
 					}
 				});
+
+				// Update step WHEN digits option get change
+				let dec = this.options.decimals;
+				Object.defineProperty(this.options, "decimals", {
+					get: () => dec,
+					set: (newVal: number) => {
+						text.inputEl.step = (1 / Math.pow(10, newVal)).toFixed(
+							newVal
+						);
+					},
+					configurable: true,
+				});
+			}); */
+
+		// CHUNK
+		const minTime: string = "00:00:00.000";
+		let maxTime: string = secondsToTime(
+			this.totalDuration,
+			this.options.decimals
+		);
+
+		let chunkStartTimeInput: {
+			inputEl: HTMLInputElement;
+			setValue: (val: string) => void;
+		} | null = null;
+		let chunkEndTimeInput: {
+			inputEl: HTMLInputElement;
+			setValue: (val: string) => void;
+		} | null = null;
+
+		// Calculate step based wanted decimals we want to display
+		const getStepTime = (decimals: number): string =>
+			decimals > 0 ? `0.${"0".repeat(decimals - 1)}1` : "1";
+
+		new Setting(contentEl)
+			.setName(t("CHUNK_OPTION"))
+			.setDesc(t("CHUNK_OPTION_DESC"))
+			// Delete chunk btn
+			.addExtraButton((btn) =>
+				btn.setIcon("trash-2").onClick(() => {
+					// Reset inputs
+					chunkStartTimeInput?.setValue(minTime);
+					chunkEndTimeInput?.setValue(maxTime);
+					// Update chunk option
+					this.options.chunk = {
+						startTime: 0,
+						endTime: this.totalDuration,
+					};
+				})
+			)
+			// Start time input
+			.addText((text) => {
+				chunkStartTimeInput = text;
+				text.inputEl.type = "time";
+				text.inputEl.step = getStepTime(this.options.decimals);
+				text.inputEl.min = minTime;
+				text.inputEl.max = maxTime;
+
+				const savedStartTime = this.options.chunk?.startTime
+					? secondsToTime(
+							this.options.chunk.startTime,
+							this.options.decimals
+					  )
+					: minTime;
+				text.setValue(savedStartTime);
+
+				// Update values WHEN interacting w/ input
+				text.inputEl.addEventListener("change", () => {
+					const newStartTime = text.inputEl.value;
+					// Check IF valid start value
+					if (
+						chunkEndTimeInput &&
+						newStartTime > chunkEndTimeInput.inputEl.value
+					) {
+						// Revert change
+						text.setValue(savedStartTime);
+					} else {
+						// Allow change
+						this.options.chunk!.startTime =
+							timeToSeconds(newStartTime);
+						// Update the minimum for the end time
+						if (chunkEndTimeInput)
+							chunkEndTimeInput.inputEl.min = newStartTime;
+					}
+				});
+			})
+			// End time input
+			.addText((text) => {
+				chunkEndTimeInput = text;
+				text.inputEl.type = "time";
+				text.inputEl.step = getStepTime(this.options.decimals);
+				text.inputEl.min = chunkStartTimeInput
+					? chunkStartTimeInput.inputEl.value
+					: minTime;
+				text.inputEl.max = maxTime;
+
+				const savedEndTime = this.options.chunk?.endTime
+					? secondsToTime(this.options.chunk.endTime, 3)
+					: maxTime;
+				text.setValue(savedEndTime);
+
+				// Update values WHEN interacting w/ input
+				text.inputEl.addEventListener("change", () => {
+					const newEndTime = text.inputEl.value;
+					// Check IF valid end value
+					if (
+						(chunkStartTimeInput &&
+							newEndTime < chunkStartTimeInput.inputEl.value) ||
+						newEndTime > text.inputEl.max
+					) {
+						// Revert change
+						text.setValue(savedEndTime);
+					} else {
+						// Allow change
+						this.options.chunk!.endTime = timeToSeconds(newEndTime);
+					}
+				});
 			});
+
+		// Update chunkTimeInput step values WHEN options.decimals is changed WHEN chunkTimeInput is already rendered
+		// (like WHEN inside the optionsModal)
+		watchProperty(this.options, "decimals", (newDecimalsOption) => {
+			const step = getStepTime(newDecimalsOption);
+			if (chunkStartTimeInput) chunkStartTimeInput.inputEl.step = step;
+			if (chunkEndTimeInput) chunkEndTimeInput.inputEl.step = step;
+
+			maxTime = secondsToTime(this.totalDuration, newDecimalsOption);
+		});
 
 		/* ------------------------ */
 		/* --- Options - Player --- */
@@ -240,6 +397,30 @@ export class optionsModal extends Modal {
 						this.options.unstoppable = value;
 					})
 			);
+
+		// Decimals
+		new Setting(contentEl)
+			.setName(t("DECIMALS_OPTION"))
+			.setDesc(t("DECIMALS_OPTION_DESC"))
+			.then((setting) => {
+				// Add slider
+				setting.addSlider((slider) => {
+					slider
+						.setLimits(0, 3, 1)
+						.setValue(this.options.decimals)
+						.setInstant(true)
+						.onChange((value: number) => {
+							this.options.decimals = value;
+							valueLabel.textContent = value.toFixed(0);
+						});
+				});
+
+				// Add label
+				const valueLabel = setting.settingEl.createEl("span", {
+					text: this.options.decimals.toFixed(0),
+				});
+				setting.controlEl.appendChild(valueLabel);
+			});
 
 		// Title
 		new Setting(contentEl)

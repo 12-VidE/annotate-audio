@@ -7,43 +7,64 @@ import { hash } from "spark-md5";
 /* ------------------ */
 
 /**
- * Converts HH:mm:ss into ss
- * @param {string} str
+ * Converts HH:mm:ss.ms into ss.ms
+ * @param {string} time
  * @returns {number}
  */
-export function timeToSeconds(str: string): number {
-	const nums = str.split(":").map((x) => Number.parseInt(x));
-	return nums[2] + nums[1] * 60 + nums[0] * 3600;
+export function timeToSeconds(time: string): number {
+	const [h, m, s] = time.split(":").map((x) => Number.parseInt(x));
+	return s + m * 60 + h * 3600;
 }
 
 /**
- * Converts ss into HH:mm:ss OR as short as possible
+ * Converts ss into HH:mm:ss.ms OR as short as possible
  * @param num - Input to convert
+ * @param nDecimals - How many decimals to show
  * @param max - WHEN present, num is strip down to fit "max" format
  * @returns {string}
  */
-export function secondsToTime(num: number, max?: number): string {
-	num = Math.floor(num);
+export function secondsToTime(
+	num: number,
+	nDecimals: number = 0,
+	max?: number
+): string {
+	let time: string = "";
+
+	const numFloor: number = Math.floor(num);
 
 	if (max && max > 0 && max < 60) {
-		// ss OR s
-		let ss = String(num % 60);
+		// ss.ms OR s.ms
+		let ss: string = String(numFloor % 60);
 		if (max >= 10) ss = ss.padStart(2, "0");
-		return `${ss}`;
+		time = `${ss}`;
 	} else if (max && max < 360) {
-		// mm:ss OR m:ss
-		const ss = String(num % 60).padStart(2, "0");
-		let mm = String(Math.floor((num % 3600) / 60));
+		// mm:ss.ms OR m:ss.ms
+		const ss: string = String(numFloor % 60).padStart(2, "0");
+		let mm: string = String(Math.floor((numFloor % 3600) / 60));
 		if (max >= 600) mm = mm.padStart(2, "0");
-		return `${mm}:${ss}`;
+		time = `${mm}:${ss}`;
 	} else {
-		// HH:mm:ss OR H:mm:ss
-		const ss = String(num % 60).padStart(2, "0");
-		const mm = String(Math.floor((num % 3600) / 60)).padStart(2, "0");
-		let HH = String(Math.floor(num / 3600));
+		// HH:mm:ss.ms OR H:mm:ss.ms
+		const ss: string = String(numFloor % 60).padStart(2, "0");
+		const mm: string = String(Math.floor((numFloor % 3600) / 60)).padStart(
+			2,
+			"0"
+		);
+		let HH: string = String(Math.floor(numFloor / 3600));
 		if (!max || max >= 36000) HH = HH.padStart(2, "0");
-		return `${HH}:${mm}:${ss}`;
+		time = `${HH}:${mm}:${ss}`;
 	}
+	// Add ms IF needed
+	if (nDecimals > 0) {
+		let selectedDecimals: string = "0".repeat(nDecimals);
+		const allDecimals = String(num).split(".")[1];
+		if (allDecimals)
+			selectedDecimals = allDecimals
+				.slice(0, nDecimals)
+				.padEnd(nDecimals, "0");
+		time = time.concat(`.${selectedDecimals}`);
+	}
+	return time;
 }
 
 /* ------------ */
@@ -128,4 +149,27 @@ export async function retriveDuration(file: string): Promise<number> {
 		console.error("retriveDuration: ", error);
 	}
 	return duration;
+}
+
+/**
+ * (Magic ChatGPT) Performe action WHEN obj is updated w/o breaking reactivity (i think)
+ * @param obj
+ * @param key
+ * @param onChange
+ */
+export function watchProperty<T extends object, K extends keyof T>(
+	obj: T,
+	key: K,
+	onChange: (newVal: T[K], oldVal: T[K]) => void
+) {
+	let val = obj[key];
+	Object.defineProperty(obj, key, {
+		get: () => val,
+		set: (newVal) => {
+			const oldVal = val;
+			val = newVal;
+			onChange(newVal, oldVal);
+		},
+		configurable: true,
+	});
 }
