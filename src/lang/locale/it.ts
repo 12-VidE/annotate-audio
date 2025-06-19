@@ -13,6 +13,7 @@ export default {
 	/* --- OPTIONS --- */
 
 	// options/optionsType.ts
+	LAYOUT_OPTION: "Layout",
 	VOLUME_OPTION: "Volume",
 	SPEED_OPTION: "Velocità riproduzione",
 	LOOP_OPTION: "Ripeti",

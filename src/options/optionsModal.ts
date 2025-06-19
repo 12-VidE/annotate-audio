@@ -358,13 +358,15 @@ export class optionsModal extends Modal {
 			.setHeading();
 
 		// Layout
-		new Setting(contentEl).setName("Layout").addDropdown((dropdown) => {
-			// Convert layouts array to record so it can be rendered
-			const layoutsRecord: Record<string, string> = Object.fromEntries(
-				layoutsArray.map((layout: Layout, index: number) => [
-					index,
-					layout.name,
-				])
+		new Setting(contentEl)
+			.setName(t("LAYOUT_OPTION"))
+			.addDropdown((dropdown) => {
+				// Convert layouts array to record so it can be rendered
+				const layoutsRecord: Record<string, string> = Object.fromEntries(
+					layoutsArray.map((layout: Layout, index: number) => [
+						index,
+						layout.name,
+					])
 			);
 			dropdown
 				.addOptions(layoutsRecord)

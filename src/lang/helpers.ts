@@ -2,10 +2,12 @@ import { moment } from "obsidian";
 // Import - Language
 import en from "./locale/en";
 import it from "./locale/it";
+import zhCN from "./locale/zh-cn";	
 
 const localeMap: { [k: string]: Partial<typeof en> } = {
 	en,
 	it,
+	'zh-cn': zhCN,
 };
 
 const locale = localeMap[moment.locale()];
