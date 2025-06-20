@@ -52,14 +52,15 @@ export class optionsModal extends Modal {
 					.setInstant(true)
 					.onChange((value: number) => {
 						this.options.volume = value;
-						valueLabel.textContent = value.toFixed(1);
+						valueLabel.textContent = String(value);
 					});
 			});
 
-			// Add label
+			// Initialize label
 			const valueLabel = setting.settingEl.createEl("span", {
-				text: this.options.volume.toFixed(1),
+				text: String(this.options.volume),
 			});
+			// Create label
 			setting.controlEl.appendChild(valueLabel);
 		});
 
@@ -362,19 +363,20 @@ export class optionsModal extends Modal {
 			.setName(t("LAYOUT_OPTION"))
 			.addDropdown((dropdown) => {
 				// Convert layouts array to record so it can be rendered
-				const layoutsRecord: Record<string, string> = Object.fromEntries(
-					layoutsArray.map((layout: Layout, index: number) => [
-						index,
-						layout.name,
-					])
-			);
-			dropdown
-				.addOptions(layoutsRecord)
-				.setValue(String(this.options.layout))
-				.onChange((value: string) => {
-					this.options.layout = Number(value);
-				});
-		});
+				const layoutsRecord: Record<string, string> =
+					Object.fromEntries(
+						layoutsArray.map((layout: Layout, index: number) => [
+							index,
+							layout.name,
+						])
+					);
+				dropdown
+					.addOptions(layoutsRecord)
+					.setValue(String(this.options.layout))
+					.onChange((value: string) => {
+						this.options.layout = Number(value);
+					});
+			});
 
 		// Sticky
 		new Setting(contentEl)
