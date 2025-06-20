@@ -2,7 +2,7 @@ import { App, MarkdownPostProcessorContext, TFile } from "obsidian";
 // Import - Type
 import { AudioBoxOptions } from "./optionsType";
 // Import - Functions
-import { formatOptions } from "./optionsLogic";
+import { formatOptions } from "../codeblock/codeblockFormat";
 
 /**
  * Write the options of a codeblock

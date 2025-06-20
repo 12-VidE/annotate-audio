@@ -21,12 +21,12 @@ import {
 	getAudioboxOptions,
 	getSourceOption,
 } from "./options/optionsGetter";
-import { formatOptions } from "./options/optionsLogic";
 import { sourceModal } from "./options/source/sourceModal";
 import { DEFAULT_SHARED_REFS, SharedRefs } from "./types";
 import { AudioComment } from "./comment/commentType";
 import { getComments } from "./comment/commentLogic";
-import { formatCodeblock, writeCodeblock } from "./codeblockLogic";
+import { formatCodeblock, formatOptions } from "./codeblock/codeblockFormat";
+import { setCodeblock } from "./codeblock/codeblockSetter";
 import { t } from "./lang/helpers";
 
 /* -------------- */
@@ -287,7 +287,7 @@ export default class AnnotateAudioPlugin extends Plugin {
 									options,
 									comments
 								);
-								writeCodeblock(
+								setCodeblock(
 									ctx,
 									container,
 									this.app,

@@ -1,7 +1,7 @@
 // Import - Type
 import type { AudioComment } from "./commentType";
 // Import - Function
-import { getCodeBlockData } from "src/codeblockLogic";
+import { getCodeblockData } from "../codeblock/codeblockGetter";
 
 /**
  * @returns Array of all (sorted) comments
@@ -11,7 +11,7 @@ export function getComments(source: string): Array<AudioComment> {
 	// Get comments FROM codeblock
 	// Format comment into AudioComment
 	// Sort comment by time (just to make sure, they should already be in order)
-	const commentsArray = getCodeBlockData(source, commentRegex)
+	const commentsArray = getCodeblockData(source, commentRegex)
 		.map((item) => {
 			if (Array.isArray(item)) {
 				return {

@@ -1,6 +1,5 @@
 // Import - Type
 import type { AudioChunk } from "src/types";
-import { Ref } from "vue";
 
 /**
  * Start player audio reproduction (pausing all the others)
