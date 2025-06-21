@@ -9,6 +9,7 @@ The plugin now supports localization. It currently includes "English" and "Itali
 
 -   _lang_([#12](https://github.com/12-VidE/annotate-audio/pull/12)) - Added chinese (zh-cn) localization - [Moyf](https://github.com/Moyf)
 -   _fix_([#13](https://github.com/12-VidE/annotate-audio/issues/13)) - `chunk` option in codeblock is now correctly identified and converted to format with millisecond
+-   _fix_ - `comments` in codeblock are now correctly identified and converted to format with millisecond
 
 ## 1.4.0
 

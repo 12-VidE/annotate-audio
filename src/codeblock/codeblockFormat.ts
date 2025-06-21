@@ -77,6 +77,6 @@ export function formatComments(comments: AudioComment[]): string[] {
 	return [...comments]
 		.sort((x: AudioComment, y: AudioComment) => x.time - y.time)
 		.map((comment) => {
-			return `${comment.time} --- ${comment.content}`;
+			return `${comment.time.toFixed(3)} --- ${comment.content}`;
 		});
 }
