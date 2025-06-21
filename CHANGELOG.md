@@ -5,6 +5,11 @@ The plugin now supports localization. It currently includes "English" and "Itali
 -   _feat ([#11](https://github.com/12-VidE/annotate-audio/issues/11))_ - Everything is now precise to the millisecond
 -   _feat ([#11](https://github.com/12-VidE/annotate-audio/issues/11))_ - New option `decimals`
 
+#### 1.5.1
+
+-   _lang_([#12](https://github.com/12-VidE/annotate-audio/pull/12)) - Added chinese (zh-cn) localization - [Moyf](https://github.com/Moyf)
+-   _fix_([#13](https://github.com/12-VidE/annotate-audio/issues/13)) - `chunk` option in codeblock is now correctly identified and converted to format with millisecond
+
 ## 1.4.0
 
 -   _feat ([#4](https://github.com/12-VidE/annotate-audio/issues/4))_ - Each codeblock now has its own ID to better handle them
@@ -24,8 +29,8 @@ Substantial tidy up of my spaghetti code
 
 -   _fix ([#8](https://github.com/12-VidE/annotate-audio/issues/8)) ([#9](https://github.com/12-VidE/annotate-audio/issues/9))_ - Codeblock is re-written only on unload
 -   _fix ([#9](https://github.com/12-VidE/annotate-audio/issues/9))_ - Cache only on audiobox unmounting
--   _style ([#10](https://github.com/12-VidE/annotate-audio/pull/10))_ - More specific CSS selectors
--   _style ([#10](https://github.com/12-VidE/annotate-audio/pull/10))_ - Better buttons cursor behaviour
+-   _style ([#10](https://github.com/12-VidE/annotate-audio/pull/10))_ - More specific CSS selectors - [Moyf](https://github.com/Moyf)
+-   _style ([#10](https://github.com/12-VidE/annotate-audio/pull/10))_ - Better buttons cursor behaviour - [Moyf](https://github.com/Moyf)
 
 ## 1.3.0 - Mobile Support
 
