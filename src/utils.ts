@@ -12,8 +12,8 @@ import { hash } from "spark-md5";
  * @returns {number}
  */
 export function timeToSeconds(time: string): number {
-	const [h, m, s] = time.split(":").map((x) => Number.parseInt(x));
-	return s + m * 60 + h * 3600;
+	let [h, m, s] = time.split(":").map((x) => Number(x));
+	return Number((s + m * 60 + h * 3600).toFixed(3));
 }
 
 /**

@@ -214,7 +214,6 @@ export default class AnnotateAudioPlugin extends Plugin {
 				}
 
 				// Get block ID
-
 				const audioboxId = getAudioboxId(source);
 				if (!audioboxId) {
 					console.error("No ID");

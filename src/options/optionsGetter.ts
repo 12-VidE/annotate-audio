@@ -58,7 +58,7 @@ function getChunkOption(
 ): AudioChunk {
 	// Check IF exists the option
 	const chunkRegex = new RegExp(
-		"^chunk: *(\\d{2}:\\d{2}:\\d{2}.\\d{3}) *- *(\\d{2}:\\d{2}:\\d{2}.\\d{3})$"
+		"^chunk: *(\\d{2}:\\d{2}:\\d{2}.?\\d{0,3}) *- *(\\d{2}:\\d{2}:\\d{2}.?\\d{0,3})$"
 	);
 	const chunkData = getCodeblockData(source, chunkRegex)[0];
 	if (chunkData !== undefined) {
@@ -74,7 +74,7 @@ function getChunkOption(
 				endTime,
 			} as AudioChunk;
 	}
-	// Fallback - It's the entire audiofile
+	// Fallback = the entire audiofile
 	return {
 		startTime: 0,
 		endTime: maxDuration,
