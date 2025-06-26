@@ -7,13 +7,37 @@ import { hash } from "spark-md5";
 /* ------------------ */
 
 /**
- * Converts HH:mm:ss.ms into ss.ms
+ * Converts time (HH:MM:SS.sss, MM:SS.sss) into SS.ss
  * @param {string} time
  * @returns {number}
  */
 export function timeToSeconds(time: string): number {
-	let [h, m, s] = time.split(":").map((x) => Number(x));
-	return Number((s + m * 60 + h * 3600).toFixed(3));
+	const parts = time.split(":").map(Number).reverse();
+
+	let seconds: number = 0;
+	if (parts[0]) seconds += parts[0]; // Seconds (can include decimals)
+	if (parts[1]) seconds += parts[1] * 60; // Minutes
+	if (parts[2]) seconds += parts[2] * 3600; // Hours
+
+	return Number(seconds.toFixed(2));
+}
+
+/**
+ * Converts time (HH:MM:SS.sss, MM:SS.sss) into LRC format MM:SS.ss
+ * @param {string} time
+ * @returns {number}
+ */
+export function secondToLRCTime(num: number): string {
+	const numFloor: number = Math.trunc(num);
+	let ss: string = String(numFloor % 60).padStart(2, "0");
+	let mm: string = String(Math.floor(numFloor / 60)).padStart(2, "0");
+	// Decimals
+	let ms: string = String(Math.floor(Math.abs(num - numFloor) * 100)).padEnd(
+		2,
+		"0"
+	);
+
+	return `${mm}:${ss}.${ms}`;
 }
 
 /**

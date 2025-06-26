@@ -2,7 +2,7 @@
 import type { AudioChunk } from "src/types";
 import type { AudioBoxOptions } from "./optionsType";
 // Import - Functions
-import { secondsToTime } from "src/utils";
+import { secondsToTime, secondToLRCTime } from "src/utils";
 
 /**
  * @param options AudioBox options to process
@@ -23,10 +23,9 @@ export function formatOptions(options: AudioBoxOptions): string[] {
 				case "chunk":
 					const chunk = value as AudioChunk;
 					if (chunk.endTime > chunk.startTime)
-						return `chunk: ${secondsToTime(
-							chunk?.startTime,
-							3
-						)}-${secondsToTime(chunk?.endTime, 3)}`;
+						return `chunk: ${secondToLRCTime(
+							chunk?.startTime
+						)}-${secondToLRCTime(chunk?.endTime)}`;
 					else return ``;
 				default:
 					return `${key}: ${value}`;

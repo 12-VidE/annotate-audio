@@ -109,135 +109,8 @@ export class optionsModal extends Modal {
 					})
 			);
 
-		/* let chunkStartTime: {
-			inputEl: HTMLInputElement;
-			setValue: (val: string) => void;
-		} | null = null;
-		let chunkEndTime: {
-			inputEl: HTMLInputElement;
-			setValue: (val: string) => void;
-		} | null = null;
-
-		const min: string = "00:00:00.000";
-		const max: string = secondsToTime(
-			this.totalDuration,
-			this.options.decimals
-		);
-		const step =
-			this.options.decimals > 0
-				? `0.${"0".repeat(this.options.decimals - 1)}1`
-				: "1"; // Step reflext the selected n° of decimals (even IF 3 decimals are always shown even WHEN we want 1 CAUSE <input> design)
-
-		new Setting(contentEl)
-			.setName(t("CHUNK_OPTION"))
-			.setDesc(t("CHUNK_OPTION_DESC"))
-			.addExtraButton((btn) =>
-				// Delete chunck btn
-				btn.setIcon("trash-2").onClick(() => {
-					// Reset inputs
-					chunkStartTime?.setValue(min);
-					chunkEndTime?.setValue(max);
-					// Update chunk option
-					this.options.chunk = {
-						startTime: 0,
-						endTime: this.totalDuration,
-					};
-				})
-			)
-			.addText((text) => {
-				// Chunk start
-				chunkStartTime = text;
-				text.inputEl.type = "time";
-				text.inputEl.step = step;
-				text.inputEl.min = min;
-				text.inputEl.max = max;
-
-				let savedStart = this.options.chunk?.startTime
-					? secondsToTime(
-							this.options.chunk.startTime,
-							this.options.decimals
-					  )
-					: min;
-				text.setValue(savedStart);
-
-				// Update values WHEN interacting w/ input
-				text.inputEl.addEventListener("change", (event: Event) => {
-					const newStart = (event.target as HTMLInputElement).value;
-					// Check IF valid value
-					if (chunkEndTime && newStart > chunkEndTime.inputEl.value) {
-						// Revert change
-						text.setValue(savedStart);
-					} else {
-						// Allow change
-						savedStart = newStart;
-						this.options.chunk!.startTime = timeToSeconds(newStart);
-						// Update the minimum for the end time
-						if (chunkEndTime) {
-							chunkEndTime.inputEl.min = newStart;
-						}
-					}
-				});
-
-				// Update step WHEN digits option get change
-				let dec = this.options.decimals;
-				Object.defineProperty(this.options, "decimals", {
-					get: () => dec,
-					set: (newVal: number) => {
-						text.inputEl.step = (1 / Math.pow(10, newVal)).toFixed(
-							newVal
-						);
-					},
-					configurable: true,
-				});
-			})
-			.addText((text) => {
-				// Chunk end
-				chunkEndTime = text;
-				text.inputEl.type = "time";
-				text.inputEl.step = step;
-				text.inputEl.min = chunkStartTime
-					? chunkStartTime.inputEl.value
-					: min;
-				text.inputEl.max = max;
-
-				let savedEnd = this.options.chunk?.endTime
-					? secondsToTime(this.options.chunk.endTime)
-					: max;
-				text.setValue(savedEnd);
-
-				// Update values WHEN interacting w/ input
-				text.inputEl.addEventListener("change", (event: Event) => {
-					const newEnd = (event.target as HTMLInputElement).value;
-					// Check IF valid end
-					if (
-						(chunkStartTime &&
-							newEnd < chunkStartTime.inputEl.value) ||
-						newEnd > text.inputEl.max // TODO Perché devo forzarlo per farlo funzionare?
-					) {
-						// Revert change
-						text.setValue(savedEnd);
-					} else {
-						// Allow change
-						savedEnd = newEnd;
-						this.options.chunk!.endTime = timeToSeconds(newEnd);
-					}
-				});
-
-				// Update step WHEN digits option get change
-				let dec = this.options.decimals;
-				Object.defineProperty(this.options, "decimals", {
-					get: () => dec,
-					set: (newVal: number) => {
-						text.inputEl.step = (1 / Math.pow(10, newVal)).toFixed(
-							newVal
-						);
-					},
-					configurable: true,
-				});
-			}); */
-
 		// CHUNK
-		const minTime: string = "00:00:00.000";
+		const minTime: string = "00:00:00.00";
 		let maxTime: string = secondsToTime(
 			this.totalDuration,
 			this.options.decimals
@@ -410,7 +283,7 @@ export class optionsModal extends Modal {
 				// Add slider
 				setting.addSlider((slider) => {
 					slider
-						.setLimits(0, 3, 1)
+						.setLimits(0, 2, 1)
 						.setValue(this.options.decimals)
 						.setInstant(true)
 						.onChange((value: number) => {

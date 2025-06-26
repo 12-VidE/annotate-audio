@@ -4,7 +4,7 @@
 
 -   Reproduce an audio file
 -   Tweak listening experience by changing: volume, playback speed, looping...
--   Add comments to desired timestamps
+-   Add comments to desired timestamps. They are formatted as [LRC](<https://en.wikipedia.org/wiki/LRC_(file_format)>)
 -   Quickly jump to a specific timestamp by left-clicking on the related comment
 -   Modify/Delete a comment by right-clicking on it (dedicated button for mobile)
 -   Inuitive keyboard shortcuts
@@ -17,7 +17,7 @@
 ``` annotate-audio
 #32a9143a94c3700d
 source: [[My Audio.mp3]]
-chunk: 00:00:00.000-00:02:52.100
+chunk: 00:00.00-00:02:52.10
 volume: 0.5
 speed: 1
 loop: false
@@ -25,9 +25,9 @@ layout: 0
 sticky: false
 autoplay: false
 
-37.075 --- Section 1
-162.349 --- Section 2
-174.902 --- Section 3
+[00:37.07]Section 1
+[12:45.34]Section 2
+[14:01.90]Section 3
 ```
 ````
 

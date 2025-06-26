@@ -56,29 +56,34 @@ function getChunkOption(
 	source: string,
 	maxDuration: number = 3600
 ): AudioChunk {
+	// Default to entire audio
+	let startTime: number = 0;
+	let endTime: number = maxDuration;
+
 	// Check IF exists the option
-	const chunkRegex = new RegExp(
-		"^chunk: *(\\d{2}:\\d{2}:\\d{2}.?\\d{0,3}) *- *(\\d{2}:\\d{2}:\\d{2}.?\\d{0,3})$"
+	// Support (deprecated) native and LRC format
+	const chunkNativeRegex = new RegExp(
+		"^chunk: *(\\d{2,}:\\d{2}:\\d{2}.?\\d{0,3}) *- *(\\d{2,}:\\d{2}:\\d{2}.?\\d{0,3})$"
 	);
-	const chunkData = getCodeblockData(source, chunkRegex)[0];
+	const chunkLRCRegex = new RegExp(
+		"^chunk: *(\\d{2,}:\\d{2}.\\d{2}) *- *(\\d{2,}:\\d{2}.\\d{2})$"
+	);
+
+	const chunkData =
+		getCodeblockData(source, chunkNativeRegex)[0] ||
+		getCodeblockData(source, chunkLRCRegex)[0];
 	if (chunkData !== undefined) {
-		// IF the option exists
-		const startTime = timeToSeconds(chunkData[0]);
-		const endTime = timeToSeconds(chunkData[1]);
+		startTime = timeToSeconds(chunkData[0]);
+		endTime = timeToSeconds(chunkData[1]);
 		if (startTime >= endTime) {
 			// IF out of boundary
 			console.warn("Annotate-Audio: Impossible audio chunk");
-		} else
-			return {
-				startTime,
-				endTime,
-			} as AudioChunk;
+		}
 	}
-	// Fallback = the entire audiofile
 	return {
-		startTime: 0,
-		endTime: maxDuration,
-	};
+		startTime,
+		endTime,
+	} as AudioChunk;
 }
 
 /** (Player)

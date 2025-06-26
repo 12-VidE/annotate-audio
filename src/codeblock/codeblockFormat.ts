@@ -3,7 +3,7 @@ import type { AudioComment } from "../comment/commentType";
 import type { AudioBoxOptions } from "../options/optionsType";
 import type { AudioChunk } from "../types";
 // Import - Function
-import { secondsToTime } from "../utils";
+import { secondsToTime, secondToLRCTime } from "../utils";
 
 /* 	##############
 	▼▼ STANDARD functions to format the codeblock
@@ -54,10 +54,9 @@ export function formatOptions(options: AudioBoxOptions): string[] {
 				case "chunk":
 					const chunk = value as AudioChunk;
 					if (chunk.endTime > chunk.startTime)
-						return `chunk: ${secondsToTime(
-							chunk?.startTime,
-							3
-						)}-${secondsToTime(chunk?.endTime, 3)}`;
+						return `chunk: ${secondToLRCTime(
+							chunk?.startTime
+						)}-${secondToLRCTime(chunk?.endTime)}`;
 					else return ``;
 				default:
 					return `${key}: ${value}`;
@@ -77,6 +76,6 @@ export function formatComments(comments: AudioComment[]): string[] {
 	return [...comments]
 		.sort((x: AudioComment, y: AudioComment) => x.time - y.time)
 		.map((comment) => {
-			return `${comment.time.toFixed(3)} --- ${comment.content}`;
+			return `[${secondToLRCTime(comment.time)}]${comment.content}`;
 		});
 }

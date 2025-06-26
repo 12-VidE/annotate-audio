@@ -11,6 +11,11 @@ The plugin now supports localization. It currently includes "English" and "Itali
 -   _fix_([#13](https://github.com/12-VidE/annotate-audio/issues/13)) - `chunk` option in codeblock is now correctly identified and converted to format with millisecond
 -   _fix_ - `comments` in codeblock are now correctly identified and converted to format with millisecond
 
+#### 1.5.2
+
+-   _feat_ ([#14](https://github.com/12-VidE/annotate-audio/issues/14))_ - Converted time to [LRC standard](https://en.wikipedia.org/wiki/LRC_(file_format))
+-   _fix_ ([#14](https://github.com/12-VidE/annotate-audio/issues/14))\_ - Reduced precision TO 2decimals, following LRC standard
+
 ## 1.4.0
 
 -   _feat ([#4](https://github.com/12-VidE/annotate-audio/issues/4))_ - Each codeblock now has its own ID to better handle them
