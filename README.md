@@ -17,7 +17,7 @@
 ``` annotate-audio
 #32a9143a94c3700d
 source: [[My Audio.mp3]]
-chunk: 00:00.00-00:02:52.10
+chunk: 00:00.00-02:52.10
 volume: 0.5
 speed: 1
 loop: false
@@ -38,18 +38,18 @@ autoplay: false
 Each audio-box has its owns. They can be tweaked manually or, more easily, **using the dedicated modal**.
 (Their order is not important but they need to be placed before the comments)
 
-| Name          | Default     | Values                      | Description                                                                                     |
-| ------------- | ----------- | --------------------------- | ----------------------------------------------------------------------------------------------- |
-| `source`      |             |                             | WikiLink to the audio file to reproduce                                                         |
-| `volume`      | `0.5`       | `0.0` → `1.0`               | Player base volume                                                                              |
-| `speed`       | `1`         | `0.0` → `1.0`               | Player playback speed                                                                           |
-| `loop`        | `false`     | `true`/`false`              | Loop-back to beginning after getting to the end of the audio                                    |
-| `sticky`      | `false`     | `true`/`false`              | Main controls become sticky, following you as you scroll down                                   |
-| `layout`      | `0`         | `0`,`1`,`2`                 | What player layout to display (feel free to make your own)                                      |
-| `chunk`       | `undefined` | `HH:MM:SS.sss-HH:MM:SS.sss` | Section of audio to play                                                                        |
-| `autoplay`    | `false`     | `true`/`false`              | When clicking on a comment, the player starts playing from there instead of simply moving there |
-| `unstoppable` | `false`     | `true`/`false`              | When creating/modifing a comment, the player doesn't stop                                       |
-| `decimals`    | `0`         | `0`,`1`,`2`,`3`             | How many decimals are displayed when showing time                                               |
+| Name          | Default     | Values              | Description                                                                                     |
+| ------------- | ----------- | ------------------- | ----------------------------------------------------------------------------------------------- |
+| `source`      |             |                     | WikiLink to the audio file to reproduce                                                         |
+| `volume`      | `0.5`       | `0.0` → `1.0`       | Player base volume                                                                              |
+| `speed`       | `1`         | `0.0` → `1.0`       | Player playback speed                                                                           |
+| `loop`        | `false`     | `true`/`false`      | Loop-back to beginning after getting to the end of the audio                                    |
+| `sticky`      | `false`     | `true`/`false`      | Main controls become sticky, following you as you scroll down                                   |
+| `layout`      | `0`         | `0`,`1`,`2`         | What player layout to display (feel free to make your own)                                      |
+| `chunk`       | `undefined` | `MM:SS.ss-MM:SS.ss` | Section of audio to play                                                                        |
+| `autoplay`    | `false`     | `true`/`false`      | When clicking on a comment, the player starts playing from there instead of simply moving there |
+| `unstoppable` | `false`     | `true`/`false`      | When creating/modifing a comment, the player doesn't stop                                       |
+| `decimals`    | `0`         | `0`,`1`,`2`,`3`     | How many decimals are displayed when showing time                                               |
 
 There are also some options only available in specific `layout`s
 
