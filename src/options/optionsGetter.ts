@@ -76,17 +76,23 @@ function getChunkOption(
 
 	// Check IF exists the option
 	// Support (deprecated) native and LRC format
-	const chunkData =
-		getCodeblockData(source, chunkNativeRegex)[0] ||
-		getCodeblockData(source, chunkLRCRegex)[0];
-	if (chunkData !== undefined) {
-		startTime = timeToSeconds(chunkData[0]);
-		endTime = timeToSeconds(chunkData[1]);
-		if (startTime >= endTime) {
-			// IF out of boundary
-			console.warn("Annotate-Audio: Impossible audio chunk");
+	const chunkNativeData = getCodeblockData(source, chunkNativeRegex)[0];
+	if (chunkNativeData !== undefined) {
+		startTime = timeToSeconds(chunkNativeData[0]);
+		endTime = timeToSeconds(chunkNativeData[1]);
+	} else {
+		const chunkLRCData = getCodeblockData(source, chunkLRCRegex)[0];
+		if (chunkLRCData) {
+			startTime = timeToSeconds(chunkLRCData[0], true);
+			endTime = timeToSeconds(chunkLRCData[1], true);
 		}
 	}
+
+	// IF out of boundary
+	if (startTime >= endTime)
+		console.warn(
+			"(Annotate Audio) getChunckOption: Impossible audio chunk"
+		);
 	return {
 		startTime,
 		endTime,

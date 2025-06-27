@@ -9,16 +9,31 @@ import { hash } from "spark-md5";
 /**
  * Converts time (HH:MM:SS.sss, MM:SS.sss) into SS.ss
  * @param {string} time
+ * @param isLRC IF true, time must be LRC formatted, bypassing check on minutes and impose one on hours
  * @returns {number}
  */
-export function timeToSeconds(time: string): number {
+export function timeToSeconds(time: string, isLRC: boolean = false): number {
 	const parts = time.split(":").map(Number).reverse();
 
-	//#TODO cosa succede se out-of-bound?
 	let seconds: number = 0;
-	if (parts[0]) seconds += parts[0]; // Seconds (can include decimals)
-	if (parts[1]) seconds += parts[1] * 60; // Minutes
-	if (parts[2]) seconds += parts[2] * 3600; // Hours
+	try {
+		// Seconds (can include decimals)
+		if ((parts[0] && parts[0] < 60) || parts[0] == 0)
+			seconds += parts[0] || 0;
+		else throw { msg: "seconds", input: time };
+		// Minutes
+		if ((isLRC && !parts[1]) || (!isLRC && parts[1] && parts[1] > 60))
+			throw { msg: "minutes", input: time };
+		else seconds += parts[1] * 60 || 0;
+		// Hours
+		if (isLRC && parts[2]) throw { msg: "hours", input: time };
+		else seconds += parts[2] * 3600 || 0;
+	} catch (error) {
+		console.warn(
+			"(Annotate Audio) timeToSeconds: Invalid time format",
+			error
+		);
+	}
 
 	return Number(seconds.toFixed(2));
 }
