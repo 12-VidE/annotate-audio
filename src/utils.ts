@@ -14,6 +14,7 @@ import { hash } from "spark-md5";
 export function timeToSeconds(time: string): number {
 	const parts = time.split(":").map(Number).reverse();
 
+	//#TODO cosa succede se out-of-bound?
 	let seconds: number = 0;
 	if (parts[0]) seconds += parts[0]; // Seconds (can include decimals)
 	if (parts[1]) seconds += parts[1] * 60; // Minutes

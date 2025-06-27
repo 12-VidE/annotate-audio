@@ -1,5 +1,20 @@
 // Import - Constants
 import { DEFAULT_AUDIOBOX_OPTIONS } from "./optionsType";
+import {
+	sourceRegex,
+	chunkNativeRegex,
+	chunkLRCRegex,
+	volumeRegex,
+	playbackSpeedRegex,
+	loopRegex,
+	layoutRegex,
+	stickyRegex,
+	titleRegex,
+	decimalsRegex,
+	autoplayRegex,
+	unstoppableRegex,
+	idRegex,
+} from "src/regex";
 // Import - Type
 import { AudioChunk } from "src/types";
 import type { AudioBoxOptions } from "./optionsType";
@@ -8,7 +23,7 @@ import { getCodeblockData } from "../codeblock/codeblockGetter";
 import { timeToSeconds } from "src/utils";
 
 /* 	##############
-	▼▼ All these functions relay on getCodeblockData. None actually read the codeblock
+	▼▼ All these functions relay on getCodeblockData. None actually read the codeblock, just a copy of it
 	#############  */
 
 /**
@@ -43,7 +58,6 @@ export function getAudioboxOptions(
  * @returns audio source
  */
 export function getSourceOption(source: string): string | undefined {
-	const sourceRegex = new RegExp("^source: *\\[\\[([^|\\]]+)\\]\\]$");
 	const sourceValue = String(getCodeblockData(source, sourceRegex)[0]);
 	if (!sourceValue) return undefined;
 	return sourceValue;
@@ -62,13 +76,6 @@ function getChunkOption(
 
 	// Check IF exists the option
 	// Support (deprecated) native and LRC format
-	const chunkNativeRegex = new RegExp(
-		"^chunk: *(\\d{2,}:\\d{2}:\\d{2}.?\\d{0,3}) *- *(\\d{2,}:\\d{2}:\\d{2}.?\\d{0,3})$"
-	);
-	const chunkLRCRegex = new RegExp(
-		"^chunk: *(\\d{2,}:\\d{2}.\\d{2}) *- *(\\d{2,}:\\d{2}.\\d{2})$"
-	);
-
 	const chunkData =
 		getCodeblockData(source, chunkNativeRegex)[0] ||
 		getCodeblockData(source, chunkLRCRegex)[0];
@@ -90,7 +97,6 @@ function getChunkOption(
  * @returns Volume @ which play the audio
  */
 function getVolumeOption(source: string): number {
-	const volumeRegex = new RegExp("^volume: *([0-9.]*)$"); // It does not match negative values
 	const volumeValue = Number(getCodeblockData(source, volumeRegex)[0]);
 	if (!volumeValue || volumeValue > 1) return DEFAULT_AUDIOBOX_OPTIONS.volume;
 	return Math.round(volumeValue * 10) / 10; // Round to 1° decimal
@@ -100,7 +106,6 @@ function getVolumeOption(source: string): number {
  * @returns Speed @ which to play the audio
  */
 function getPlaybackSpeedOption(source: string): number {
-	const playbackSpeedRegex = new RegExp("^speed: *([0-9.]*)$");
 	const playbackSpeedValue = Number(
 		getCodeblockData(source, playbackSpeedRegex)[0]
 	);
@@ -112,7 +117,6 @@ function getPlaybackSpeedOption(source: string): number {
  * @returns Flag IF audio can loop
  */
 function getLoopOption(source: string): boolean {
-	const loopRegex = new RegExp("^loop: *(True|False)$", "i");
 	const loopValue = String(getCodeblockData(source, loopRegex)[0]);
 	if (!loopValue) return DEFAULT_AUDIOBOX_OPTIONS.loop;
 	return loopValue.toLowerCase() === "true";
@@ -122,7 +126,6 @@ function getLoopOption(source: string): boolean {
  * @returns Index of what player layout to render
  */
 export function getLayoutOption(source: string): number {
-	const layoutRegex = new RegExp("^layout: *([0-9])$", "i");
 	const layoutValue = Number(getCodeblockData(source, layoutRegex)[0]);
 	if (!layoutValue) return DEFAULT_AUDIOBOX_OPTIONS.layout;
 	else return layoutValue;
@@ -132,7 +135,6 @@ export function getLayoutOption(source: string): number {
  * @returns Flag IF audio-controls are sticky
  */
 function getStickyOption(source: string): boolean {
-	const stickyRegex = new RegExp("^sticky: *(True|False)$", "i");
 	const stickyValue = String(getCodeblockData(source, stickyRegex)[0]);
 	if (!stickyValue) return DEFAULT_AUDIOBOX_OPTIONS.sticky;
 	return stickyValue.toLowerCase() === "true";
@@ -142,7 +144,6 @@ function getStickyOption(source: string): boolean {
  * @returns title to display
  */
 export function getTitleOption(source: string): string | undefined {
-	const titleRegex = new RegExp("^title: *(.*)$");
 	const titleValue = getCodeblockData(source, titleRegex)[0];
 	if (titleValue == undefined) return DEFAULT_AUDIOBOX_OPTIONS.title; // Useless BUT good practice
 	return (titleValue as string).trim();
@@ -152,7 +153,6 @@ export function getTitleOption(source: string): string | undefined {
  * @returns How many decimals to show in time (btw 0-3)
  */
 function getDecimalsOption(source: string): number {
-	const decimalsRegex = new RegExp("^decimals: *([0-3])$", "i");
 	const decimalsValue = Number(getCodeblockData(source, decimalsRegex)[0]);
 	if (!decimalsValue) return DEFAULT_AUDIOBOX_OPTIONS.decimals;
 	return decimalsValue;
@@ -162,7 +162,6 @@ function getDecimalsOption(source: string): number {
  * @returns Flag IF resume player WHEN selecting a comment
  */
 function getAutoplayOption(source: string): boolean {
-	const autoplayRegex = new RegExp("^autoplay: *(True|False)$", "i");
 	const autoplayValue = String(getCodeblockData(source, autoplayRegex)[0]);
 	if (!autoplayValue) return DEFAULT_AUDIOBOX_OPTIONS.autoplay;
 	return autoplayValue.toLowerCase() === "true";
@@ -172,7 +171,6 @@ function getAutoplayOption(source: string): boolean {
  * @returns Flag IF the player can continue WHEN editing a comment
  */
 function getUnstoppableOption(source: string): boolean {
-	const unstoppableRegex = new RegExp("^unstoppable: *(True|False)$", "i");
 	const unstoppableValue = String(
 		getCodeblockData(source, unstoppableRegex)[0]
 	);
@@ -184,7 +182,6 @@ function getUnstoppableOption(source: string): boolean {
  * @returns Index of what player layout to render
  */
 export function getAudioboxId(source: string): string | null {
-	const idRegex = new RegExp("^#(\\S{16}) *$");
 	const idValue = String(getCodeblockData(source, idRegex)[0]);
 	if (!idValue) return null;
 	else return idValue;

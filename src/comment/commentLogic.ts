@@ -1,3 +1,5 @@
+// Import - Constant
+import { commentNativeRegex, commentLCRegex } from "src/regex";
 // Import - Type
 import type { AudioComment } from "./commentType";
 // Import - Function
@@ -9,9 +11,6 @@ import { timeToSeconds } from "src/utils";
  */
 export function getComments(source: string): Array<AudioComment> {
 	// Support both (deprecated) native and LRC format
-	const commentNativeRegex = new RegExp("^(.+) --- (.+)$");
-	const commentLCRegex = new RegExp("^\\[(\\d{2,}:\\d{2}.\\d{1,3})\\](.+)$");
-
 	// Get comments FROM codeblock
 	// Format comment into AudioComment
 	const commentsNativeArray = getCodeblockData(
