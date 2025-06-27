@@ -1,4 +1,6 @@
 import { App, MarkdownPostProcessorContext, TFile } from "obsidian";
+// Import - Constants
+import { commentLCRegex, commentNativeRegex } from "src/regex";
 // Import - Type
 import { AudioBoxOptions } from "./optionsType";
 // Import - Functions
@@ -26,10 +28,13 @@ export async function setAudioboxOptions(
 	const codeblock = lines.slice(sectionInfo.lineStart, sectionInfo.lineEnd);
 
 	try {
-		// Count lines (of codeblock) until it finds first comment
+		// Count lines (of codeblock) until it finds first comment (in native OR LRC format)
 		let optionsNumber: number | undefined = undefined;
 		for (let i = 0; i < codeblock.length; i++) {
-			if (/^\d+\s*---\s*.+$/.test(codeblock[i])) {
+			if (
+				commentNativeRegex.test(codeblock[i]) ||
+				commentLCRegex.test(codeblock[i])
+			) {
 				optionsNumber = i - 1;
 				break;
 			}
