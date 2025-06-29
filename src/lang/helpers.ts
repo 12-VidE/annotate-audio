@@ -4,12 +4,14 @@ import en from "./locale/en";
 import it from "./locale/it";
 import zhCN from "./locale/zh-cn";
 import es from "./locale/es";
+import ptBR from "./locale/pt-br";
 
 const localeMap: { [k: string]: Partial<typeof en> } = {
 	en,
 	it,
 	"zh-cn": zhCN,
 	es,
+	"pt-br": ptBR,
 };
 
 const locale = localeMap[moment.locale()];

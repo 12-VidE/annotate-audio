@@ -10,7 +10,7 @@
 -   Inuitive keyboard shortcuts
 -   Mobile compatible
 -   Controllabe with Obsdian commands
--   Localized interface: `en`, `it`, `zh-cn`, `es` ([Want to add your language?](https://github.com/12-VidE/annotate-audio/tree/master/src/lang/README.md))
+-   Localized interface: `en`, `it`, `zh-cn`, `es`, `pt-br` ([Want to add your language?](https://github.com/12-VidE/annotate-audio/tree/master/src/lang/README.md))
 -   Precision down to the millisecond
 
 ````
