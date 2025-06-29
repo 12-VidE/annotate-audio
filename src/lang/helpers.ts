@@ -19,7 +19,7 @@ const locale = localeMap[moment.locale()];
 export function t(str: keyof typeof en): string {
 	if (!locale)
 		console.error(
-			"Error: annonate-audio locale not found",
+			"(Annonate-audio) Localization not found",
 			moment.locale()
 		);
 
