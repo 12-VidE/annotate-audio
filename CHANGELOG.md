@@ -13,6 +13,7 @@ The plugin now supports localization. It currently includes "English" and "Itali
 
 #### 1.5.2
 
+-   _lang_([#15](https://github.com/12-VidE/annotate-audio/issues/15)) - Added spanish (es) localization - [whoszatarash](https://github.com/whoszatarash)
 -   _feat_ ([#14](https://github.com/12-VidE/annotate-audio/issues/14))_ - Converted time to [LRC standard](https://en.wikipedia.org/wiki/LRC_(file_format))
 -   _fix_ ([#14](https://github.com/12-VidE/annotate-audio/issues/14))\_ - Reduced precision TO 2decimals, following LRC standard
 
